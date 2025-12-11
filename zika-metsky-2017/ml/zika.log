@@ -1,0 +1,339 @@
+IQ-TREE multicore version 2.3.6 for Linux x86 64-bit built Aug  1 2024
+Developed by Bui Quang Minh, Nguyen Lam Tung, Olga Chernomor, Heiko Schmidt,
+Dominik Schrempf, Michael Woodhams, Ly Trong Nhan, Thomas Wong
+
+Host:    patrick-varillys-laptop (AVX2, FMA3, 62 GB RAM)
+Command: ../iqtree2 -s delphy_inputs/zika.fasta -m HKY+FO --prefix ml/zika
+Seed:    892834 (Using SPRNG - Scalable Parallel Random Number Generator)
+Time:    Wed Dec 10 12:29:27 2025
+Kernel:  AVX+FMA - 1 threads (22 CPU cores detected)
+
+HINT: Use -nt option to specify number of threads because your CPU has 22 cores!
+HINT: -nt AUTO will automatically determine the best number of threads to use.
+
+Reading alignment file delphy_inputs/zika.fasta ... Fasta format detected
+Reading fasta file: done in 0.0129023 secs using 94.24% CPU
+Alignment most likely contains DNA/RNA sequences
+WARNING: 535 sites contain only gaps or ambiguous characters.
+Alignment has 174 sequences with 10807 columns, 3007 distinct patterns
+369 parsimony-informative, 599 singleton sites, 9839 constant sites
+                                      Gap/Ambiguity  Composition  p-value
+Analyzing sequences: done in 0.000533966 secs using 99.82% CPU
+   1  KU312312.1|2015-10-02                   4.95%    passed     99.96%
+   2  KU321639.1|2015-03-14                   4.95%    passed     99.96%
+   3  KU365777.1|2015-07-21                   4.95%    passed     99.99%
+   4  KU365778.1|2015-07-23                   4.95%    passed    100.00%
+   5  KU365779.1|2015-09-02                   4.95%    passed     99.99%
+   6  KU497555.1|2015-11-30                   4.95%    passed    100.00%
+   7  KU501216.1|2015-12-01                   4.95%    passed     99.95%
+   8  KU501217.1|2015-11-01                   4.95%    passed     99.97%
+   9  KU509998.3|2014-12-12                   4.95%    passed     99.93%
+  10  KU527068.1|2015                         4.95%    passed     99.95%
+  11  KU647676.1|2015-12                      4.95%    passed    100.00%
+  12  KU707826.1|2015-07-01                   4.95%    passed     99.99%
+  13  KU729217.2|2015-11-18                   4.95%    passed     99.97%
+  14  KU729218.1|2015-06-02                   4.95%    passed     99.97%
+  15  KU820897.5|2015-12                      4.95%    passed     99.99%
+  16  KU853012.1|2016-02-01                   4.97%    passed     99.96%
+  17  KU853013.1|2016-02-01                   4.95%    passed     99.97%
+  18  KU926310.1|2016-01-29                   4.95%    passed    100.00%
+  19  KU940224.1|2015-08-01                   5.39%    passed     99.59%
+  20  KU940227.1|2015-07-15                  20.88%    passed     88.67%
+  21  KU940228.1|2015-07-01                   4.95%    passed     99.99%
+  22  KX051563.1|2016-02-05                   4.95%    passed     99.86%
+  23  KX101060.1|2015-05                     29.46%    passed     48.78%
+  24  KX101061.1|2015-05                     26.59%    passed     94.24%
+  25  KX101066.1|2015-05                     30.81%    passed     91.57%
+  26  KX269878.1|2016-02-01                   4.96%    passed    100.00%
+  27  KX280026.1|2015                         4.95%    passed    100.00%
+  28  KY317936.1|2016-01-16                   4.95%    passed     99.91%
+  29  KY317937.1|2016-01-07                   4.95%    passed     99.74%
+  30  KY317938.1|2016-01-10                   4.95%    passed     99.83%
+  31  KY317939.1|2016-01-06                   4.96%    passed     99.96%
+  32  KY317940.1|2016-01-09                   4.95%    passed     99.96%
+  33  ZBRA105|2015-02-23                      9.12%    passed     99.57%
+  34  ZBRC14|2016-01-15                      20.55%    passed     68.48%
+  35  ZBRC16|2016-01-19                      33.58%    passed     54.58%
+  36  ZBRC18|2016-01-06                      31.23%    passed     73.35%
+  37  ZBRC28|2016-01-18                      17.10%    passed     94.87%
+  38  ZBRC301|2015-05-13                      9.15%    passed     98.93%
+  39  ZBRC302|2015-05-13                      7.64%    passed     99.15%
+  40  ZBRC313|2015-06-15                     12.55%    passed     99.67%
+  41  ZBRC319|2016-07-10                      4.96%    passed     99.97%
+  42  ZBRC321|2015-08-09                     20.23%    passed     93.66%
+  43  ZBRD103|2015-08-20                     22.81%    passed     97.77%
+  44  ZBRD107|2015-09-09                     31.63%    passed     87.28%
+  45  ZBRD116|2015-08-28                      9.82%    passed     98.55%
+  46  ZBRX1|2016-04-18                        5.02%    passed     99.52%
+  47  ZBRX2|2016-04-18                       10.50%    passed     97.08%
+  48  ZBRX4|2016-04-18                        4.98%    passed     99.82%
+  49  ZBRX7|2016-04-19                       21.98%    passed     69.03%
+  50  ZBRX8|2016-04-19                       19.83%    passed     72.80%
+  51  ZBRX11|2016-04-19                      13.57%    passed     90.15%
+  52  ZBRX12|2016-04-19                       7.37%    passed     99.85%
+  53  ZBRX13|2016-04-24                       4.96%    passed     99.72%
+  54  ZBRX14|2016-04-24                      31.26%    passed     75.16%
+  55  ZBRX15|2016-04-24                       4.98%    passed    100.00%
+  56  ZBRX16|2016-04-25                      16.72%    passed     84.07%
+  57  ZBRX100|2016-05-19                     11.45%    passed     90.18%
+  58  ZBRX102|2016-02-25                     12.48%    passed     81.52%
+  59  ZBRX103|2016-05-24                     12.41%    passed     82.69%
+  60  ZBRX106|2016-03-07                     21.99%    passed     81.15%
+  61  ZBRX127|2016-03-10                      7.21%    passed     97.34%
+  62  ZBRX128|2016-03-13                     20.19%    passed     96.77%
+  63  ZBRX130|2016-03-22                     10.79%    passed     94.61%
+  64  ZBRX137|2016-03-03                     12.42%    passed     83.47%
+  65  DOM_2016_BB-0059-SER|2016-04-04        13.18%    passed     92.46%
+  66  DOM_2016_BB-0071-SER|2016-04-05        14.51%    passed     87.97%
+  67  DOM_2016_BB-0071-URI|2016-04-05        49.45%    passed     43.58%
+  68  DOM_2016_BB-0076-SER|2016-04-05         4.97%    passed     99.99%
+  69  DOM_2016_BB-0076-URI|2016-04-05         6.88%    passed     98.67%
+  70  DOM_2016_BB-0085-SER|2016-04-07        62.96%    passed     44.87%
+  71  DOM_2016_BB-0085-URI|2016-04-07         7.55%    passed     99.77%
+  72  DOM_2016_BB-0091-SER|2016-04-07         5.04%    passed     99.99%
+  73  DOM_2016_BB-0115-SER|2016-04-11         4.95%    passed     99.97%
+  74  DOM_2016_BB-0115-URI|2016-04-11         5.09%    passed     99.69%
+  75  DOM_2016_BB-0127-SER|2016-04-11         4.95%    passed     99.94%
+  76  DOM_2016_BB-0180-SER|2016-04-18         4.95%    passed     99.96%
+  77  DOM_2016_BB-0180-URI|2016-04-18         5.02%    passed     99.97%
+  78  DOM_2016_BB-0183-SER|2016-04-18         4.95%    passed     99.96%
+  79  DOM_2016_BB-0208-SER|2016-04-20         4.95%    passed     99.98%
+  80  DOM_2016_BB-0216-SER|2016-04-21         4.98%    passed     99.96%
+  81  DOM_2016_BB-0269-SER|2016-04-27         4.98%    passed     99.95%
+  82  DOM_2016_BB-0428-PLA|2016-06-13        57.59%    passed     28.23%
+  83  DOM_2016_BB-0433-SER|2016-06-13         4.95%    passed     99.94%
+  84  DOM_2016_BB-0436-PLA|2016-06-14         4.95%    passed     99.93%
+  85  MTQ_2016_FL-001-SAL|2016-03-22         24.88%    passed     60.41%
+  86  USA_2016_FL-010-URI|2016-06-22          4.95%    passed     99.99%
+  87  USA_2016_FL-019-URI|2016-07-07         71.38%    passed     38.26%
+  88  USA_2016_FL-021-URI|2016-07-19          6.52%    passed     99.70%
+  89  USA_2016_FL-022-URI|2016-07-22         17.69%    passed     95.58%
+  90  USA_2016_FL-028-SER|2016-08-01         22.86%    passed     87.12%
+  91  USA_2016_FL-029-URI|2016-08-01         35.50%    passed     80.06%
+  92  USA_2016_FL-030-URI|2016-08-02          4.95%    passed     99.99%
+  93  USA_2016_FL-032-URI|2016-08-05          9.59%    passed     98.27%
+  94  USA_2016_FL-035-URI|2016-08-03         73.67%    passed     97.77%
+  95  USA_2016_FL-036-SER|2016-08-04         32.27%    passed     54.20%
+  96  USA_2016_FL-038-URI|2016-08-05         19.77%    passed     95.38%
+  97  USA_2016_FL-039-URI|2016-08-17          4.95%    passed     99.80%
+  98  USA_2016_FL-05-MOS|2016-09-09           4.97%    passed     99.98%
+  99  USA_2016_FL-06-MOS|2016-09-20           6.57%    passed     99.26%
+ 100  USA_2016_FL-08-MOS|2016-10-05           5.00%    passed     99.99%
+ 101  USA_2016_FL-04-MOS|2016-09-04           4.97%    passed    100.00%
+ 102  USA_2016_FL-01-MOS|2016-08-22           4.95%    passed     99.97%
+ 103  USA_2016_FL-02-MOS|2016-08-23           4.95%    passed     99.99%
+ 104  USA_2016_FL-03-MOS|2016-08-23           4.95%    passed    100.00%
+ 105  BRA_2016_FC-5790-SER|2016-03-22        35.49%    passed     98.82%
+ 106  BRA_2016_FC-5905-SER|2016-03-23        31.77%    passed     76.09%
+ 107  BRA_2016_FC-6418-SER|2016-03-27         6.21%    passed     99.58%
+ 108  BRA_2016_FC-6696-SER|2016-04-05        15.06%    passed     93.89%
+ 109  BRA_2016_FC-6703-SER|2016-04-08        39.53%    passed     67.63%
+ 110  BRA_2016_FC-6706-SER|2016-04-08         8.05%    passed     99.42%
+ 111  BRA_2016_FC-6863-SER|2016-04-12         4.98%    passed     99.99%
+ 112  BRA_2016_FC-6864-URI|2016-04-12         4.96%    passed     99.99%
+ 113  BRA_2016_FC-DQ107D1-URI|2016-04-13      6.99%    passed     99.96%
+ 114  BRA_2016_FC-DQ116D1-PLA|2016-04-14      9.31%    passed     97.64%
+ 115  BRA_2016_FC-DQ122D1-PLA|2016-04-15      9.75%    passed     99.34%
+ 116  BRA_2016_FC-DQ12D1-PLA|2016-03-15      54.79%    passed     43.29%
+ 117  BRA_2016_FC-DQ131D1-URI|2016-04-18      4.95%    passed     99.78%
+ 118  BRA_2016_FC-DQ192D1-URI|2016-05-10     53.17%    passed     35.73%
+ 119  BRA_2016_FC-DQ28D1-URI|2016-03-21       4.95%    passed     99.95%
+ 120  BRA_2016_FC-DQ42D1-URI|2016-03-23       4.95%    passed     99.76%
+ 121  BRA_2016_FC-DQ47D1-PLA|2016-03-28       9.36%    passed     99.28%
+ 122  BRA_2016_FC-DQ49D1-PLA|2016-03-28       6.73%    passed     99.86%
+ 123  BRA_2016_FC-DQ58D1-PLA|2016-03-30       6.25%    passed     99.89%
+ 124  BRA_2016_FC-DQ5D1-URI|2016-03-14       15.68%    passed     97.94%
+ 125  BRA_2016_FC-DQ60D1-PLA|2016-03-30      74.81%    passed     75.27%
+ 126  BRA_2016_FC-DQ60D1-URI|2016-03-30       6.73%    passed     99.98%
+ 127  BRA_2016_FC-DQ62D1-PLA|2016-03-30      11.90%    passed     98.39%
+ 128  BRA_2016_FC-DQ62D2-URI|2016-04-06       4.95%    passed     99.92%
+ 129  BRA_2016_FC-DQ68D1-URI|2016-04-01      66.42%    passed     66.99%
+ 130  BRA_2016_FC-DQ75D1-PLA|2016-04-04      75.48%    passed     43.67%
+ 131  BRA_2016_FC-DQ75D1-URI|2016-04-04       6.83%    passed     98.65%
+ 132  PRI_2016_MA-WGS16-004-SER|2016-04-13    4.96%    passed     99.92%
+ 133  PRI_2016_MA-WGS16-005-SER|2016-04-12   33.15%    passed     89.29%
+ 134  DOM_2016_MA-WGS16-007-SER|2016-05-10    6.81%    passed     99.10%
+ 135  DOM_2016_MA-WGS16-009-SER|2016-05-24   73.77%    passed     43.32%
+ 136  DOM_2016_MA-WGS16-011-SER|2016-06-06    6.96%    passed     99.91%
+ 137  DOM_2016_MA-WGS16-013-SER|2016-06-15   34.23%    passed     94.81%
+ 138  DOM_2016_MA-WGS16-014-SER|2016-06-18   11.09%    passed     98.88%
+ 139  PRI_2016_MA-WGS16-016-SER|2016-06-26   10.80%    passed     95.39%
+ 140  DOM_2016_MA-WGS16-020-SER|2016-06-30   71.90%    passed     15.26%
+ 141  HTI_2016_MA-WGS16-022-SER|2016-07-05   63.35%    passed     76.18%
+ 142  DOM_2016_MA-WGS16-024-SER|2016-07-07    5.25%    passed     99.99%
+ 143  JAM_2016_MA-WGS16-025-SER|2016-07-10   14.10%    passed     97.12%
+ 144  UNK_2016_MA-WGS16-029-SER|2016-08-05   43.72%    passed     34.34%
+ 145  DOM_2016_MA-WGS16-031-SER|2016-08-17   76.18%    passed     26.06%
+ 146  USA_2016_MA-WGS16-034-SER|2016-08-15    8.98%    passed     99.48%
+ 147  DOM_2016_MA-WGS16-036-SER|2016-09-22   47.02%    passed     42.48%
+ 148  JAM_2016_MA-WGS16-038-SER|2016-09-26   55.74%    passed     51.46%
+ 149  JAM_2016_MA-WGS16-039-SER|2016-09-28   21.25%    passed     97.08%
+ 150  DOM_2016_MA-WGS16-040-SER|2016-10-06   23.80%    passed     97.30%
+ 151  JAM_2016_MA-WGS16-041-SER|2016-10-12   51.11%    passed     81.53%
+ 152  COL_2016_SU-1810A-SER|2016-04-06       51.98%    passed     81.01%
+ 153  COL_2016_SU-1856A-SER|2016-04-28        5.07%    passed     99.87%
+ 154  COL_2016_SU-2293A-SER|2016-06-09       51.64%    passed     92.62%
+ 155  COL_2016_SU-2724A-SER|2016-04-05        4.98%    passed     99.91%
+ 156  HND_2016_HU-ME131-PLA|2016-05-28       12.81%    passed     98.12%
+ 157  HND_2016_HU-ME136-PLA|2016-05-31       46.64%    passed     98.20%
+ 158  HND_2016_HU-ME137-PLA|2016-05-31       60.15%    passed     39.72%
+ 159  HND_2016_HU-ME147-SER|2016-06-04        5.00%    passed     99.98%
+ 160  HND_2016_HU-ME152-SER|2016-06-06        4.96%    passed     99.71%
+ 161  HND_2016_HU-ME156-SER|2016-06-07        6.62%    passed     98.06%
+ 162  HND_2016_HU-ME167-PLA|2016-06-09        7.65%    passed     97.39%
+ 163  HND_2016_HU-ME171-PLA|2016-06-10        5.01%    passed     99.94%
+ 164  HND_2016_HU-ME172-PLA|2016-06-10       40.71%    passed     65.16%
+ 165  HND_2016_HU-ME178-PLA|2016-06-10        4.98%    passed     99.84%
+ 166  HND_2016_HU-ME180-PLA|2016-06-13       21.28%    passed    100.00%
+ 167  HND_2016_HU-ME33-PLA|2016-04-28        50.00%    passed     46.54%
+ 168  HND_2016_HU-ME38-PLA|2016-04-30         5.00%    passed    100.00%
+ 169  HND_2016_HU-ME42-SER|2016-05-09         5.14%    passed     99.97%
+ 170  HND_2016_HU-ME50-PLA|2016-05-12        27.88%    passed     49.15%
+ 171  HND_2016_HU-ME58-PLA|2016-05-13         4.95%    passed     99.75%
+ 172  HND_2016_HU-ME59-PLA|2016-05-13         4.98%    passed     99.94%
+ 173  HND_2016_HU-SZ76-SER|2016-05-03        49.43%    passed     28.34%
+ 174  JAM_2016_WI-JM6-SER|2016-06-13          7.19%    passed     89.94%
+WARNING: 19 sequences contain more than 50% gaps/ambiguity
+****  TOTAL                                  17.80%  0 sequences failed composition chi2 test (p-value<5%; df=3)
+NOTE: KU707826.1|2015-07-01 is identical to KU365779.1|2015-09-02 but kept for subsequent analysis
+
+Create initial parsimony tree by phylogenetic likelihood library (PLL)... 0.018 seconds
+
+NOTE: 16 MB RAM (0 GB) is required!
+Estimate model parameters (epsilon = 0.100)
+1. Initial log-likelihood: -25392.464
+2. Current log-likelihood: -24512.257
+Optimal log-likelihood: -24512.227
+Rate parameters:  A-C: 1.00000  A-G: 16.57583  A-T: 1.00000  C-G: 1.00000  C-T: 16.57583  G-T: 1.00000
+Base frequencies:  A: 0.261  C: 0.232  G: 0.278  T: 0.229
+Parameters optimization took 2 rounds (0.406 sec)
+Wrote distance file to... 
+Computing ML distances based on estimated model parameters...
+Calculating distance matrix: done in 0.0875616 secs using 98.81% CPU
+Computing ML distances took 0.088718 sec (of wall-clock time) 0.087677 sec (of CPU time)
+Setting up auxiliary I and S matrices: done in 0.0011121 secs using 188.5% CPU
+Computing RapidNJ tree took 0.003731 sec (of wall-clock time) 0.005712 sec (of CPU time)
+Log-likelihood of RapidNJ tree: -24851.413
+--------------------------------------------------------------------
+|             INITIALIZING CANDIDATE TREE SET                      |
+--------------------------------------------------------------------
+Generating 98 parsimony trees... 1.829 second
+Computing log-likelihood of 98 initial trees ... 2.026 seconds
+Current best score: -24484.134
+
+Do NNI search on 20 best initial trees
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 1: -24479.960
+Iteration 10 / LogL: -24492.905 / Time: 0h:0m:9s
+Iteration 20 / LogL: -24498.061 / Time: 0h:0m:13s
+Finish initializing candidate tree set (20)
+Current best tree score: -24479.960 / CPU time: 13.041
+Number of iterations: 20
+--------------------------------------------------------------------
+|               OPTIMIZING CANDIDATE TREE SET                      |
+--------------------------------------------------------------------
+Iteration 30 / LogL: -24486.112 / Time: 0h:0m:18s (0h:0m:45s left)
+Iteration 40 / LogL: -24481.549 / Time: 0h:0m:23s (0h:0m:36s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 41: -24478.933
+Iteration 50 / LogL: -24491.786 / Time: 0h:0m:27s (0h:0m:51s left)
+Iteration 60 / LogL: -24483.447 / Time: 0h:0m:32s (0h:0m:44s left)
+Iteration 70 / LogL: -24540.434 / Time: 0h:0m:36s (0h:0m:37s left)
+Iteration 80 / LogL: -24479.131 / Time: 0h:0m:41s (0h:0m:31s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 81: -24478.879
+Iteration 90 / LogL: -24483.731 / Time: 0h:0m:46s (0h:0m:47s left)
+Iteration 100 / LogL: -24492.841 / Time: 0h:0m:50s (0h:0m:41s left)
+Iteration 110 / LogL: -24479.116 / Time: 0h:0m:55s (0h:0m:36s left)
+Iteration 120 / LogL: -24506.217 / Time: 0h:0m:59s (0h:0m:30s left)
+Iteration 130 / LogL: -24479.482 / Time: 0h:1m:4s (0h:0m:25s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 135: -24478.577
+Iteration 140 / LogL: -24482.671 / Time: 0h:1m:9s (0h:0m:47s left)
+Iteration 150 / LogL: -24486.712 / Time: 0h:1m:15s (0h:0m:42s left)
+Iteration 160 / LogL: -24485.699 / Time: 0h:1m:19s (0h:0m:37s left)
+Iteration 170 / LogL: -24482.066 / Time: 0h:1m:24s (0h:0m:32s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 178: -24478.123
+Iteration 180 / LogL: -24478.256 / Time: 0h:1m:28s (0h:0m:48s left)
+Iteration 190 / LogL: -24493.921 / Time: 0h:1m:33s (0h:0m:43s left)
+BETTER TREE FOUND at iteration 200: -24478.119
+Iteration 200 / LogL: -24478.119 / Time: 0h:1m:38s (0h:0m:49s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 207: -24477.386
+Iteration 210 / LogL: -24490.072 / Time: 0h:1m:42s (0h:0m:47s left)
+Iteration 220 / LogL: -24477.458 / Time: 0h:1m:47s (0h:0m:42s left)
+Iteration 230 / LogL: -24478.824 / Time: 0h:1m:52s (0h:0m:37s left)
+Iteration 240 / LogL: -24477.461 / Time: 0h:1m:56s (0h:0m:32s left)
+Iteration 250 / LogL: -24477.502 / Time: 0h:2m:1s (0h:0m:27s left)
+Iteration 260 / LogL: -24477.470 / Time: 0h:2m:5s (0h:0m:22s left)
+Iteration 270 / LogL: -24504.571 / Time: 0h:2m:9s (0h:0m:17s left)
+Iteration 280 / LogL: -24477.490 / Time: 0h:2m:14s (0h:0m:12s left)
+BETTER TREE FOUND at iteration 285: -24477.382
+Iteration 290 / LogL: -24477.498 / Time: 0h:2m:18s (0h:0m:45s left)
+Iteration 300 / LogL: -24504.511 / Time: 0h:2m:22s (0h:0m:40s left)
+Iteration 310 / LogL: -24484.229 / Time: 0h:2m:27s (0h:0m:35s left)
+Iteration 320 / LogL: -24477.797 / Time: 0h:2m:31s (0h:0m:30s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 327: -24476.025
+Iteration 330 / LogL: -24477.500 / Time: 0h:2m:36s (0h:0m:46s left)
+Iteration 340 / LogL: -24476.124 / Time: 0h:2m:41s (0h:0m:41s left)
+Iteration 350 / LogL: -24479.427 / Time: 0h:2m:46s (0h:0m:36s left)
+Iteration 360 / LogL: -24486.902 / Time: 0h:2m:50s (0h:0m:31s left)
+Iteration 370 / LogL: -24476.089 / Time: 0h:2m:55s (0h:0m:27s left)
+Iteration 380 / LogL: -24476.154 / Time: 0h:2m:59s (0h:0m:22s left)
+Iteration 390 / LogL: -24486.122 / Time: 0h:3m:4s (0h:0m:17s left)
+Iteration 400 / LogL: -24489.662 / Time: 0h:3m:9s (0h:0m:12s left)
+Iteration 410 / LogL: -24476.097 / Time: 0h:3m:14s (0h:0m:8s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 417: -24475.631
+Iteration 420 / LogL: -24476.029 / Time: 0h:3m:19s (0h:0m:46s left)
+Iteration 430 / LogL: -24476.065 / Time: 0h:3m:24s (0h:0m:41s left)
+Iteration 440 / LogL: -24481.249 / Time: 0h:3m:29s (0h:0m:36s left)
+Iteration 450 / LogL: -24484.795 / Time: 0h:3m:34s (0h:0m:32s left)
+Iteration 460 / LogL: -24477.109 / Time: 0h:3m:39s (0h:0m:27s left)
+Iteration 470 / LogL: -24476.976 / Time: 0h:3m:44s (0h:0m:22s left)
+Iteration 480 / LogL: -24488.312 / Time: 0h:3m:49s (0h:0m:17s left)
+Iteration 490 / LogL: -24476.150 / Time: 0h:3m:54s (0h:0m:12s left)
+BETTER TREE FOUND at iteration 500: -24475.629
+Iteration 500 / LogL: -24475.629 / Time: 0h:3m:59s (0h:0m:47s left)
+Iteration 510 / LogL: -24500.145 / Time: 0h:4m:4s (0h:0m:43s left)
+BETTER TREE FOUND at iteration 517: -24475.624
+Iteration 520 / LogL: -24482.267 / Time: 0h:4m:9s (0h:0m:46s left)
+Iteration 530 / LogL: -24475.639 / Time: 0h:4m:13s (0h:0m:41s left)
+Iteration 540 / LogL: -24475.732 / Time: 0h:4m:18s (0h:0m:36s left)
+Iteration 550 / LogL: -24477.084 / Time: 0h:4m:23s (0h:0m:32s left)
+Iteration 560 / LogL: -24544.278 / Time: 0h:4m:27s (0h:0m:27s left)
+Iteration 570 / LogL: -24475.681 / Time: 0h:4m:32s (0h:0m:22s left)
+Iteration 580 / LogL: -24476.535 / Time: 0h:4m:37s (0h:0m:17s left)
+Iteration 590 / LogL: -24479.054 / Time: 0h:4m:42s (0h:0m:12s left)
+Iteration 600 / LogL: -24480.449 / Time: 0h:4m:47s (0h:0m:8s left)
+Iteration 610 / LogL: -24481.988 / Time: 0h:4m:51s (0h:0m:3s left)
+TREE SEARCH COMPLETED AFTER 618 ITERATIONS / Time: 0h:4m:55s
+
+--------------------------------------------------------------------
+|                    FINALIZING TREE SEARCH                        |
+--------------------------------------------------------------------
+Performs final model parameters optimization
+Estimate model parameters (epsilon = 0.010)
+1. Initial log-likelihood: -24475.624
+Optimal log-likelihood: -24475.624
+Rate parameters:  A-C: 1.00000  A-G: 17.25708  A-T: 1.00000  C-G: 1.00000  C-T: 17.25708  G-T: 1.00000
+Base frequencies:  A: 0.260  C: 0.232  G: 0.278  T: 0.230
+Parameters optimization took 1 rounds (0.077 sec)
+BEST SCORE FOUND : -24475.624
+Total tree length: 0.132
+
+Total number of iterations: 618
+CPU time used for tree search: 292.960 sec (0h:4m:52s)
+Wall-clock time used for tree search: 294.910 sec (0h:4m:54s)
+Total CPU time used: 293.696 sec (0h:4m:53s)
+Total wall-clock time used: 295.668 sec (0h:4m:55s)
+
+Analysis results written to: 
+  IQ-TREE report:                ml/zika.iqtree
+  Maximum-likelihood tree:       ml/zika.treefile
+  Likelihood distances:          ml/zika.mldist
+  Screen log file:               ml/zika.log
+
+Date and Time: Wed Dec 10 12:34:23 2025
