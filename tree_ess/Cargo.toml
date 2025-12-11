@@ -1,0 +1,27 @@
+[package]
+name = "tree-ess"
+version = "0.1.0"
+description = "Calculate tree ESS's using Magee et al 2024's frechetCorrelationESS"
+authors = ["Patrick Varilly <pvarilly@broadinstitute.org>"]
+license = "MIT"
+edition = "2024"
+
+[dependencies]
+indoc = "2.0.7"
+rand = "0.9.0"
+thiserror = "2.0.0"
+itertools = "0.14.0"
+ndarray = "0.16.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+clap = { version = "4.5.49", features = ["derive"] }
+
+[features]
+# Trade the safety of many Rc<RefCell<T>>'s for the zero-overhead performance of NonNull<T>'s in places where the code:
+# (a) respects Rust's aliasing rules already, so runtime checks are redundant;
+# (b) can perform memory management manually without the overhead of reference counting.
+fast_unsafe_light_refs = []
+
+[[bin]]
+name = "calc-tree-ess"
+path = "src/bin/calc_tree_ess.rs"

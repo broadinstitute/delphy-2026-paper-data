@@ -1,0 +1,5 @@
+jupyter==1.0.0
+bio==1.6.0
+baltic==0.2.2
+seaborn==0.13.0
+phylo-treetime==0.11.4

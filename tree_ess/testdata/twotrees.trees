@@ -1,0 +1,22 @@
+#NEXUS
+# Two trees with with an RS distance of 2
+
+Begin taxa;
+    Dimensions ntax=4;
+        Taxlabels
+            A
+            B
+            C
+            D
+            ;
+End;
+Begin trees;
+    Translate
+        1 A,
+        2 B,
+        3 C,
+        4 D
+;
+tree STATE_100 = ((1,2),(3,4));
+tree STATE_200 = (((1,2),3),4);
+End;

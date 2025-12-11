@@ -1,0 +1,44 @@
+# Links to tools compiled and stored elsewhere
+/calc-tree-ess
+/createMapleFile.py
+/delphy
+/beastX1050
+/beast277
+/loganalyser277
+/mafft
+/delphy-env
+/sapling
+/delphy_mcc
+/iqtree2
+
+# A tiny bash script used to orchestate rsync'ing outputs from AWS - not of general interest
+/sync.sh
+
+# Python compiled files
+*.pyc
+
+# Avoid storing large amounts of easily downloadable raw data from elsewhere
+/ebola-dudas-2017/raw/     # Just a clone of the git repo https://github.com/ebov/space-time.git at commit 9db59a4
+/h5n1-andersen-2025/raw/   # Just a clone of the git repo https://github.com/andersen-lab/avian-influenza/ and a direct download from GenBank via Entrez
+/h5n1-daily-updated-tree/avian-influenza/   # Just a clone of the git repo https://github.com/andersen-lab/avian-influenza/
+/mpox-otoole-2023/raw/     # Just a clone of the git repo https://github.com/hmpxv/apobec3.git
+/mpox-parker-2025/raw/     # Just a clone of the git repo https://github.com/andersen-lab/Mpox_West_Africa.git
+
+# Avoid accidentally publishing sequence data from GISAID, in violation of their [GISAID's Data Access Agreement](https://gisaid.org/terms-of-use/).  See /sars-cov-2-gisaid-week-by-week/README.md
+/sars-cov-2-gisaid-week-by-week/20200331.fasta.xz
+/sars-cov-2-gisaid-week-by-week/metadata_20200331.tsv
+/sars-cov-2-gisaid-week-by-week/inputs_by_collection_date
+/sars-cov-2-gisaid-week-by-week/inputs_by_submission_date
+# Output *.trees files contain explicit mutation annotations that could be used to reconstruct the original GISAID sequences
+/sars-cov-2-gisaid-week-by-week/outputs_by_collection_date_a
+/sars-cov-2-gisaid-week-by-week/outputs_by_collection_date_b
+/sars-cov-2-gisaid-week-by-week/outputs_by_submission_date_a
+/sars-cov-2-gisaid-week-by-week/outputs_by_submission_date_b
+
+# *.trees and *.dphy files are too large to store in a Git repo on GitHub; available in Zenodo
+*.trees
+*.dphy
+
+# The daily-updated H5N1 results change all the time; the latest run is available at https://delphy.fathom.info/us-h5n1-latest
+/h5n1-daily-updated-tree/results
+
