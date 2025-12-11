@@ -1,0 +1,366 @@
+#NEXUS
+
+Begin taxa;
+    Dimensions ntax=177;
+        Taxlabels
+            MK783027|3018|Nigeria|2017-11-09
+            MK783028|3019|Nigeria|2017-11-09
+            MK783029|3029|Nigeria|2017-12-06
+            MK783030|3025|Nigeria|2017-11-30
+            MK783031|3020|Nigeria|2017-11-09
+            MK783032|3030|Nigeria|2017-11-01
+            MK783033|2920|Nigeria|2017-10-09
+            MN648051|Israel_2018|Israel_ex_Nigeria|2018-10-04
+            MT903338|MPXV-M2957|Nigeria|2018
+            MT903339|MPXV-M3021|Nigeria|2018
+            MT903343|MPXV-UK_P1|UK_ex_Nigeria|2018-09-07
+            MT903344|MPXV-UK_P2|UK_ex_Nigeria|2018-09-07
+            NC_063383|MPXV-M5312_HM12|Nigeria|2018-08
+            ON563414|MA001|USA|2022-05-19
+            ON674051|FL001|USA_ex|2022-05-22
+            ON675438-VA001|USA_ex|2022-05-27
+            ON676707|USA_2021_TX|USA_ex_Nigeria|2021-07-15
+            ON676708|USA_2021_MD|USA_ex_Nigeria|9000155|UK|2022-06-03
+            OP331336-9000166|UK|2022-06-29
+            OP413718-9000360|9000360|UK_ex|2022-08
+            OP450997-PA0016|USA|2022-07
+            OP535312|MPXV_5222|Nigeria|2018-02
+            OP535314|MPXV_5220|Nigeria|2018-01
+            OP535315|MPXV_5219|Nigeria|2018-02
+            OP535316|MPXV_5218|Nigeria|2018-02
+            OP535318|MPXV_5227|Nigeria|2017-12
+            OP535319|MPXV_5205|Nigeria|2017-12
+            OP535320|MPXV_3008|Nigeria|2017-11
+            OP535321|MPXV_2979|Nigeria|2017-10
+            OP535322|MPXV_2958|Nigeria|2017-10
+            OP535323|MPXV_2948|Nigeria|2017-10
+            OP535324|MPXV_5302|Nigeria|2018-02
+            OP535325|MPXV_5316|Nigeria|2018-06
+            OP535326|MPXV_5315|Nigeria|2018-06
+            OP535327|MPXV_5307|Nigeria|2018-03
+            OP535328|MPXV_5306|Nigeria|2018-03
+            OP535329|MPXV_5305|Nigeria|2018-03
+            OP535330|MPXV_5301|Nigeria|2018-02
+            OP535331|MPXV_5300|Nigeria|2018-01
+            OP535332|MPXV_5232|Nigeria|2018-01
+            OP535333|MPXV_5231|Nigeria|2018-01
+            OP535334|MPXV_5223|Nigeria|2018-02
+            OP535335|MPXV_2947|Nigeria|2017-10
+            OP535336|MPXV_2946|Nigeria|2017-10
+            OP535337|MPXV_2945|Nigeria|2017-10
+            OP535338|MPXV_2944|Nigeria|2017-10
+            OP535339|MPXV_2915|Nigeria|2017-10
+            OP535340|MPXV_2888|Nigeria|2017-10
+            OP535341|MPXV_2886|Nigeria|2017-10
+            OP555515-PT0428|PT0428|Portugal|2022-08-01
+            OP605572|MPXV-30|Slovenia|2022-07
+            OP612674|MPXV/003/19|Nigeria|2019-01-16
+            OP612675|MPXV/007/19|Nigeria|2019-02-03
+            OP612676|MPXV/013/19|Nigeria|2019-02-26
+            OP612677|MPXV/015/19|Nigeria|2019-03-14
+            OP612678|MPXV/017/19|Nigeria|2019-03-19
+            OP612679|MPXV/018/19|Nigeria|2019-03-18
+            OP612680|MPXV/021/19|Nigeria|2019-04-03
+            OP612681|MPXV/039/19|Nigeria|2019-04-29
+            OP612682|MPXV/040/19|Nigeria|2019-04-29
+            OP612683|MPXV/042/19|Nigeria|2019-04-29
+            OP612684|MPXV/046/19|Nigeria|2019-05-13
+            OP612685|MPXV/052/19|Nigeria|2019-06-08
+            OP612686|MPXV/053/19|Nigeria|2019-07-01
+            OP612687|MPXV/058/19|Nigeria|2019-08-19
+            OP612688|MPXV/104/19|Nigeria|2019-11-16
+            OP612689|MPXV/111/19|Nigeria|2019-12-19
+            OP612690|MPXV/113/19|Nigeria|2019-12-20
+            OP612691|MPXV/191/20|Nigeria|2020-01-23
+            OP936000|Mpox-HCMC-M157|Vietnam_ex_Dubai|2022-09-26
+            OP936001|Mpox-HCMC-M155|Vietnam_ex_Dubai|2022-10-19
+            OR113690|MUW1607960|Austria_ex_Nigeria|2023-04-05
+            unpub|TRM076|Nigeria|Rivers|2022-09-27
+            unpub|TRM077|Nigeria|Anambra|2022-09-27
+            unpub|TRM078|Nigeria|Abia|2022-09-19
+            unpub|TRM081|Nigeria|Bayelsa|2022-10-21
+            unpub|TRM082|Nigeria|Nasarawa|2022-11-01
+            unpub|TRM275|Nigeria|Kwara|2022-09-15
+            unpub|TRM276|Nigeria|Anambra|2022-09-22
+            unpub|TRM277|Nigeria|FCT|2022-09-30
+            unpub|TRM278|Nigeria|Imo|2022-09-20
+            unpub|TRM279|Nigeria|Abia|2022-09-26
+            unpub|TRM280|Nigeria|Enugu|2022-10-05
+            unpub|TRM281|Nigeria|Imo|2022-10-11
+            unpub|TRM283|Nigeria|Ebonyi|2022
+            unpub|TRM284|Nigeria|Kaduna|2022-10-30
+            unpub|TRM285|Nigeria|Lagos|2022-09-16
+            unpub|TRM286|Nigeria|Anambra|2022-09-12
+            unpub|TRM289|Nigeria|Abia|2022-09-25
+            unpub|TRM291|Nigeria|Bayelsa|2022-10-07
+            unpub|TRM293|Nigeria|Ebonyi|2022
+            unpub|TRM294|Nigeria|Edo|2022-11-01
+            unpub|TRM295|Nigeria|Lagos|2022-09-18
+            unpub|TRM296|Nigeria|Delta|2022-08-30
+            unpub|TRM299|Nigeria|Abia|2022-09-26
+            unpub|TRM301|Nigeria|Bayelsa|2022-09-26
+            unpub|TRM302|Nigeria|Imo|2022-10-14
+            unpub|TRM303|Nigeria|Imo|2022-10-24
+            unpub|TRM306|Nigeria|Imo|2022-09-13
+            unpub|TRM307|Nigeria|FCT|2022-09-26
+            unpub|TRM308|Nigeria|FCT|2022-10-02
+            unpub|TRM310|Nigeria|Ogun|2022-09-30
+            unpub|TRM311|Nigeria|Edo|2022-10-01
+            unpub|TRM312|Nigeria|Gombe|2022-10-08
+            unpub|TRM313|Nigeria|Imo|2022-10-24
+            unpub|TRM314|Nigeria|Bayelsa|2022-10-27
+            unpub|TRM315|Nigeria|Kogi|2022-09-18
+            unpub|TRM316|Nigeria|Bayelsa|2022-09-19
+            unpub|TRM317|Nigeria|Imo|2022-09-17
+            unpub|TRM318|Nigeria|Lagos|2022-09-22
+            unpub|TRM319|Nigeria|Akwa-Ibom|2022-09-27
+            unpub|TRM320|Nigeria|Rivers|2022-10-03
+            unpub|TRM321|Nigeria|Ondo|2022-10-05
+            unpub|TRM322|Nigeria|Nasarawa|2022-10-13
+            unpub|TRM323|Nigeria|Ogun|2022-10-26
+            unpub|TRM324|Nigeria|Bayelsa|2022-10-30
+            unpub|TRM325|Nigeria|Lagos|2022-09-14
+            unpub|TRM326|Nigeria|Rivers|2022-09-27
+            unpub|TRM327|Nigeria|Delta|2022-09-16
+            unpub|TRM328|Nigeria|Lagos|2022-09-16
+            unpub|TRM329|Nigeria|Bayelsa|2022-09-28
+            unpub|TRM330|Nigeria|Ebonyi|2022
+            unpub|TRM331|Nigeria|Rivers|2022-10-06
+            unpub|TRM332|Nigeria|Anambra|2022-10-12
+            unpub|TRM333|Nigeria|Kaduna|2022-10-24
+            unpub|TRM334|Nigeria|Kano|2022-11-02
+            unpub|TRM335|Nigeria|Lagos|2022-09-12
+            unpub|TRM336|Nigeria|FCT|2022-09-23
+            unpub|TRM337|Nigeria|Delta|2022-09-16
+            unpub|TRM338|Nigeria|Lagos|2022-09-23
+            unpub|TRM339|Nigeria|Bayelsa|2022-09-28
+            unpub|TRM340|Nigeria|Lagos|2022-09-29
+            unpub|TRM341|Nigeria|Akwa-Ibom|2022-10-05
+            unpub|TRM342|Nigeria|Anambra|2022-10-14
+            unpub|TRM343|Nigeria|Kaduna|2022-10-26
+            unpub|TRM344|Nigeria|Edo|2022-10-26
+            unpub|TRM346|Nigeria|Lagos|2022-09-20
+            unpub|TRM347|Nigeria|Delta|2022-08-30
+            unpub|TRM349|Nigeria|Anambra|2022-09-27
+            unpub|TRM350|Nigeria|Lagos|2022-09-30
+            unpub|TRM351|Nigeria|Rivers|2022-10-12
+            unpub|TRM352|Nigeria|Akwa-Ibom|2022-10-08
+            unpub|TRM353|Nigeria|Plateau|2022-10-24
+            unpub|TRM354|Nigeria|Imo|2022-10-17
+            unpub|TRM355|Nigeria|Lagos|2022-09-13
+            unpub|TRM357|Nigeria|Plateau|2022-09-12
+            unpub|TRM358|Nigeria|Lagos|2022-09-23
+            unpub|TRM359|Nigeria|Anambra|2022-09-27
+            unpub|TRM360|Nigeria|Kaduna|2022-09-17
+            unpub|TRM362|Nigeria|Rivers|2022-10-14
+            unpub|TRM363|Nigeria|Bayelsa|2022-10-13
+            unpub|TRM365|Nigeria|Ogun|2022-09-14
+            unpub|TRM367|Nigeria|Anambra|2022-09-14
+            unpub|VSP188|Nigeria|Bayelsa|2022-12-26
+            unpub|VSP190|Nigeria|Abia|2023-01-02
+            unpub|VSP192|Nigeria|Akwa-Ibom|2023-01-08
+            unpub|VSP193|Nigeria|Borno|2023-01-08
+            unpub|VSP194|Nigeria|Borno|2022-01-01
+            unpub|VSP195|Nigeria|Imo|2022
+            unpub|VSP196|Nigeria|Abia|2023-01-24
+            unpub|VSP197|Nigeria|Edo|2022
+            unpub|VSP198|Nigeria|Edo|2022
+            unpub|VSP200|Nigeria|Edo|2022
+            unpub|VSP201|Nigeria|Akwa-Ibom|2023-02-21
+            unpub|VSP202|Nigeria||2023-02-21
+            unpub|VSP203|Nigeria|Cross-River|2023-02-20
+            unpub|VSP204|Nigeria|Rivers|2023-03-03
+            unpub|VSP205|Nigeria|Rivers|2023-03-03
+            unpub|VSP206|Nigeria|Niger|2023-03-15
+            unpub|VSP207|Nigeria|Bayelsa|2023-03-14
+            unpub|VSP208|Nigeria|Rivers|2023-03-15
+            unpub|VSP209|Nigeria|Abia|2023-03-20
+            unpub|VSP210|Nigeria|Enugu|2023-03-21
+            unpub|VSP212|Nigeria|Imo|2023-04-17
+            unpub|VSP213|Nigeria|Rivers|2023-05-16
+            unpub|VSP214|Nigeria|FCT|2023-05-31
+            unpub|VSP215|Nigeria|FCT|2023-05-31
+            ;
+End;
+Begin trees;
+    Translate
+           1 MK783027|3018|Nigeria|2017-11-09,
+           2 MK783028|3019|Nigeria|2017-11-09,
+           3 MK783029|3029|Nigeria|2017-12-06,
+           4 MK783030|3025|Nigeria|2017-11-30,
+           5 MK783031|3020|Nigeria|2017-11-09,
+           6 MK783032|3030|Nigeria|2017-11-01,
+           7 MK783033|2920|Nigeria|2017-10-09,
+           8 MN648051|Israel_2018|Israel_ex_Nigeria|2018-10-04,
+           9 MT903338|MPXV-M2957|Nigeria|2018,
+          10 MT903339|MPXV-M3021|Nigeria|2018,
+          11 MT903343|MPXV-UK_P1|UK_ex_Nigeria|2018-09-07,
+          12 MT903344|MPXV-UK_P2|UK_ex_Nigeria|2018-09-07,
+          13 NC_063383|MPXV-M5312_HM12|Nigeria|2018-08,
+          14 ON563414|MA001|USA|2022-05-19,
+          15 ON674051|FL001|USA_ex|2022-05-22,
+          16 ON675438-VA001|USA_ex|2022-05-27,
+          17 ON676707|USA_2021_TX|USA_ex_Nigeria|2021-07-15,
+          18 ON676708|USA_2021_MD|USA_ex_Nigeria|9000155|UK|2022-06-03,
+          19 OP331336-9000166|UK|2022-06-29,
+          20 OP413718-9000360|9000360|UK_ex|2022-08,
+          21 OP450997-PA0016|USA|2022-07,
+          22 OP535312|MPXV_5222|Nigeria|2018-02,
+          23 OP535314|MPXV_5220|Nigeria|2018-01,
+          24 OP535315|MPXV_5219|Nigeria|2018-02,
+          25 OP535316|MPXV_5218|Nigeria|2018-02,
+          26 OP535318|MPXV_5227|Nigeria|2017-12,
+          27 OP535319|MPXV_5205|Nigeria|2017-12,
+          28 OP535320|MPXV_3008|Nigeria|2017-11,
+          29 OP535321|MPXV_2979|Nigeria|2017-10,
+          30 OP535322|MPXV_2958|Nigeria|2017-10,
+          31 OP535323|MPXV_2948|Nigeria|2017-10,
+          32 OP535324|MPXV_5302|Nigeria|2018-02,
+          33 OP535325|MPXV_5316|Nigeria|2018-06,
+          34 OP535326|MPXV_5315|Nigeria|2018-06,
+          35 OP535327|MPXV_5307|Nigeria|2018-03,
+          36 OP535328|MPXV_5306|Nigeria|2018-03,
+          37 OP535329|MPXV_5305|Nigeria|2018-03,
+          38 OP535330|MPXV_5301|Nigeria|2018-02,
+          39 OP535331|MPXV_5300|Nigeria|2018-01,
+          40 OP535332|MPXV_5232|Nigeria|2018-01,
+          41 OP535333|MPXV_5231|Nigeria|2018-01,
+          42 OP535334|MPXV_5223|Nigeria|2018-02,
+          43 OP535335|MPXV_2947|Nigeria|2017-10,
+          44 OP535336|MPXV_2946|Nigeria|2017-10,
+          45 OP535337|MPXV_2945|Nigeria|2017-10,
+          46 OP535338|MPXV_2944|Nigeria|2017-10,
+          47 OP535339|MPXV_2915|Nigeria|2017-10,
+          48 OP535340|MPXV_2888|Nigeria|2017-10,
+          49 OP535341|MPXV_2886|Nigeria|2017-10,
+          50 OP555515-PT0428|PT0428|Portugal|2022-08-01,
+          51 OP605572|MPXV-30|Slovenia|2022-07,
+          52 OP612674|MPXV/003/19|Nigeria|2019-01-16,
+          53 OP612675|MPXV/007/19|Nigeria|2019-02-03,
+          54 OP612676|MPXV/013/19|Nigeria|2019-02-26,
+          55 OP612677|MPXV/015/19|Nigeria|2019-03-14,
+          56 OP612678|MPXV/017/19|Nigeria|2019-03-19,
+          57 OP612679|MPXV/018/19|Nigeria|2019-03-18,
+          58 OP612680|MPXV/021/19|Nigeria|2019-04-03,
+          59 OP612681|MPXV/039/19|Nigeria|2019-04-29,
+          60 OP612682|MPXV/040/19|Nigeria|2019-04-29,
+          61 OP612683|MPXV/042/19|Nigeria|2019-04-29,
+          62 OP612684|MPXV/046/19|Nigeria|2019-05-13,
+          63 OP612685|MPXV/052/19|Nigeria|2019-06-08,
+          64 OP612686|MPXV/053/19|Nigeria|2019-07-01,
+          65 OP612687|MPXV/058/19|Nigeria|2019-08-19,
+          66 OP612688|MPXV/104/19|Nigeria|2019-11-16,
+          67 OP612689|MPXV/111/19|Nigeria|2019-12-19,
+          68 OP612690|MPXV/113/19|Nigeria|2019-12-20,
+          69 OP612691|MPXV/191/20|Nigeria|2020-01-23,
+          70 OP936000|Mpox-HCMC-M157|Vietnam_ex_Dubai|2022-09-26,
+          71 OP936001|Mpox-HCMC-M155|Vietnam_ex_Dubai|2022-10-19,
+          72 OR113690|MUW1607960|Austria_ex_Nigeria|2023-04-05,
+          73 unpub|TRM076|Nigeria|Rivers|2022-09-27,
+          74 unpub|TRM077|Nigeria|Anambra|2022-09-27,
+          75 unpub|TRM078|Nigeria|Abia|2022-09-19,
+          76 unpub|TRM081|Nigeria|Bayelsa|2022-10-21,
+          77 unpub|TRM082|Nigeria|Nasarawa|2022-11-01,
+          78 unpub|TRM275|Nigeria|Kwara|2022-09-15,
+          79 unpub|TRM276|Nigeria|Anambra|2022-09-22,
+          80 unpub|TRM277|Nigeria|FCT|2022-09-30,
+          81 unpub|TRM278|Nigeria|Imo|2022-09-20,
+          82 unpub|TRM279|Nigeria|Abia|2022-09-26,
+          83 unpub|TRM280|Nigeria|Enugu|2022-10-05,
+          84 unpub|TRM281|Nigeria|Imo|2022-10-11,
+          85 unpub|TRM283|Nigeria|Ebonyi|2022,
+          86 unpub|TRM284|Nigeria|Kaduna|2022-10-30,
+          87 unpub|TRM285|Nigeria|Lagos|2022-09-16,
+          88 unpub|TRM286|Nigeria|Anambra|2022-09-12,
+          89 unpub|TRM289|Nigeria|Abia|2022-09-25,
+          90 unpub|TRM291|Nigeria|Bayelsa|2022-10-07,
+          91 unpub|TRM293|Nigeria|Ebonyi|2022,
+          92 unpub|TRM294|Nigeria|Edo|2022-11-01,
+          93 unpub|TRM295|Nigeria|Lagos|2022-09-18,
+          94 unpub|TRM296|Nigeria|Delta|2022-08-30,
+          95 unpub|TRM299|Nigeria|Abia|2022-09-26,
+          96 unpub|TRM301|Nigeria|Bayelsa|2022-09-26,
+          97 unpub|TRM302|Nigeria|Imo|2022-10-14,
+          98 unpub|TRM303|Nigeria|Imo|2022-10-24,
+          99 unpub|TRM306|Nigeria|Imo|2022-09-13,
+         100 unpub|TRM307|Nigeria|FCT|2022-09-26,
+         101 unpub|TRM308|Nigeria|FCT|2022-10-02,
+         102 unpub|TRM310|Nigeria|Ogun|2022-09-30,
+         103 unpub|TRM311|Nigeria|Edo|2022-10-01,
+         104 unpub|TRM312|Nigeria|Gombe|2022-10-08,
+         105 unpub|TRM313|Nigeria|Imo|2022-10-24,
+         106 unpub|TRM314|Nigeria|Bayelsa|2022-10-27,
+         107 unpub|TRM315|Nigeria|Kogi|2022-09-18,
+         108 unpub|TRM316|Nigeria|Bayelsa|2022-09-19,
+         109 unpub|TRM317|Nigeria|Imo|2022-09-17,
+         110 unpub|TRM318|Nigeria|Lagos|2022-09-22,
+         111 unpub|TRM319|Nigeria|Akwa-Ibom|2022-09-27,
+         112 unpub|TRM320|Nigeria|Rivers|2022-10-03,
+         113 unpub|TRM321|Nigeria|Ondo|2022-10-05,
+         114 unpub|TRM322|Nigeria|Nasarawa|2022-10-13,
+         115 unpub|TRM323|Nigeria|Ogun|2022-10-26,
+         116 unpub|TRM324|Nigeria|Bayelsa|2022-10-30,
+         117 unpub|TRM325|Nigeria|Lagos|2022-09-14,
+         118 unpub|TRM326|Nigeria|Rivers|2022-09-27,
+         119 unpub|TRM327|Nigeria|Delta|2022-09-16,
+         120 unpub|TRM328|Nigeria|Lagos|2022-09-16,
+         121 unpub|TRM329|Nigeria|Bayelsa|2022-09-28,
+         122 unpub|TRM330|Nigeria|Ebonyi|2022,
+         123 unpub|TRM331|Nigeria|Rivers|2022-10-06,
+         124 unpub|TRM332|Nigeria|Anambra|2022-10-12,
+         125 unpub|TRM333|Nigeria|Kaduna|2022-10-24,
+         126 unpub|TRM334|Nigeria|Kano|2022-11-02,
+         127 unpub|TRM335|Nigeria|Lagos|2022-09-12,
+         128 unpub|TRM336|Nigeria|FCT|2022-09-23,
+         129 unpub|TRM337|Nigeria|Delta|2022-09-16,
+         130 unpub|TRM338|Nigeria|Lagos|2022-09-23,
+         131 unpub|TRM339|Nigeria|Bayelsa|2022-09-28,
+         132 unpub|TRM340|Nigeria|Lagos|2022-09-29,
+         133 unpub|TRM341|Nigeria|Akwa-Ibom|2022-10-05,
+         134 unpub|TRM342|Nigeria|Anambra|2022-10-14,
+         135 unpub|TRM343|Nigeria|Kaduna|2022-10-26,
+         136 unpub|TRM344|Nigeria|Edo|2022-10-26,
+         137 unpub|TRM346|Nigeria|Lagos|2022-09-20,
+         138 unpub|TRM347|Nigeria|Delta|2022-08-30,
+         139 unpub|TRM349|Nigeria|Anambra|2022-09-27,
+         140 unpub|TRM350|Nigeria|Lagos|2022-09-30,
+         141 unpub|TRM351|Nigeria|Rivers|2022-10-12,
+         142 unpub|TRM352|Nigeria|Akwa-Ibom|2022-10-08,
+         143 unpub|TRM353|Nigeria|Plateau|2022-10-24,
+         144 unpub|TRM354|Nigeria|Imo|2022-10-17,
+         145 unpub|TRM355|Nigeria|Lagos|2022-09-13,
+         146 unpub|TRM357|Nigeria|Plateau|2022-09-12,
+         147 unpub|TRM358|Nigeria|Lagos|2022-09-23,
+         148 unpub|TRM359|Nigeria|Anambra|2022-09-27,
+         149 unpub|TRM360|Nigeria|Kaduna|2022-09-17,
+         150 unpub|TRM362|Nigeria|Rivers|2022-10-14,
+         151 unpub|TRM363|Nigeria|Bayelsa|2022-10-13,
+         152 unpub|TRM365|Nigeria|Ogun|2022-09-14,
+         153 unpub|TRM367|Nigeria|Anambra|2022-09-14,
+         154 unpub|VSP188|Nigeria|Bayelsa|2022-12-26,
+         155 unpub|VSP190|Nigeria|Abia|2023-01-02,
+         156 unpub|VSP192|Nigeria|Akwa-Ibom|2023-01-08,
+         157 unpub|VSP193|Nigeria|Borno|2023-01-08,
+         158 unpub|VSP194|Nigeria|Borno|2022-01-01,
+         159 unpub|VSP195|Nigeria|Imo|2022,
+         160 unpub|VSP196|Nigeria|Abia|2023-01-24,
+         161 unpub|VSP197|Nigeria|Edo|2022,
+         162 unpub|VSP198|Nigeria|Edo|2022,
+         163 unpub|VSP200|Nigeria|Edo|2022,
+         164 unpub|VSP201|Nigeria|Akwa-Ibom|2023-02-21,
+         165 unpub|VSP202|Nigeria||2023-02-21,
+         166 unpub|VSP203|Nigeria|Cross-River|2023-02-20,
+         167 unpub|VSP204|Nigeria|Rivers|2023-03-03,
+         168 unpub|VSP205|Nigeria|Rivers|2023-03-03,
+         169 unpub|VSP206|Nigeria|Niger|2023-03-15,
+         170 unpub|VSP207|Nigeria|Bayelsa|2023-03-14,
+         171 unpub|VSP208|Nigeria|Rivers|2023-03-15,
+         172 unpub|VSP209|Nigeria|Abia|2023-03-20,
+         173 unpub|VSP210|Nigeria|Enugu|2023-03-21,
+         174 unpub|VSP212|Nigeria|Imo|2023-04-17,
+         175 unpub|VSP213|Nigeria|Rivers|2023-05-16,
+         176 unpub|VSP214|Nigeria|FCT|2023-05-31,
+         177 unpub|VSP215|Nigeria|FCT|2023-05-31
+;
+tree TREE1 = ((7[&posterior=1]:0.446523,(31[&posterior=1]:0.0961267,((55[&posterior=1]:0.438317,((84[&posterior=1]:1.14596,(20[&posterior=1]:0.123164,101[&posterior=1]:0.254874)[&posterior=1]:0.866434)[&posterior=1]:1.4038,(((91[&posterior=1]:0.248535,(85[&posterior=1]:0.0911076,160[&posterior=1]:0.466847)[&posterior=0.497714]:0.113224)[&posterior=0.999714]:0.394817,(159[&posterior=1]:0.181769,136[&posterior=1]:0.37465)[&posterior=1]:0.353661)[&posterior=1]:1.34883,152[&posterior=1]:1.96207)[&posterior=1]:0.513716)[&posterior=1]:1.47212)[&posterior=1]:1.04109,43[&posterior=1]:0.0781712)[&posterior=0.341714]:0.0185003)[&posterior=1]:0.370532)[&posterior=1]:1.11849,(((((((17[&posterior=1]:0.644581,(((125[&posterior=1]:0.633182,50[&posterior=1]:0.403045)[&posterior=1]:0.886536,(80[&posterior=1]:1.44707,(((((((147[&posterior=1]:0.156812,148[&posterior=1]:0.167771)[&posterior=0.999714]:0.108626,((105[&posterior=1]:0.131422,144[&posterior=1]:0.112244)[&posterior=0.474286]:0.0475737,83[&posterior=1]:0.126941)[&posterior=0.871429]:0.171374)[&posterior=1]:0.197016,122[&posterior=1]:0.358472)[&posterior=0.999429]:0.183329,(169[&posterior=1]:0.67291,128[&posterior=1]:0.198937)[&posterior=1]:0.446846)[&posterior=0.999429]:0.190542,((76[&posterior=1]:0.163532,(170[&posterior=1]:0.520871,106[&posterior=1]:0.142789)[&posterior=0.501429]:0.0371815)[&posterior=1]:0.204192,(116[&posterior=1]:0.285092,(90[&posterior=1]:0.186649,154[&posterior=1]:0.405828)[&posterior=0.297714]:0.0354293)[&posterior=0.647714]:0.107289)[&posterior=1]:0.545314)[&posterior=0.998857]:0.313811,((149[&posterior=1]:0.122135,157[&posterior=1]:0.431724)[&posterior=0.998571]:0.139214,92[&posterior=1]:0.384636)[&posterior=1]:0.872349)[&posterior=0.354571]:0.273162,(((74[&posterior=1]:0.274859,139[&posterior=1]:0.274859)[&posterior=1]:0.771375,(158[&posterior=1]:0.15401,((165[&posterior=1]:0.104925,173[&posterior=1]:0.181637)[&posterior=1]:0.445945,(168[&posterior=1]:0.300328,171[&posterior=1]:0.333205)[&posterior=0.998286]:0.27794)[&posterior=1]:0.742866)[&posterior=1]:0.155238)[&posterior=1]:0.225069,((108[&posterior=1]:1.07688,(((134[&posterior=1]:0.205109,88[&posterior=1]:0.117438)[&posterior=0.999429]:0.125378,146[&posterior=1]:0.242816)[&posterior=1]:0.654716,((109[&posterior=1]:0.805176,(81[&posterior=1]:0.732521,73[&posterior=1]:0.7517)[&posterior=0.165429]:0.0808733)[&posterior=0.117429]:0.0540908,((174[&posterior=1]:0.496974,((166[&posterior=1]:0.297935,164[&posterior=1]:0.300675)[&posterior=0.181714]:0.033525,(175[&posterior=1]:0.33175,172[&posterior=1]:0.175586)[&posterior=0.998571]:0.232587)[&posterior=0.153714]:0.0120894)[&posterior=1]:0.484534,167[&posterior=1]:0.858221)[&posterior=0.990286]:0.45858)[&posterior=0.18]:0.0519646)[&posterior=0.502857]:0.160174)[&posterior=0.544286]:0.12882,((((153[&posterior=1]:0.284551,98[&posterior=1]:0.39414)[&posterior=0.999714]:0.331101,((82[&posterior=1]:0.167437,95[&posterior=1]:0.167437)[&posterior=1]:0.215636,((99[&posterior=1]:0.164073,(155[&posterior=1]:0.392067,107[&posterior=1]:0.101656)[&posterior=0.611714]:0.0761162)[&posterior=0.348857]:0.02107,(75[&posterior=1]:0.0301687,89[&posterior=1]:0.0466071)[&posterior=1]:0.171413)[&posterior=1]:0.162314)[&posterior=1]:0.265455)[&posterior=0.14]:0.00768557,(119[&posterior=1]:0.176457,103[&posterior=1]:0.217552)[&posterior=1]:0.45236)[&posterior=1]:0.399128,(163[&posterior=1]:0.0957711,145[&posterior=1]:0.0801065)[&posterior=1]:0.93962)[&posterior=0.982]:0.169539)[&posterior=0.45]:0.0436818)[&posterior=1]:0.162954)[&posterior=0.0314286]:0.0045895)[&posterior=0.110857]:0.00689835)[&posterior=0.998857]:0.128487,(133[&posterior=1]:0.111094,156[&posterior=1]:0.371368)[&posterior=1]:1.48506)[&posterior=1]:0.273088)[&posterior=1]:1.55798,((((((162[&posterior=1]:0.0911964,161[&posterior=1]:0.0906901)[&posterior=1]:0.459299,(114[&posterior=1]:0.732813,21[&posterior=1]:0.488759)[&posterior=0.997429]:0.17112)[&posterior=0.999429]:0.159544,77[&posterior=1]:1.11553)[&posterior=1]:0.278391,((126[&posterior=1]:1.31738,(((130[&posterior=1]:0.0486843,132[&posterior=1]:0.0651227)[&posterior=1]:0.372464,19[&posterior=1]:0.185532)[&posterior=1]:0.288287,(120[&posterior=1]:0.30969,((72[&posterior=1]:0.784626,127[&posterior=1]:0.222982)[&posterior=0.218571]:0.0268971,140[&posterior=1]:0.299195)[&posterior=0.416]:0.0488513)[&posterior=1]:0.380567)[&posterior=1]:0.49836)[&posterior=0.257143]:0.0428837,97[&posterior=1]:1.30821)[&posterior=0.334857]:0.0363944)[&posterior=1]:0.571466,(((150[&posterior=1]:0.510468,118[&posterior=1]:0.463893)[&posterior=0.192286]:0.034895,(110[&posterior=1]:0.208135,(87[&posterior=1]:0.154306,102[&posterior=1]:0.192662)[&posterior=0.451143]:0.0373912)[&posterior=0.999429]:0.276954)[&posterior=0.186]:0.01963,(177[&posterior=1]:0.0640116,176[&posterior=1]:0.0640116)[&posterior=1]:1.12838)[&posterior=1]:1.35108)[&posterior=1]:1.50569,(((((16[&posterior=1]:0.672227,112[&posterior=1]:1.02565)[&posterior=1]:1.26699,(135[&posterior=1]:0.982997,((113[&posterior=1]:0.570162,143[&posterior=1]:0.622217)[&posterior=1]:0.307267,100[&posterior=1]:0.852771)[&posterior=0.363143]:0.0480336)[&posterior=1]:1.37266)[&posterior=1]:0.589026,(121[&posterior=1]:1.047,((129[&posterior=1]:0.74742,((79[&posterior=1]:0.274822,115[&posterior=1]:0.367973)[&posterior=1]:0.282465,(((142[&posterior=1]:0.102432,111[&posterior=1]:0.0764092)[&posterior=1]:0.380106,123[&posterior=1]:0.477059)[&posterior=0.380286]:0.0604498,(94[&posterior=1]:0.156676,138[&posterior=1]:0.156676)[&posterior=0.999143]:0.279462)[&posterior=0.460286]:0.0581348)[&posterior=1]:0.206571)[&posterior=0.909143]:0.208746,(((93[&posterior=1]:0.168644,(131[&posterior=1]:0.0411949,96[&posterior=1]:0.0357154)[&posterior=1]:0.154847)[&posterior=1]:0.329088,(137[&posterior=1]:0.477947,(78[&posterior=1]:0.367195,141[&posterior=1]:0.441167)[&posterior=0.474857]:0.0970537)[&posterior=0.296]:0.0252651)[&posterior=0.999714]:0.162636,151[&posterior=1]:0.728862)[&posterior=0.999429]:0.301277)[&posterior=0.422857]:0.0579595)[&posterior=1]:1.82097)[&posterior=0.999714]:0.397206,(67[&posterior=1]:0.300558,68[&posterior=1]:0.300558)[&posterior=0.292]:0.183796)[&posterior=0.0748571]:0.077153,(((124[&posterior=1]:1.73219,((15[&posterior=1]:0.795368,71[&posterior=1]:1.20633)[&posterior=0.989429]:0.29285,(70[&posterior=1]:1.2604,(18[&posterior=1]:0.0847604,51[&posterior=1]:0.742585)[&posterior=1]:0.315361)[&posterior=0.997143]:0.175768)[&posterior=1]:0.252187)[&posterior=1]:1.26889,69[&posterior=1]:0.283107)[&posterior=0.987429]:0.30065,((86[&posterior=1]:0.334528,117[&posterior=1]:0.2085)[&posterior=1]:0.405592,104[&posterior=1]:0.679846)[&posterior=1]:2.61093)[&posterior=0.0662857]:0.0789547)[&posterior=0.115714]:0.0355987)[&posterior=0.210857]:0.0301105)[&posterior=1]:2.20835,(6[&posterior=1]:0.195877,28[&posterior=1]:0.234147)[&posterior=1]:0.513661)[&posterior=0.958571]:0.326459,((5[&posterior=1]:0.150574,(3[&posterior=1]:0.194836,1[&posterior=1]:0.120864)[&posterior=0.180571]:0.0297103)[&posterior=0.0957143]:0.0044264,2[&posterior=1]:0.155)[&posterior=1]:0.902914)[&posterior=0.107429]:0.101162,((9[&posterior=1]:0.378305,((13[&posterior=1]:0.733417,40[&posterior=1]:0.0829168)[&posterior=0.46]:0.0774519,(41[&posterior=1]:0.13064,39[&posterior=1]:0.122445)[&posterior=0.34]:0.0385887)[&posterior=0.999714]:0.130266)[&posterior=1]:0.884379,(((26[&posterior=1]:0.429837,(48[&posterior=1]:0.050621,34[&posterior=1]:0.71195)[&posterior=0.999143]:0.214826)[&posterior=0.13]:0.0152861,10[&posterior=1]:0.603353)[&posterior=0.255714]:0.0881601,(((38[&posterior=1]:0.121075,(25[&posterior=1]:0.0991993,32[&posterior=1]:0.0990258)[&posterior=0.313714]:0.0219464)[&posterior=0.654857]:0.0657841,24[&posterior=1]:0.197989)[&posterior=1]:0.489871,(23[&posterior=1]:0.214892,(22[&posterior=1]:0.155778,42[&posterior=1]:0.156807)[&posterior=0.643714]:0.128528)[&posterior=1]:0.389835)[&posterior=0.0968571]:0.0244)[&posterior=1]:0.557609)[&posterior=0.169714]:0.170457)[&posterior=0.209714]:0.220637,(((57[&posterior=1]:0.715856,(12[&posterior=1]:0.058881,(65[&posterior=1]:0.45624,(64[&posterior=1]:0.23204,14[&posterior=1]:3.12793)[&posterior=0.994286]:0.183104)[&posterior=1]:0.443737)[&posterior=1]:0.141907)[&posterior=1]:0.288888,((((66[&posterior=1]:0.937202,60[&posterior=1]:0.471448)[&posterior=1]:0.559631,(59[&posterior=1]:1.00946,(52[&posterior=1]:0.655888,(63[&posterior=1]:0.402808,61[&posterior=1]:0.290479)[&posterior=0.999429]:0.628422)[&posterior=0.176857]:0.0850807)[&posterior=0.0788571]:0.0216176)[&posterior=0.112857]:0.0326146,11[&posterior=1]:0.447255)[&posterior=0.111714]:0.0191989,8[&posterior=1]:0.540427)[&posterior=0.238]:0.0232217)[&posterior=1]:1.65377,((45[&posterior=1]:0.346908,((4[&posterior=1]:0.125228,29[&posterior=1]:0.212199)[&posterior=1]:0.17892,49[&posterior=1]:0.177983)[&posterior=0.999714]:0.166347)[&posterior=1]:0.404392,((46[&posterior=1]:0.355373,30[&posterior=1]:0.352452)[&posterior=1]:0.36534,((36[&posterior=1]:0.191576,((35[&posterior=1]:0.166625,(((53[&posterior=1]:0.0422612,54[&posterior=1]:0.0997955)[&posterior=1]:0.196079,56[&posterior=1]:0.994505)[&posterior=1]:0.424825,(62[&posterior=1]:0.416352,58[&posterior=1]:0.309503)[&posterior=1]:0.520786)[&posterior=0.999143]:0.376495)[&posterior=0.112286]:0.019129,37[&posterior=1]:0.181547)[&posterior=0.064]:0.00909632)[&posterior=0.153143]:0.0141001,33[&posterior=1]:0.458232)[&posterior=1]:0.927481)[&posterior=0.341714]:0.0325434)[&posterior=1]:0.4987)[&posterior=0.0671429]:0.063662)[&posterior=0.316286]:0.098153,(27[&posterior=1]:0.51431,(47[&posterior=1]:0.0875437,44[&posterior=1]:0.0872321)[&posterior=0.912571]:0.249355)[&posterior=1]:1.07167)[&posterior=0.608571]:0.172074)[&posterior=1]:0;
+End;

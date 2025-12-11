@@ -1,0 +1,56 @@
+
+Operator analysis
+Operator                                          Tuning   Count      Time     Time/Op  Pr(accept) Smoothed_Pr(accept)
+deltaExchange(non_apobec3.gtr.rates)              1.008   448669     556144   1.24     0.2341      0.31        
+deltaExchange(non_apobec3.frequencies)            0.004   447529     698697   1.56     0.2336      0.22        
+scale(non_apobec3.alpha)                          0.162   448684     692680   1.54     0.234       0.19        
+scale(apobec3.clock.rate)                         0.798   1344503    4369404  3.25     0.234       0.2         
+up:nodeHeights(treeModel) down:apobec3.clock.rate 0.997   1343551    3501710  2.61     0.234       0.2         
+scale(non_apobec3.clock.rate)                     0.556   1346419    2082891  1.55     0.2342      0.27        
+up:nodeHeights(treeModel) down:non_apobec3.clock.rate 0.996   1344700    3505045  2.61     0.234       0.26        
+subtreeLeap(treeModel)                            0.658   19727439   10599142 0.54     0.234       0.32        
+subtreeJump(treeModel)                                    1974760    1277887  0.65     0.0322      0.04        
+deltaExchange(apobec3.root.frequencies)           0.001   448007     1096743  2.45     0.2337      0.24        
+scale(exponential.popSize)                        0.571   1342808    35039    0.03     0.2339      0.23        
+randomWalkOperator(exponential.growthRate)        0.133   1346425    34418    0.03     0.2341      0.19        
+uniform(age(MT903338|MPXV-M2957|Nigeria|2018))            448020     177110   0.4      0.2569      0.18        
+uniform(age(MT903339|MPXV-M3021|Nigeria|2018))            447620     197482   0.44     0.2398      0.24        
+uniform(age(NC_063383|MPXV-M5312_HM12|Nigeria|2018-08))        448394     196251   0.44     0.439       0.3         
+uniform(age(OP413718-9000360|9000360|UK_ex|2022-08))        448002     189569   0.42     0.8536      0.83        
+uniform(age(OP450997-PA0016|USA|2022-07))                 447922     264216   0.59     0.9565      0.95        
+uniform(age(OP535312|MPXV_5222|Nigeria|2018-02))          447682     200804   0.45     0.8617      0.87        
+uniform(age(OP535314|MPXV_5220|Nigeria|2018-01))          449241     199885   0.44     0.7991      0.74        
+uniform(age(OP535315|MPXV_5219|Nigeria|2018-02))          449167     200915   0.45     0.7788      0.7         
+uniform(age(OP535316|MPXV_5218|Nigeria|2018-02))          447843     207766   0.46     0.8671      0.79        
+uniform(age(OP535319|MPXV_5205|Nigeria|2017-12))          450040     152040   0.34     0.8602      0.82        
+uniform(age(OP535318|MPXV_5227|Nigeria|2017-12))          448037     191735   0.43     0.9481      0.95        
+uniform(age(OP535320|MPXV_3008|Nigeria|2017-11))          448503     172266   0.38     0.8974      0.88        
+uniform(age(OP535322|MPXV_2958|Nigeria|2017-10))          448105     172647   0.39     0.9281      0.95        
+uniform(age(OP535323|MPXV_2948|Nigeria|2017-10))          448532     151386   0.34     0.8383      0.84        
+uniform(age(OP535324|MPXV_5302|Nigeria|2018-02))          448016     207171   0.46     0.8675      0.9         
+uniform(age(OP535325|MPXV_5316|Nigeria|2018-06))          448407     196659   0.44     0.9685      1.0         
+uniform(age(OP535326|MPXV_5315|Nigeria|2018-06))          448271     199635   0.45     0.9614      0.94        
+uniform(age(OP535327|MPXV_5307|Nigeria|2018-03))          448052     194972   0.44     0.9088      0.9         
+uniform(age(OP535328|MPXV_5306|Nigeria|2018-03))          448777     200142   0.45     0.8794      0.81        
+uniform(age(OP535329|MPXV_5305|Nigeria|2018-03))          448296     198906   0.44     0.8802      0.92        
+uniform(age(OP535330|MPXV_5301|Nigeria|2018-02))          447623     207684   0.46     0.8686      0.85        
+uniform(age(OP535331|MPXV_5300|Nigeria|2018-01))          449604     197787   0.44     0.8642      0.88        
+uniform(age(OP535332|MPXV_5232|Nigeria|2018-01))          449203     196152   0.44     0.8633      0.8         
+uniform(age(OP535333|MPXV_5231|Nigeria|2018-01))          448883     193843   0.43     0.8356      0.8         
+uniform(age(OP535334|MPXV_5223|Nigeria|2018-02))          447963     203270   0.45     0.8623      0.85        
+uniform(age(OP535335|MPXV_2947|Nigeria|2017-10))          448772     151863   0.34     0.8388      0.77        
+uniform(age(OP535336|MPXV_2946|Nigeria|2017-10))          448045     155154   0.35     0.8202      0.87        
+uniform(age(OP535337|MPXV_2945|Nigeria|2017-10))          449417     180580   0.4      0.947       0.93        
+uniform(age(OP535338|MPXV_2944|Nigeria|2017-10))          448852     173879   0.39     0.942       0.9         
+uniform(age(OP535339|MPXV_2915|Nigeria|2017-10))          448321     156060   0.35     0.8226      0.88        
+uniform(age(OP535340|MPXV_2888|Nigeria|2017-10))          447870     198587   0.44     0.8465      0.85        
+uniform(age(OP535341|MPXV_2886|Nigeria|2017-10))          447758     190327   0.43     0.8915      0.91        
+uniform(age(OP605572|MPXV-30|Slovenia|2022-07))           447646     251359   0.56     0.8515      0.87        
+uniform(age(unpub|TRM283|Nigeria|Ebonyi|2022))            449090     212271   0.47     0.5412      0.48        
+uniform(age(unpub|TRM293|Nigeria|Ebonyi|2022))            448344     211529   0.47     0.7174      0.84        
+uniform(age(unpub|TRM330|Nigeria|Ebonyi|2022))            448076     295631   0.66     0.6846      0.58        
+uniform(age(unpub|VSP195|Nigeria|Imo|2022))               449669     204141   0.45     0.6316      0.7         
+uniform(age(unpub|VSP197|Nigeria|Edo|2022))               448166     265294   0.59     0.3117      0.22        
+uniform(age(unpub|VSP198|Nigeria|Edo|2022))               447556     265095   0.59     0.313       0.23        
+uniform(age(unpub|VSP200|Nigeria|Edo|2022))               448721     283543   0.63     0.5111      0.56        
+
