@@ -1,0 +1,12 @@
+
+Operator analysis
+Operator                                          Tuning   Count      Time     Time/Op  Pr(accept) Smoothed_Pr(accept)
+scale(kappa)                                      0.729   555485     19559897 35.21    0.2339      0.24        
+deltaExchange(frequencies)                        0.015   556783     19604624 35.21    0.2346      0.21        
+scale(alpha)                                      0.578   555032     19536231 35.2     0.234       0.18        
+scale(clock.rate)                                 0.886   1666329    58663745 35.21    0.2338      0.19        
+up:nodeHeights(treeModel) down:clock.rate         1.0     1666964    36789813 22.07    0.2338      0.24        
+subtreeLeap(treeModel)                            0.09    894454221  1154505694 1.29     0.234       0.26        
+subtreeJump(treeModel)                                    89435389   147977360 1.65     0.0325      0.03        
+VanillaHMC(skygrid.parameters)                    0.066   1109797    4794     0.0      0.8005      0.82        
+
