@@ -1,0 +1,18 @@
+
+Citations for this analysis: 
+
+FRAMEWORK
+BEAST primary citation:
+	Baele G, Ji X, Hassler GW, McCrone JT, Shao Y, Zhang Z, Holbrook AJ, Lemey P, Drummond AJ, Rambaut A, Suchard MA (2025) BEAST X for Bayesian phylogenetic, phylogeographic and phylodynamic inference. Nature Methods. . DOI:10.1038/s41592-025-02751-x
+
+HIGH-PERFORMANCE COMPUTING
+BEAGLE citation:
+	Ayres DL, Cummings MP, Baele G, Darling AE, Lewis PO, Swofford DL, Huelsenbeck JP, Lemey P, Rambaut A, Suchard MA (2019) BEAGLE 3: Improved performance, scaling and usability for a high-performance computing library for statistical phylogenetics. Systematic Biology. 68, 1052-1061
+
+SUBSTITUTION MODELS
+HKY nucleotide substitution model:
+	Hasegawa M, Kishino H, Yano T (1985) Dating the human-ape splitting by a molecular clock of mitochondrial DNA. Journal of Molecular Evolution. 22, 160-174
+Discrete gamma-distributed rate heterogeneity model:
+	Yang Z (1994) Maximum likelihood phylogenetic estimation from DNA sequences with variable rates over sites: approximate methods. J. Mol. Evol.. 39, 306-314
+
+
