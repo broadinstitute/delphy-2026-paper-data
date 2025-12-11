@@ -1,0 +1,94 @@
+#NEXUS
+
+Begin taxa;
+    Dimensions ntax=41;
+        Taxlabels
+            OP415257|9000312|UK|2022-08
+            MK783027|3018|Nigeria_Rivers_State|2017-11-09
+            MK783028|3019|Nigeria_Rivers_State|2017-11-09
+            MK783029|3029|Nigeria_Rivers_State|2017-12-06
+            MK783031|3020|Nigeria_Rivers_State|2017-11-09
+            MK783030|3025|Nigeria_Rivers_State|2017-11-30
+            MK783032|3030|Nigeria_Rivers_State|2017-11
+            MK783033|2920|Nigeria_Rivers_State|2017-10-09
+            MN648051|Israel_2018|Israel_ex_Nigeria|2018-10-04
+            MT250197|Singapore_2019|Singapore_ex_Nigeria|2019-05-08
+            MT903341|MPXV-M5320_M15_Bayelsa|Nigeria_Bayelsa_State|2018-08-14
+            MT903343|MPXV-UK_P1|UK_ex_Nigeria|2018-09-07
+            MT903344|MPXV-UK_P2|UK_ex_Nigeria|2018-09-07
+            MT903345|MPXV-UK_P3|UK|2018-09-22
+            NC_063383|MPXV-M5312_HM12_Rivers|Nigeria_Rivers_State|2018-08
+            ON563414|MA001|USA|2022-05-19
+            ON674051|FL001|USA|2022-05-22
+            ON675438|VA001|USA|2022-05-27
+            ON676707|USA_2021_TX|USA|2021-07-15
+            ON676708|USA_2021_MD|USA|2021-11-16
+            OP612674|MPX/003/19|Nigeria_Bayelsa_State|2019-01-12
+            OP612675|MPX/007/19|Nigeria_Bayelsa_State|2019-01-30
+            OP612676|MPX/013/79|Nigeria_Bayelsa_State|2019-02-20
+            OP612677|MPX/015/19|Nigeria_Rivers_State|2019-03-12
+            OP612678|MPX/017/19|Nigeria_Rivers_State|2019-11-02
+            OP612679|MPX/018/19|Nigeria_Delta_State|2019-03-14
+            OP612680|MPX/021/19|Nigeria_Lagos_State|2019-04-01
+            OP612681|MPX/039/19|Nigeria_Bayelsa_State|2019-04-20
+            OP612682|MPX/040/19|Nigeria_Bayelsa_State|2019-04-20
+            OP612683|MPX/042/19|Nigeria_Delta_State|2019-04-18
+            OP612684|MPX/046/19|Nigeria_Lagos_State|2019-05-10
+            OP612685|MPX/052/19|Nigeria_Delta_State|2019-05-29
+            OP612686|MPX/053/19|Nigeria_Delta_State|2019-06-26
+            OP612687|MPX/058/19|Nigeria_Enugu_State|2019-07-11
+            OP612688|MPX/104/19|Nigeria_Oyo_State|2019-10-07
+            OP612689|MPX/111/19|Nigeria_Rivers_State|2019-12-17
+            OP612690|MPX/113/19|Nigeria_Imo_State|2019-12-17
+            OP612691|MPX/191/20|Nigeria|2020-01-23
+            OP331335|9000155|UK|2022-06-03
+            OP331336|9000166|UK|2022-06-29
+            OL504741|2091|UK_ex_Nigeria|2019-12-03
+            ;
+End;
+Begin trees;
+    Translate
+           1 OP415257|9000312|UK|2022-08,
+           2 MK783027|3018|Nigeria_Rivers_State|2017-11-09,
+           3 MK783028|3019|Nigeria_Rivers_State|2017-11-09,
+           4 MK783029|3029|Nigeria_Rivers_State|2017-12-06,
+           5 MK783031|3020|Nigeria_Rivers_State|2017-11-09,
+           6 MK783030|3025|Nigeria_Rivers_State|2017-11-30,
+           7 MK783032|3030|Nigeria_Rivers_State|2017-11,
+           8 MK783033|2920|Nigeria_Rivers_State|2017-10-09,
+           9 MN648051|Israel_2018|Israel_ex_Nigeria|2018-10-04,
+          10 MT250197|Singapore_2019|Singapore_ex_Nigeria|2019-05-08,
+          11 MT903341|MPXV-M5320_M15_Bayelsa|Nigeria_Bayelsa_State|2018-08-14,
+          12 MT903343|MPXV-UK_P1|UK_ex_Nigeria|2018-09-07,
+          13 MT903344|MPXV-UK_P2|UK_ex_Nigeria|2018-09-07,
+          14 MT903345|MPXV-UK_P3|UK|2018-09-22,
+          15 NC_063383|MPXV-M5312_HM12_Rivers|Nigeria_Rivers_State|2018-08,
+          16 ON563414|MA001|USA|2022-05-19,
+          17 ON674051|FL001|USA|2022-05-22,
+          18 ON675438|VA001|USA|2022-05-27,
+          19 ON676707|USA_2021_TX|USA|2021-07-15,
+          20 ON676708|USA_2021_MD|USA|2021-11-16,
+          21 OP612674|MPX/003/19|Nigeria_Bayelsa_State|2019-01-12,
+          22 OP612675|MPX/007/19|Nigeria_Bayelsa_State|2019-01-30,
+          23 OP612676|MPX/013/79|Nigeria_Bayelsa_State|2019-02-20,
+          24 OP612677|MPX/015/19|Nigeria_Rivers_State|2019-03-12,
+          25 OP612678|MPX/017/19|Nigeria_Rivers_State|2019-11-02,
+          26 OP612679|MPX/018/19|Nigeria_Delta_State|2019-03-14,
+          27 OP612680|MPX/021/19|Nigeria_Lagos_State|2019-04-01,
+          28 OP612681|MPX/039/19|Nigeria_Bayelsa_State|2019-04-20,
+          29 OP612682|MPX/040/19|Nigeria_Bayelsa_State|2019-04-20,
+          30 OP612683|MPX/042/19|Nigeria_Delta_State|2019-04-18,
+          31 OP612684|MPX/046/19|Nigeria_Lagos_State|2019-05-10,
+          32 OP612685|MPX/052/19|Nigeria_Delta_State|2019-05-29,
+          33 OP612686|MPX/053/19|Nigeria_Delta_State|2019-06-26,
+          34 OP612687|MPX/058/19|Nigeria_Enugu_State|2019-07-11,
+          35 OP612688|MPX/104/19|Nigeria_Oyo_State|2019-10-07,
+          36 OP612689|MPX/111/19|Nigeria_Rivers_State|2019-12-17,
+          37 OP612690|MPX/113/19|Nigeria_Imo_State|2019-12-17,
+          38 OP612691|MPX/191/20|Nigeria|2020-01-23,
+          39 OP331335|9000155|UK|2022-06-03,
+          40 OP331336|9000166|UK|2022-06-29,
+          41 OL504741|2091|UK_ex_Nigeria|2019-12-03
+;
+tree TREE1 = ((8:0.509863,(1:3.93043,24:0.497552):1.43423):0.916774,(((((34:0.495738,((20:0.465394,16:0.969504):2.18048,33:0.251357):0.203285):0.431121,(13:0.0593208,14:0.100417):0.0264425):0.136826,26:0.737658):0.31316,(12:0.513921,((21:0.808707,(11:0.365917,((41:1.00274,((10:0.113868,32:0.171403):0.271966,30:0.33104):0.0442998):0.512989,(35:0.932977,29:0.467224):0.426584):0.154301):0.0290912):0.0416968,(28:1.05228,9:0.509818):0.0666128):0.0114625):0.0218284):1.55308,(((40:3.0422,((38:0.240853,(39:0.644874,17:0.611998):1.95762):0.340708,(19:2.03325,(18:2.83104,(36:0.269256,37:0.269256):0.11795):0.067962):0.0250235):0.0277634):2.3369,7:0.761114):0.357032,((6:0.568116,((25:0.990183,(23:0.0978653,22:0.040331):0.193687):0.440114,(27:0.305935,31:0.412784):0.535321):1.06111):0.467341,(((5:0.155364,(3:0.0998608,2:0.0998608):0.0555036):0.0237177,4:0.253055):0.655307,15:1.59847):0.143533):0.119851):0.163663):0.250133):0;
+End;
