@@ -1,0 +1,202 @@
+IQ-TREE multicore version 2.3.6 for Linux x86 64-bit built Aug  1 2024
+Developed by Bui Quang Minh, Nguyen Lam Tung, Olga Chernomor, Heiko Schmidt,
+Dominik Schrempf, Michael Woodhams, Ly Trong Nhan, Thomas Wong
+
+Host:    patrick-varillys-laptop (AVX2, FMA3, 62 GB RAM)
+Command: ../iqtree2 -s exp_100/inputs/exp_100.fasta -m HKY+FO --prefix exp_100/ml_outputs/exp_100
+Seed:    927808 (Using SPRNG - Scalable Parallel Random Number Generator)
+Time:    Fri Mar 14 22:29:33 2025
+Kernel:  AVX+FMA - 1 threads (22 CPU cores detected)
+
+HINT: Use -nt option to specify number of threads because your CPU has 22 cores!
+HINT: -nt AUTO will automatically determine the best number of threads to use.
+
+Reading alignment file exp_100/inputs/exp_100.fasta ... Fasta format detected
+Reading fasta file: done in 0.0189138 secs using 95.67% CPU
+Alignment most likely contains DNA/RNA sequences
+Alignment has 100 sequences with 30000 columns, 230 distinct patterns
+99 parsimony-informative, 162 singleton sites, 29739 constant sites
+                    Gap/Ambiguity  Composition  p-value
+Analyzing sequences: done in 2.15509e-05 secs using 92.8% CPU
+   1  TIP_27|2024-02-08     0.00%    passed    100.00%
+   2  TIP_30|2024-03-06     0.00%    passed     99.99%
+   3  TIP_64|2024-05-21     0.00%    passed     99.98%
+   4  TIP_79|2024-05-05     0.00%    passed     99.98%
+   5  TIP_5|2024-02-04      0.00%    passed    100.00%
+   6  TIP_44|2024-03-15     0.00%    passed    100.00%
+   7  TIP_14|2024-05-11     0.00%    passed    100.00%
+   8  TIP_57|2024-05-29     0.00%    passed    100.00%
+   9  TIP_21|2024-06-30     0.00%    passed     99.99%
+  10  TIP_42|2024-07-14     0.00%    passed    100.00%
+  11  TIP_80|2024-07-03     0.00%    passed    100.00%
+  12  TIP_22|2024-07-28     0.00%    passed     99.99%
+  13  TIP_36|2024-07-26     0.00%    passed     99.99%
+  14  TIP_8|2024-07-24      0.00%    passed     99.99%
+  15  TIP_6|2024-05-15      0.00%    passed     99.99%
+  16  TIP_70|2024-06-03     0.00%    passed    100.00%
+  17  TIP_78|2024-06-21     0.00%    passed    100.00%
+  18  TIP_28|2024-06-11     0.00%    passed    100.00%
+  19  TIP_93|2024-05-12     0.00%    passed    100.00%
+  20  TIP_99|2024-06-02     0.00%    passed     99.99%
+  21  TIP_97|2024-06-11     0.00%    passed    100.00%
+  22  TIP_65|2024-07-28     0.00%    passed     99.98%
+  23  TIP_92|2024-06-16     0.00%    passed     99.99%
+  24  TIP_82|2024-05-04     0.00%    passed    100.00%
+  25  TIP_35|2024-04-03     0.00%    passed    100.00%
+  26  TIP_58|2024-06-08     0.00%    passed    100.00%
+  27  TIP_13|2024-05-30     0.00%    passed    100.00%
+  28  TIP_51|2024-07-30     0.00%    passed     99.99%
+  29  TIP_43|2024-07-11     0.00%    passed     99.99%
+  30  TIP_60|2024-07-06     0.00%    passed     99.98%
+  31  TIP_41|2024-07-20     0.00%    passed    100.00%
+  32  TIP_2|2024-06-14      0.00%    passed    100.00%
+  33  TIP_40|2024-07-11     0.00%    passed    100.00%
+  34  TIP_49|2024-06-15     0.00%    passed    100.00%
+  35  TIP_85|2024-06-27     0.00%    passed    100.00%
+  36  TIP_89|2024-06-18     0.00%    passed    100.00%
+  37  TIP_90|2024-07-14     0.00%    passed    100.00%
+  38  TIP_4|2024-07-24      0.00%    passed    100.00%
+  39  TIP_81|2024-07-06     0.00%    passed    100.00%
+  40  TIP_84|2024-07-30     0.00%    passed     99.99%
+  41  TIP_71|2024-06-14     0.00%    passed     99.98%
+  42  TIP_53|2024-06-23     0.00%    passed     99.96%
+  43  TIP_88|2024-07-20     0.00%    passed     99.96%
+  44  TIP_83|2024-07-07     0.00%    passed     99.94%
+  45  TIP_46|2024-07-08     0.00%    passed     99.98%
+  46  TIP_69|2024-06-24     0.00%    passed     99.99%
+  47  TIP_72|2024-06-10     0.00%    passed     99.99%
+  48  TIP_95|2024-07-02     0.00%    passed     99.99%
+  49  TIP_32|2024-07-12     0.00%    passed     99.97%
+  50  TIP_39|2024-07-26     0.00%    passed     99.99%
+  51  TIP_19|2024-07-23     0.00%    passed     99.99%
+  52  TIP_16|2024-07-30     0.00%    passed     99.98%
+  53  TIP_31|2024-07-12     0.00%    passed    100.00%
+  54  TIP_76|2024-07-12     0.00%    passed     99.97%
+  55  TIP_68|2024-06-26     0.00%    passed    100.00%
+  56  TIP_61|2024-06-25     0.00%    passed    100.00%
+  57  TIP_75|2024-07-29     0.00%    passed     99.99%
+  58  TIP_87|2024-07-23     0.00%    passed     99.99%
+  59  TIP_98|2024-07-14     0.00%    passed    100.00%
+  60  TIP_59|2024-04-10     0.00%    passed    100.00%
+  61  TIP_54|2024-07-12     0.00%    passed    100.00%
+  62  TIP_94|2024-06-18     0.00%    passed     99.99%
+  63  TIP_38|2024-04-20     0.00%    passed    100.00%
+  64  TIP_33|2024-05-10     0.00%    passed    100.00%
+  65  TIP_18|2024-05-28     0.00%    passed     99.99%
+  66  TIP_86|2024-06-21     0.00%    passed    100.00%
+  67  TIP_7|2024-07-16      0.00%    passed     99.99%
+  68  TIP_91|2024-07-08     0.00%    passed     99.99%
+  69  TIP_96|2024-07-15     0.00%    passed     99.99%
+  70  TIP_52|2024-07-26     0.00%    passed    100.00%
+  71  TIP_63|2024-07-14     0.00%    passed    100.00%
+  72  TIP_45|2024-06-04     0.00%    passed    100.00%
+  73  TIP_3|2024-06-29      0.00%    passed    100.00%
+  74  TIP_67|2024-07-12     0.00%    passed    100.00%
+  75  TIP_55|2024-06-23     0.00%    passed    100.00%
+  76  TIP_26|2024-06-25     0.00%    passed    100.00%
+  77  TIP_10|2024-07-10     0.00%    passed    100.00%
+  78  TIP_23|2024-07-23     0.00%    passed     99.99%
+  79  TIP_9|2024-05-20      0.00%    passed     99.99%
+  80  TIP_100|2024-07-15    0.00%    passed     99.99%
+  81  TIP_56|2024-06-21     0.00%    passed     99.99%
+  82  TIP_74|2024-07-29     0.00%    passed     99.99%
+  83  TIP_77|2024-07-19     0.00%    passed     99.99%
+  84  TIP_25|2024-05-28     0.00%    passed     99.99%
+  85  TIP_73|2024-05-28     0.00%    passed    100.00%
+  86  TIP_12|2024-06-04     0.00%    passed     99.99%
+  87  TIP_24|2024-06-21     0.00%    passed     99.98%
+  88  TIP_47|2024-07-21     0.00%    passed     99.99%
+  89  TIP_15|2024-06-06     0.00%    passed    100.00%
+  90  TIP_20|2024-06-14     0.00%    passed    100.00%
+  91  TIP_37|2024-07-30     0.00%    passed     99.96%
+  92  TIP_50|2024-07-25     0.00%    passed     99.98%
+  93  TIP_29|2024-07-22     0.00%    passed     99.99%
+  94  TIP_62|2024-07-11     0.00%    passed     99.99%
+  95  TIP_48|2024-06-10     0.00%    passed    100.00%
+  96  TIP_66|2024-07-28     0.00%    passed    100.00%
+  97  TIP_17|2024-07-23     0.00%    passed    100.00%
+  98  TIP_34|2024-06-26     0.00%    passed     99.99%
+  99  TIP_11|2024-07-26     0.00%    passed     99.99%
+ 100  TIP_1|2024-07-08      0.00%    passed     99.99%
+****  TOTAL                 0.00%  0 sequences failed composition chi2 test (p-value<5%; df=3)
+NOTE: TIP_81|2024-07-06 is identical to TIP_4|2024-07-24 but kept for subsequent analysis
+NOTE: TIP_15|2024-06-06 is identical to TIP_45|2024-06-04 but kept for subsequent analysis
+NOTE: TIP_26|2024-06-25 is identical to TIP_55|2024-06-23 but kept for subsequent analysis
+NOTE: TIP_1|2024-07-08 is identical to TIP_34|2024-06-26 but kept for subsequent analysis
+
+Create initial parsimony tree by phylogenetic likelihood library (PLL)... 0.002 seconds
+
+NOTE: 0 MB RAM (0 GB) is required!
+Estimate model parameters (epsilon = 0.100)
+1. Initial log-likelihood: -43699.114
+2. Current log-likelihood: -43625.983
+Optimal log-likelihood: -43625.983
+Rate parameters:  A-C: 1.00000  A-G: 4.62640  A-T: 1.00000  C-G: 1.00000  C-T: 4.62640  G-T: 1.00000
+Base frequencies:  A: 0.299  C: 0.181  G: 0.200  T: 0.320
+Parameters optimization took 2 rounds (0.017 sec)
+Wrote distance file to... 
+Computing ML distances based on estimated model parameters...
+Calculating distance matrix: done in 0.0180727 secs using 99.86% CPU
+Computing ML distances took 0.018142 sec (of wall-clock time) 0.018119 sec (of CPU time)
+Setting up auxiliary I and S matrices: done in 0.000195293 secs using 88.07% CPU
+Computing RapidNJ tree took 0.000748 sec (of wall-clock time) 0.000585 sec (of CPU time)
+Log-likelihood of RapidNJ tree: -43627.672
+--------------------------------------------------------------------
+|             INITIALIZING CANDIDATE TREE SET                      |
+--------------------------------------------------------------------
+Generating 98 parsimony trees... 0.277 second
+Computing log-likelihood of 98 initial trees ... 0.143 seconds
+Current best score: -43625.983
+
+Do NNI search on 20 best initial trees
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 1: -43625.983
+BETTER TREE FOUND at iteration 2: -43625.983
+BETTER TREE FOUND at iteration 5: -43625.983
+BETTER TREE FOUND at iteration 10: -43625.983
+Iteration 10 / LogL: -43625.983 / Time: 0h:0m:0s
+BETTER TREE FOUND at iteration 12: -43625.983
+Iteration 20 / LogL: -43625.983 / Time: 0h:0m:0s
+Finish initializing candidate tree set (20)
+Current best tree score: -43625.983 / CPU time: 0.570
+Number of iterations: 20
+--------------------------------------------------------------------
+|               OPTIMIZING CANDIDATE TREE SET                      |
+--------------------------------------------------------------------
+Iteration 30 / LogL: -43641.684 / Time: 0h:0m:0s (0h:0m:2s left)
+Iteration 40 / LogL: -43642.372 / Time: 0h:0m:1s (0h:0m:2s left)
+Iteration 50 / LogL: -43629.116 / Time: 0h:0m:1s (0h:0m:1s left)
+Iteration 60 / LogL: -43632.656 / Time: 0h:0m:1s (0h:0m:1s left)
+Iteration 70 / LogL: -43631.549 / Time: 0h:0m:1s (0h:0m:1s left)
+Iteration 80 / LogL: -43626.625 / Time: 0h:0m:2s (0h:0m:0s left)
+Iteration 90 / LogL: -43639.818 / Time: 0h:0m:2s (0h:0m:0s left)
+Iteration 100 / LogL: -43629.028 / Time: 0h:0m:2s (0h:0m:0s left)
+Iteration 110 / LogL: -43626.626 / Time: 0h:0m:2s (0h:0m:0s left)
+TREE SEARCH COMPLETED AFTER 113 ITERATIONS / Time: 0h:0m:2s
+
+--------------------------------------------------------------------
+|                    FINALIZING TREE SEARCH                        |
+--------------------------------------------------------------------
+Performs final model parameters optimization
+Estimate model parameters (epsilon = 0.010)
+1. Initial log-likelihood: -43625.983
+Optimal log-likelihood: -43625.983
+Rate parameters:  A-C: 1.00000  A-G: 4.62640  A-T: 1.00000  C-G: 1.00000  C-T: 4.62640  G-T: 1.00000
+Base frequencies:  A: 0.299  C: 0.181  G: 0.200  T: 0.320
+Parameters optimization took 1 rounds (0.004 sec)
+BEST SCORE FOUND : -43625.983
+Total tree length: 0.009
+
+Total number of iterations: 113
+CPU time used for tree search: 2.655 sec (0h:0m:2s)
+Wall-clock time used for tree search: 2.738 sec (0h:0m:2s)
+Total CPU time used: 2.712 sec (0h:0m:2s)
+Total wall-clock time used: 2.793 sec (0h:0m:2s)
+
+Analysis results written to: 
+  IQ-TREE report:                exp_100/ml_outputs/exp_100.iqtree
+  Maximum-likelihood tree:       exp_100/ml_outputs/exp_100.treefile
+  Likelihood distances:          exp_100/ml_outputs/exp_100.mldist
+  Screen log file:               exp_100/ml_outputs/exp_100.log
+
+Date and Time: Fri Mar 14 22:29:36 2025

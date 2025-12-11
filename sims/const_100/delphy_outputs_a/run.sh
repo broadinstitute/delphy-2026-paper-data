@@ -1,0 +1,1 @@
+../delphy --v0-in-maple const_100/inputs/const_100.maple --v0-threads 5 --v0-steps 500000000 --v0-out-log-file const_100/delphy_outputs_a/const_100.log --v0-log-every 50000 --v0-out-trees-file const_100/delphy_outputs_a/const_100.trees --v0-tree-every 2500000 --v0-out-delphy-file const_100/delphy_outputs_a/const_100.dphy --v0-delphy-snapshot-every 2500000

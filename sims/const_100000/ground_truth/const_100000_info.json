@@ -1,0 +1,33 @@
+{
+  "args": "../sapling --seed 100000 -n 100000 --const-pop-n0 2.0 --t0 2024-07-31 --min-tip-t 2024-01-01 --max-tip-t 2024-07-31 --hky-kappa 5.0 --hky-pi-A 0.3 --hky-pi-C 0.18 --hky-pi-G 0.20 --hky-pi-T 0.32 --mu 0.001 -L 30000 --out-info const_100000/ground_truth/const_100000_info.json --out-newick const_100000/ground_truth/const_100000_tree.nwk --out-nexus const_100000/ground_truth/const_100000_tree.nexus --out-maple const_100000/inputs/const_100000.maple",
+  "num_sites": 30000,
+  "pop_model": {
+    "n0": 2.0,
+    "type": "const"
+  },
+  "sampling_strategy": {
+    "max_tip_t": "2024-07-31",
+    "min_tip_t": "2024-01-01",
+    "num_samples": 100000
+  },
+  "sapling_build_number": 2,
+  "sapling_commit": "a0b9da1",
+  "sapling_version": "0.1.1",
+  "seed": 100000,
+  "subst_model": {
+    "kappa": 5.0,
+    "mu": 0.001,
+    "pi": [
+      0.3,
+      0.18,
+      0.2,
+      0.32
+    ],
+    "type": "hky"
+  },
+  "t0": "2024-07-31",
+  "tree_stats": {
+    "num_mutations": 14815,
+    "total_branch_length": 499.62002987543525
+  }
+}

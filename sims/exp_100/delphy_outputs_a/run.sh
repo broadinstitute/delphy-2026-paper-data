@@ -1,0 +1,1 @@
+../delphy --v0-in-maple exp_100/inputs/exp_100.maple --v0-threads 5 --v0-steps 500000000 --v0-out-log-file exp_100/delphy_outputs_a/exp_100.log --v0-log-every 50000 --v0-out-trees-file exp_100/delphy_outputs_a/exp_100.trees --v0-tree-every 2500000 --v0-out-delphy-file exp_100/delphy_outputs_a/exp_100.dphy --v0-delphy-snapshot-every 2500000
