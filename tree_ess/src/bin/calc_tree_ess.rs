@@ -183,7 +183,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     let sorted_split_fingerprints_j = &sample_j.sorted_split_fingerprints;
 
                     let d_u64 =
-                        calc_rs_dist(sorted_split_fingerprints_i, sorted_split_fingerprints_j);
+                        calc_rf_dist(sorted_split_fingerprints_i, sorted_split_fingerprints_j);
                     let d = d_u64 as f64;
 
                     all_rf_dist_matrix[(ii, jj)] = d;
@@ -352,7 +352,7 @@ fn calc_sorted_splits(
     result
 }
 
-fn calc_rs_dist(
+fn calc_rf_dist(
     sorted_split_fingerprints_a: &Vec<u64>,
     sorted_split_fingerprints_b: &Vec<u64>,
 ) -> u64 {
@@ -427,7 +427,7 @@ mod tests {
         let sorted_split_fingerprints_b = vec![2, 3, 5, 7];
 
         assert_eq!(
-            calc_rs_dist(&sorted_split_fingerprints_a, &sorted_split_fingerprints_b),
+            calc_rf_dist(&sorted_split_fingerprints_a, &sorted_split_fingerprints_b),
             4
         );
     }

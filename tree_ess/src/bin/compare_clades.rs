@@ -110,7 +110,7 @@ fn assign_tip_fingerprints(tree: &NewickTree) -> HashMap<String, u64> {
 
 // -- RF distance (from calc_tree_ess.rs) --
 
-fn calc_rs_dist(sorted_a: &[u64], sorted_b: &[u64]) -> u64 {
+fn calc_rf_dist(sorted_a: &[u64], sorted_b: &[u64]) -> u64 {
     use EitherOrBoth::{Both, Left, Right};
     let mut distance: u64 = 0;
     for pair in itertools::merge_join_by(sorted_a.iter(), sorted_b.iter(), |a, b| a.cmp(b)) {
@@ -255,7 +255,7 @@ fn compute_ess(sorted_splits: &[Vec<u64>]) -> f64 {
             n
         );
         for j in (i + 1)..n {
-            let d = calc_rs_dist(&sorted_splits[i], &sorted_splits[j]) as f64;
+            let d = calc_rf_dist(&sorted_splits[i], &sorted_splits[j]) as f64;
             rf_dist[(i, j)] = d;
             rf_dist[(j, i)] = d;
         }
