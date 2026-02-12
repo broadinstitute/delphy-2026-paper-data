@@ -3,7 +3,7 @@
 //! This Nexus reader is *extremely* fragile and not very efficient, but good enough to parse
 //! the trees written by Delphy into a `.trees` file and at least one actual BEAST run.
 
-use crate::newick::{NewickNode, NewickTree, Parser};
+use crate::newick::{NewickNode, NewickTree, Parser, lexer};
 use crate::refs::Pool;
 use crate::trees::TreeLike;
 use std::io::{BufRead, BufReader, Read};
@@ -94,7 +94,9 @@ impl NexusReader {
         let mut tip_names = vec![];
         tip_names.push(String::from("Tip indices are 1-based, not 0-based!"));
         for _tip_index in 1..=ntax {
-            tip_names.push(line_reader.next_line()?.trim().to_string());
+            let raw_name = line_reader.next_line()?.trim().to_string();
+            let name = lexer::unquote(&raw_name).unwrap_or(raw_name);
+            tip_names.push(name);
         }
 
         check(line_reader.next_line()?.trim() == ";")?;
@@ -170,6 +172,41 @@ mod tests {
     use crate::refs::TestPool;
     use indoc::indoc;
     use std::io::Cursor;
+
+    #[test]
+    fn quoted_tip_names() {
+        let test_contents = indoc! {"\
+           #NEXUS
+
+           Begin taxa;
+               Dimensions ntax=2;
+                   Taxlabels
+                       'A|2020-01-01'
+                       'B|2020-06-15'
+                       ;
+           End;
+           Begin trees;
+               Translate
+                   1 'A|2020-01-01',
+                   2 'B|2020-06-15'
+           ;
+           tree STATE_100 = (1:0.1,2:0.2):0;
+           End;
+        "};
+
+        let pool = TestPool::new();
+        let results = NexusReader::parse(Cursor::new(test_contents), 0, 1, &pool).unwrap();
+
+        assert_eq!(results.len(), 1);
+        let tree = &results[0].1;
+        let mut tip_names: Vec<String> = tree
+            .preorder_iter()
+            .filter(|n| n.borrow().children.is_empty())
+            .map(|n| n.borrow().name.clone())
+            .collect();
+        tip_names.sort();
+        assert_eq!(tip_names, vec!["A|2020-01-01", "B|2020-06-15"]);
+    }
 
     #[test]
     fn simple() {

@@ -94,30 +94,6 @@ fn decimal_date(year: i32, month: u32, day: u32) -> f64 {
     year as f64 + (doy as f64 - 1.0) / days_in_year
 }
 
-// -- Tip name normalization --
-// BEAST wraps tip names in single quotes (e.g., 'name|date'), Delphy does not.
-// Strip surrounding quotes so both match.
-
-fn normalize_tip_name(name: &str) -> String {
-    if name.starts_with('\'') && name.ends_with('\'') && name.len() >= 2 {
-        name[1..name.len() - 1].to_string()
-    } else {
-        name.to_string()
-    }
-}
-
-fn normalize_tree_tip_names(tree: &NewickTree) {
-    for node_ref in tree.any_order_iter() {
-        let mut node = node_ref.borrow_mut();
-        if node.is_tip() {
-            let normalized = normalize_tip_name(&node.name);
-            if normalized != node.name {
-                node.name = normalized;
-            }
-        }
-    }
-}
-
 // -- Tip fingerprints (from calc_tree_ess.rs) --
 
 fn assign_tip_fingerprints(tree: &NewickTree) -> HashMap<String, u64> {
@@ -401,7 +377,6 @@ fn process_file(
     let mut has_dates = false;
 
     for (i, (_state, tree)) in trees.into_iter().enumerate() {
-        normalize_tree_tip_names(&tree);
         if i < num_burnin {
             continue;
         }
@@ -506,7 +481,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     let first_trees = NexusReader::parse(reader, 0, 1, &pool)?;
     assert!(!first_trees.is_empty(), "No trees in {}", args.file_a);
 
-    normalize_tree_tip_names(&first_trees[0].1);
     let tip_fingerprints = assign_tip_fingerprints(&first_trees[0].1);
 
     // Build tip name list and index map
