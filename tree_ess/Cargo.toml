@@ -25,3 +25,7 @@ fast_unsafe_light_refs = []
 [[bin]]
 name = "calc-tree-ess"
 path = "src/bin/calc_tree_ess.rs"
+
+[[bin]]
+name = "compare-clades"
+path = "src/bin/compare_clades.rs"
