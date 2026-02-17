@@ -214,7 +214,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             rf_dist_matrix.slice(s![first_prod_sample_idx..n, first_prod_sample_idx..n]);
         let prod_n = n - first_prod_sample_idx;
 
-        // Calculate Frechet covariance at lag s (rho_s in Eq (18) of Magee et al 2024.
+        // Calculate Frechet covariance at lag s (rho_s in Eq (18) of Magee et al 2024).
         //
         // We simplify their expressions because Var(tau_t) and Var(tau_{t+s}) are statistically
         // identical (why should the variance at different points in the chain be different when
