@@ -2,6 +2,8 @@
 
 ## Mendes, Bouckaert, Carvalho & Drummond (2025) — "How to Validate a Bayesian Evolutionary Model"
 
+<https://doi.org/10.1093/sysbio/syae064>
+
 The paper describes two complementary protocols for validating that a Bayesian phylogenetic model is correctly implemented:
 
 ### 1. Coverage Validation
@@ -27,6 +29,8 @@ The paper describes two complementary protocols for validating that a Bayesian p
 ---
 
 ## Bouckaert — DeveloperManual (GitHub)
+
+<https://github.com/rbouckaert/DeveloperManual>
 
 This is the practical companion, showing how to implement these studies in BEAST 2:
 
