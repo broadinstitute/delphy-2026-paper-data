@@ -23,7 +23,7 @@ use std::io::BufReader;
 use std::io;
 use tree_ess::burnin::BurninSpec;
 use tree_ess::clades::{analyze_tree_clades, assign_tip_fps, calc_rf_dist, tips_in_clade, CladeDefinition, CladeFp, CladeMap};
-use tree_ess::dates::{find_root_date, parse_tip_date};
+use tree_ess::dates::find_root_date;
 use tree_ess::ess::calc_frechet_ess;
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
@@ -70,13 +70,12 @@ struct TreeResult {
 fn process_tree(
     tree: &NewickTree,
     tip_fps: &HashMap<String, CladeFp>,
-    exact_tip_dates: &HashMap<String, f64>,
     clade_map: &mut CladeMap,
 ) -> TreeResult {
 
     let per_tree_info = analyze_tree_clades(tree, tip_fps, clade_map);
 
-    let root_date = find_root_date(tree, exact_tip_dates)
+    let root_date = find_root_date(tree)
         .expect("No tip found with an exact date!  Cannot deduce root date!");
 
     let clade_fps_2_info: HashMap<CladeFp, CladeInTreeInfo> = per_tree_info
@@ -172,7 +171,6 @@ fn process_trees(
     trees: &Vec<(u64, NewickTree)>,
     burnin: &BurninSpec,
     tip_fps: &HashMap<String, CladeFp>,
-    exact_tip_dates: &HashMap<String, f64>,
     clade_map: &mut CladeMap,
 ) -> Result<FileProcessingResult, Box<dyn Error>> {
     let num_total = trees.len();
@@ -194,7 +192,7 @@ fn process_trees(
             continue;
         }
 
-        let result = process_tree(&tree, tip_fps, exact_tip_dates, clade_map);
+        let result = process_tree(&tree, tip_fps, clade_map);
 
         // Accumulate per-clade statistics
         for (&clade_fp, info) in &result.clade_fps_2_info {
@@ -309,18 +307,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     }
 
-    // Build tip date map
-    let mut exact_tip_dates: HashMap<String, f64> = HashMap::new();
-    for name in tip_fps.keys() {
-        if let Some(date) = parse_tip_date(name) {
-            exact_tip_dates.insert(name.clone(), date);
-        }
-    }
-    eprintln!("  {} tips with full dates", exact_tip_dates.len());
-    if exact_tip_dates.is_empty() {
-        panic!("WARNING: No tips with full YYYY-MM-DD dates found.");
-    }
-
     // Clade definitions will accumulate here
     let mut clade_map: CladeMap = HashMap::new();
 
@@ -330,7 +316,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         &file_a_trees,
         &burnin_spec,
         &tip_fps,
-        &exact_tip_dates,
         &mut clade_map,
     )?;
     let result_b = process_trees(
@@ -338,7 +323,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         &file_b_trees,
         &burnin_spec,
         &tip_fps,
-        &exact_tip_dates,
         &mut clade_map,
     )?;
 
@@ -442,15 +426,9 @@ mod tests {
             (name_b.to_string(), fp_b),
             (name_c.to_string(), fp_c),
         ]);
-        let exact_tip_dates: HashMap<String, f64> = HashMap::from([
-            (name_a.to_string(), parse_tip_date(name_a).unwrap()),
-            (name_b.to_string(), parse_tip_date(name_b).unwrap()),
-            (name_c.to_string(), parse_tip_date(name_c).unwrap()),
-        ]);
-
         let mut clade_map: CladeMap = HashMap::new();
 
-        let result = process_tree(&tree, &tip_fps, &exact_tip_dates, &mut clade_map);
+        let result = process_tree(&tree, &tip_fps, &mut clade_map);
 
         // 2 inner nodes: {A,B} and the root {A,B,C}
         let fp_ab = fp_a.union(&fp_b);

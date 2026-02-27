@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::newick::NewickTree;
 use crate::trees::{NodeLike, TraversalAction, TreeLike};
 
@@ -42,10 +40,7 @@ pub fn decimal_date(year: i32, month: u32, day: u32) -> f64 {
 /// to the first tip suffices to nail down the root date.  If that fails, then likely
 /// one of the next few tips visited will have an exact date, thus producing a root date.
 /// Hence, the amount of roundoff that we expect in practice is very small.
-pub fn find_root_date(
-    tree: &NewickTree,
-    exact_tip_dates: &HashMap<String, f64>,
-) -> Option<f64> {
+pub fn find_root_date(tree: &NewickTree) -> Option<f64> {
     let mut root_to_node_dist = 0.0;
 
     for (action, node_ref) in tree.traversal_iter() {
@@ -58,10 +53,10 @@ pub fn find_root_date(
                 };
 
                 if node.is_tip()
-                    && let Some(exact_tip_date) = exact_tip_dates.get(node.name.as_str())
+                    && let Some(tip_date) = parse_tip_date(&node.name)
                 {
                     // Found a tip with an exact date: done!
-                    let root_date = exact_tip_date - root_to_node_dist;
+                    let root_date = tip_date - root_to_node_dist;
                     return Some(root_date);
                 }
             }
