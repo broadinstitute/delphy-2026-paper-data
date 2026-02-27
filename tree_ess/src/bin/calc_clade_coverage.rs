@@ -133,12 +133,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Step 2: Compute posterior clade support
     eprintln!("Computing posterior clade support...");
     let mut clade_counts: HashMap<CladeFp, usize> = HashMap::new();
+    let mut clade_map = CladeMap::new();
 
     for (i, (_state, tree)) in posterior_trees.iter().enumerate() {
         if i < num_burnin {
             continue;
         }
-        let mut clade_map = CladeMap::new();
         // false => only non-trivial clades (excluding tips and root)
         for fp in catalog_tree_clades(tree, &tip_fps, &mut clade_map, false) {
             *clade_counts.entry(fp).or_insert(0) += 1;
@@ -151,7 +151,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Step 3: Merge true tree clades into posterior support map
     eprintln!("Extracting true tree clades...");
-    let mut clade_map = CladeMap::new();
     // false => only non-trivial clades (excluding tips and root)
     let true_clade_fps: HashSet<CladeFp> =
         catalog_tree_clades(true_tree, &tip_fps, &mut clade_map, false)
