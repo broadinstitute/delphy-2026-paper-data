@@ -19,11 +19,11 @@ use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use tree_ess::burnin::BurninSpec;
-use tree_ess::clade_fp::{assign_tip_fps, CladeFp};
+use tree_ess::clades::{analyze_tree_clades, assign_tip_fps, CladeDefinition, CladeFp, CladeMap};
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
-use tree_ess::trees::{NodeLike, TraversalAction, TreeLike};
+use tree_ess::trees::{NodeLike, TreeLike};
 
 #[derive(Parser)]
 #[command(
@@ -59,46 +59,22 @@ struct Args {
     header: bool,
 }
 
-/// Traverse a tree and return clade fingerprints for all non-trivial clades
+/// Return clade fingerprints for all non-trivial clades in a tree
 /// (excluding tip singletons and the root clade).
 fn extract_nontrivial_clades(
     tree: &NewickTree,
     tip_fps: &HashMap<String, CladeFp>,
 ) -> Vec<CladeFp> {
-    let mut fp_stack: Vec<CladeFp> = Vec::new();
-    let mut result: Vec<CladeFp> = Vec::new();
-
-    for (action, node_ref) in tree.traversal_iter() {
-        let node = node_ref.borrow();
-        match action {
-            TraversalAction::Enter => {
-                if node.is_tip() {
-                    let fp = *tip_fps
-                        .get(node.name.as_str())
-                        .expect("Unknown tip name");
-                    fp_stack.push(fp);
-                } else {
-                    fp_stack.push(CladeFp::empty());
-                }
-            }
-            TraversalAction::Exit => {
-                let fp = fp_stack.pop().expect("Improper nesting?");
-
-                // Exclude tips and the root
-                let is_tip = node.is_tip();
-                let is_root = node_ref == tree.root;
-                if !is_tip && !is_root {
-                    result.push(fp);
-                }
-
-                if let Some(parent_fp) = fp_stack.last_mut() {
-                    *parent_fp = parent_fp.union(&fp);
-                }
-            }
-        }
-    }
-
-    result
+    let num_tips = tip_fps.len();
+    let mut clade_map = CladeMap::new();
+    analyze_tree_clades(tree, tip_fps, &mut clade_map);
+    clade_map.into_iter()
+        .filter_map(|(fp, defn)| match defn {
+            CladeDefinition::InnerNodeClade { size, .. }
+                if size < num_tips => Some(fp),
+            _ => None,
+        })
+        .collect()
 }
 
 // -- Binning --

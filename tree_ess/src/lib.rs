@@ -1,5 +1,5 @@
 pub mod burnin;
-pub mod clade_fp;
+pub mod clades;
 pub mod dates;
 pub mod ess;
 pub mod nexus_reader;

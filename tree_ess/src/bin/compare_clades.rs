@@ -22,13 +22,13 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io;
 use tree_ess::burnin::BurninSpec;
-use tree_ess::clade_fp::{assign_tip_fps, calc_rf_dist, CladeFp};
-use tree_ess::dates::parse_tip_date;
+use tree_ess::clades::{analyze_tree_clades, assign_tip_fps, calc_rf_dist, tips_in_clade, CladeDefinition, CladeFp, CladeMap};
+use tree_ess::dates::{find_root_date, parse_tip_date};
 use tree_ess::ess::calc_frechet_ess;
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
-use tree_ess::trees::{NodeLike, TraversalAction, TreeLike};
+use tree_ess::trees::{NodeLike, TreeLike};
 
 #[derive(Parser)]
 #[command(
@@ -56,77 +56,6 @@ struct Args {
     min_support: f64,
 }
 
-// -- Clade definitions --
-
-#[derive(Debug, Serialize, Clone, Eq, PartialEq)]
-enum CladeDefinition {
-    TipClade {
-        name: String,
-        fp: CladeFp,
-    },
-    InnerNodeClade {
-        subclade1: CladeFp,
-        subclade2: CladeFp,
-        size: usize,
-    },
-}
-
-impl CladeDefinition {
-    fn fp(&self) -> CladeFp {
-        match self {
-            CladeDefinition::TipClade { fp, .. } => fp.clone(),
-            CladeDefinition::InnerNodeClade {
-                subclade1,
-                subclade2,
-                ..
-            } => subclade1.union(&subclade2),
-        }
-    }
-
-    fn size(&self) -> usize {
-        match self {
-            CladeDefinition::TipClade { .. } => 1,
-            CladeDefinition::InnerNodeClade { size, .. } => *size,
-        }
-    }
-
-    fn is_complete(&self) -> bool {
-        match self {
-            CladeDefinition::TipClade { .. } => true,
-            CladeDefinition::InnerNodeClade {
-                subclade1,
-                subclade2,
-                ..
-            } => !subclade1.is_empty() && !subclade2.is_empty(),
-        }
-    }
-}
-
-type CladeMap = HashMap<CladeFp, CladeDefinition>;
-
-fn tips_in_clade(fp: &CladeFp, clade_map: &CladeMap) -> Vec<String> {
-
-    fn go(fp: &CladeFp, clade_map: &CladeMap, result: &mut Vec<String>) {
-        match clade_map.get(fp) {
-            None => { },
-            Some(CladeDefinition::TipClade { name, .. }) => result.push(name.clone()),
-            Some(CladeDefinition::InnerNodeClade {
-                subclade1,
-                subclade2,
-                ..
-            }) => {
-                go(subclade1, clade_map, result);
-                go(subclade2, clade_map, result);
-            }
-        }
-    }
-
-    let mut result: Vec<String> = Vec::new();
-    go(fp, clade_map, &mut result);
-    result.sort();
-    result
-}
-
 // -- Per-tree processing --
 
 struct CladeInTreeInfo {
@@ -138,48 +67,6 @@ struct TreeResult {
     clade_fps_2_info: HashMap<CladeFp, CladeInTreeInfo>,
 }
 
-fn find_root_date(tree: &NewickTree, exact_tip_dates: &HashMap<String, f64>) -> f64 {
-    // Use the fixed date of some tip to back out the date of the root.
-    // Panics if no tip has an exact date
-
-    // We put up with the possibility of some round-off error in adding and subtracting
-    // branch lengths as we traverse the tree.  The working assumption is that most tips
-    // have exact dates, so it's very likely that just the initial descent from the root
-    // to the first tip suffices to nail down the root date.  If that fails, then likely
-    // one of the next few tips visited will have an exact date, thus producing a root date.
-    // Hence, the amount of roundoff that we expect in practice is very small.
-
-    let mut root_to_node_dist = 0.0;
-
-    for (action, node_ref) in tree.traversal_iter() {
-        let node = node_ref.borrow();
-        match action {
-            TraversalAction::Enter => {
-                if node_ref != tree.root {
-                    // root-to-root distance is 0 by definition; ignore branch length then
-                    root_to_node_dist += node.branch_length
-                };
-
-                if node.is_tip()
-                    && let Some(exact_tip_date) = exact_tip_dates.get(node.name.as_str())
-                {
-                    // Found a tip with an exact date: done!
-                    let root_date = exact_tip_date - root_to_node_dist;
-                    return root_date;
-                }
-            }
-            TraversalAction::Exit => {
-                // If we get here when `node` is the root, then we're going to fail
-                // anyway, so there's nothing to gain from subtracting `node.branch_length`
-                // only for non-root nodes.
-                root_to_node_dist -= node.branch_length;
-            }
-        }
-    }
-
-    panic!("No tip found with an exact date!  Cannot deduce root date!");
-}
-
 fn process_tree(
     tree: &NewickTree,
     tip_fps: &HashMap<String, CladeFp>,
@@ -187,102 +74,15 @@ fn process_tree(
     clade_map: &mut CladeMap,
 ) -> TreeResult {
 
-    let root_date = find_root_date(tree, exact_tip_dates);
+    let per_tree_info = analyze_tree_clades(tree, tip_fps, clade_map);
 
-    let mut node_clade_defn = CladeDefinition::InnerNodeClade {
-        subclade1: CladeFp::empty(),
-        subclade2: CladeFp::empty(),
-        size: 0,
-    };
-    let mut node_clade_defn_stack: Vec<CladeDefinition> = vec![];
+    let root_date = find_root_date(tree, exact_tip_dates)
+        .expect("No tip found with an exact date!  Cannot deduce root date!");
 
-    let mut node_date = root_date;
-    let mut node_date_stack: Vec<f64> = vec![];
-
-    let mut clade_fps_2_info: HashMap<CladeFp, CladeInTreeInfo> = HashMap::new();
-
-    for (action, node_ref) in tree.traversal_iter() {
-        let node = node_ref.borrow();
-        match action {
-            TraversalAction::Enter => {
-                // Shift focus from parent to node
-
-                node_date_stack.push(node_date);
-                if node_ref != tree.root {
-                    // root date is root_date by definition; ignore branch length then
-                    node_date += node.branch_length
-                };
-
-                let new_clade_defn = {
-                    if node.is_tip() {
-                        CladeDefinition::TipClade {
-                            name: node.name.clone(),
-                            fp: *tip_fps
-                                .get(node.name.as_str())
-                                .expect("Unknown tip name"),
-                        }
-                    } else {
-                        CladeDefinition::InnerNodeClade {
-                            subclade1: CladeFp::empty(),
-                            subclade2: CladeFp::empty(),
-                            size: 0,
-                        }
-                    }
-                };
-                node_clade_defn_stack.push(std::mem::replace(&mut node_clade_defn, new_clade_defn));
-
-                // Invariant: at this point, node_date and node_clade_defn refer to the
-                // date and (partial) fingerprint for the current node after entering it
-            }
-            TraversalAction::Exit => {
-                // Invariant: at this point, node_date and node_clade_defn refer to the
-                // date and (partial) fingerprint for the current node before exiting it
-
-                assert!(node_clade_defn.is_complete());
-                let node_fp = node_clade_defn.fp();
-
-                clade_fps_2_info.insert(node_fp, CladeInTreeInfo { date: node_date });
-
-                // After this line, node_clade_defn becomes the parent's clade definition
-                let child_clade_defn =
-                    std::mem::replace(&mut node_clade_defn, node_clade_defn_stack.pop().unwrap());
-                let child_clade_size = child_clade_defn.size();
-                clade_map.entry(node_fp).or_insert(child_clade_defn); // Save one example decomposition of this clade for later reconstruction
-
-                // Shift focus from node to parent, merging this node's fingerprint into it
-
-                // node_clade_defn is already the parent's clade definition; merge exited child's
-                // fingerprint if necessary
-                node_clade_defn = match node_clade_defn {
-                    CladeDefinition::TipClade { .. } => node_clade_defn,
-                    CladeDefinition::InnerNodeClade {
-                        subclade1,
-                        subclade2,
-                        size,
-                    } => {
-                        if subclade1.is_empty() {
-                            CladeDefinition::InnerNodeClade {
-                                subclade1: node_fp,
-                                subclade2: CladeFp::empty(),
-                                size: child_clade_size,
-                            }
-                        } else if subclade2.is_empty() {
-                            CladeDefinition::InnerNodeClade {
-                                subclade1,
-                                subclade2: node_fp,
-                                size: size + child_clade_size,
-                            }
-                        } else {
-                            panic!("Non-bifurcating tree?")
-                        }
-                    }
-                };
-
-                let parent_date = node_date_stack.pop().unwrap();
-                node_date = parent_date;
-            }
-        }
-    }
+    let clade_fps_2_info: HashMap<CladeFp, CladeInTreeInfo> = per_tree_info
+        .into_iter()
+        .map(|(fp, info)| (fp, CladeInTreeInfo { date: root_date + info.time_from_root }))
+        .collect();
 
     let sorted_clade_fps: Vec<CladeFp> = clade_fps_2_info.keys().cloned().sorted().collect();
 
@@ -607,7 +407,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::CladeDefinition::{InnerNodeClade, TipClade};
+    use tree_ess::clades::CladeDefinition::{InnerNodeClade, TipClade};
     use itertools::Itertools;
     use tree_ess::newick::NewickNode;
     use tree_ess::refs::Pool;

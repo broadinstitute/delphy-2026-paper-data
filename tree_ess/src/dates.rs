@@ -1,3 +1,8 @@
+use std::collections::HashMap;
+
+use crate::newick::NewickTree;
+use crate::trees::{NodeLike, TraversalAction, TreeLike};
+
 /// Parse a tip date from the `name|YYYY-MM-DD` convention, returning
 /// the date as a decimal year.  Returns `None` if the name does not
 /// end with a valid full date.
@@ -26,6 +31,50 @@ pub fn decimal_date(year: i32, month: u32, day: u32) -> f64 {
         doy += 1;
     }
     year as f64 + (doy as f64 - 1.0) / days_in_year
+}
+
+/// Use the fixed date of some tip to back out the date of the root.
+/// Returns `None` if no tip has an exact date.
+///
+/// We put up with the possibility of some round-off error in adding and subtracting
+/// branch lengths as we traverse the tree.  The working assumption is that most tips
+/// have exact dates, so it's very likely that just the initial descent from the root
+/// to the first tip suffices to nail down the root date.  If that fails, then likely
+/// one of the next few tips visited will have an exact date, thus producing a root date.
+/// Hence, the amount of roundoff that we expect in practice is very small.
+pub fn find_root_date(
+    tree: &NewickTree,
+    exact_tip_dates: &HashMap<String, f64>,
+) -> Option<f64> {
+    let mut root_to_node_dist = 0.0;
+
+    for (action, node_ref) in tree.traversal_iter() {
+        let node = node_ref.borrow();
+        match action {
+            TraversalAction::Enter => {
+                if node_ref != tree.root {
+                    // root-to-root distance is 0 by definition; ignore branch length then
+                    root_to_node_dist += node.branch_length
+                };
+
+                if node.is_tip()
+                    && let Some(exact_tip_date) = exact_tip_dates.get(node.name.as_str())
+                {
+                    // Found a tip with an exact date: done!
+                    let root_date = exact_tip_date - root_to_node_dist;
+                    return Some(root_date);
+                }
+            }
+            TraversalAction::Exit => {
+                // If we get here when `node` is the root, then we're going to fail
+                // anyway, so there's nothing to gain from subtracting `node.branch_length`
+                // only for non-root nodes.
+                root_to_node_dist -= node.branch_length;
+            }
+        }
+    }
+
+    None
 }
 
 #[cfg(test)]

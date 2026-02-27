@@ -15,7 +15,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io;
 use tree_ess::burnin::BurninSpec;
-use tree_ess::clade_fp::{assign_tip_fps, calc_rf_dist, CladeFp};
+use tree_ess::clades::{assign_tip_fps, calc_rf_dist, CladeFp};
 use tree_ess::ess::calc_frechet_ess;
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
