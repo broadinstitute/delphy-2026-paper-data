@@ -19,10 +19,10 @@ use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::fs::File;
-use std::hash::Hash;
 use std::io::BufReader;
 use std::io;
 use tree_ess::burnin::BurninSpec;
+use tree_ess::clade_fp::CladeFp;
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
@@ -82,30 +82,7 @@ fn decimal_date(year: i32, month: u32, day: u32) -> f64 {
     year as f64 + (doy as f64 - 1.0) / days_in_year
 }
 
-// -- Clade and fingerprint definitions --
-
-// A clade fingerprint ("Fp" for short) represents a set of tips.
-// Singletons are represented directly as a random fingerprint.
-// Otherwise, a larger set of tips is represented as the XOR of all of those tips' fingerprints.
-#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Clone, Copy, Serialize)]
-struct CladeFp(u64);
-impl CladeFp {
-    fn empty() -> CladeFp {
-        CladeFp(0)
-    }
-
-    fn random(rng: &mut dyn Rng) -> CladeFp {
-        CladeFp(rng.next_u64())
-    }
-
-    fn union(&self, other: &CladeFp) -> CladeFp {
-        CladeFp(self.0 ^ other.0)
-    }
-
-    fn is_empty(&self) -> bool {
-        self.0 == 0
-    }
-}
+// -- Clade definitions --
 
 #[derive(Debug, Serialize, Clone, Eq, PartialEq)]
 enum CladeDefinition {
@@ -766,9 +743,9 @@ mod tests {
     fn test_process_tree_basic() {
         use tree_ess::refs::TestPool;
 
-        let (name_a, fp_a) = ("A|2020-01-01", CladeFp(0b001));
-        let (name_b, fp_b) = ("B|2020-07-01", CladeFp(0b010));
-        let (name_c, fp_c) = ("C|2021-01-01", CladeFp(0b100));
+        let (name_a, fp_a) = ("A|2020-01-01", CladeFp::new(0b001));
+        let (name_b, fp_b) = ("B|2020-07-01", CladeFp::new(0b010));
+        let (name_c, fp_c) = ("C|2021-01-01", CladeFp::new(0b100));
 
         let pool = TestPool::new();
         let tree = NewickTree::new(pool.alloc(NewickNode::inner_node(

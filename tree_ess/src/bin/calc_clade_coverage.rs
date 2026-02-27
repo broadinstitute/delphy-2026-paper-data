@@ -19,6 +19,7 @@ use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use tree_ess::burnin::BurninSpec;
+use tree_ess::clade_fp::CladeFp;
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
@@ -56,24 +57,6 @@ struct Args {
     /// Prepend a TSV header line before the data line
     #[arg(long)]
     header: bool,
-}
-
-// -- Clade fingerprint (same as compare_clades.rs) --
-
-#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Clone, Copy)]
-struct CladeFp(u64);
-impl CladeFp {
-    fn empty() -> CladeFp {
-        CladeFp(0)
-    }
-
-    fn random(rng: &mut dyn Rng) -> CladeFp {
-        CladeFp(rng.next_u64())
-    }
-
-    fn union(&self, other: &CladeFp) -> CladeFp {
-        CladeFp(self.0 ^ other.0)
-    }
 }
 
 // -- Tip fingerprint assignment (same pattern as compare_clades.rs) --
@@ -294,10 +277,10 @@ mod tests {
 
     fn make_tip_fps() -> HashMap<String, CladeFp> {
         HashMap::from([
-            ("A".to_string(), CladeFp(0b0001)),
-            ("B".to_string(), CladeFp(0b0010)),
-            ("C".to_string(), CladeFp(0b0100)),
-            ("D".to_string(), CladeFp(0b1000)),
+            ("A".to_string(), CladeFp::new(0b0001)),
+            ("B".to_string(), CladeFp::new(0b0010)),
+            ("C".to_string(), CladeFp::new(0b0100)),
+            ("D".to_string(), CladeFp::new(0b1000)),
         ])
     }
 

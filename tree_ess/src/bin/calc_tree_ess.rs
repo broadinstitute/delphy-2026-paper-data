@@ -17,29 +17,12 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io;
 use tree_ess::burnin::BurninSpec;
+use tree_ess::clade_fp::CladeFp;
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
 use tree_ess::trees::NodeLike;
 use tree_ess::trees::{TraversalAction, TreeLike};
-
-// -- Clade fingerprint (same as compare_clades.rs / calc_clade_coverage.rs) --
-
-#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Clone, Copy)]
-struct CladeFp(u64);
-impl CladeFp {
-    fn empty() -> CladeFp {
-        CladeFp(0)
-    }
-
-    fn random(rng: &mut dyn Rng) -> CladeFp {
-        CladeFp(rng.next_u64())
-    }
-
-    fn union(&self, other: &CladeFp) -> CladeFp {
-        CladeFp(self.0 ^ other.0)
-    }
-}
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -401,10 +384,10 @@ mod tests {
             ],
         )));
         let tip_name_2_fp = HashMap::from([
-            (String::from("A"), CladeFp(0b0001)),
-            (String::from("B"), CladeFp(0b0010)),
-            (String::from("C"), CladeFp(0b0100)),
-            (String::from("D"), CladeFp(0b1000)),
+            (String::from("A"), CladeFp::new(0b0001)),
+            (String::from("B"), CladeFp::new(0b0010)),
+            (String::from("C"), CladeFp::new(0b0100)),
+            (String::from("D"), CladeFp::new(0b1000)),
         ]);
 
         let splits = calc_sorted_splits(&tree, &tip_name_2_fp);
@@ -412,17 +395,17 @@ mod tests {
         assert_eq!(
             splits,
             vec![
-                CladeFp(0b0011), // {A,B} || {C,D,root}
-                CladeFp(0b1100), // {C,D} || {A,B,root}
-                CladeFp(0b1111), // {A,B,C,D} || {root}
+                CladeFp::new(0b0011), // {A,B} || {C,D,root}
+                CladeFp::new(0b1100), // {C,D} || {A,B,root}
+                CladeFp::new(0b1111), // {A,B,C,D} || {root}
             ]
         );
     }
 
     #[test]
     fn calc_rs_dist_test() {
-        let sorted_split_fps_a = vec![CladeFp(1), CladeFp(3), CladeFp(4), CladeFp(7)];
-        let sorted_split_fps_b = vec![CladeFp(2), CladeFp(3), CladeFp(5), CladeFp(7)];
+        let sorted_split_fps_a = vec![CladeFp::new(1), CladeFp::new(3), CladeFp::new(4), CladeFp::new(7)];
+        let sorted_split_fps_b = vec![CladeFp::new(2), CladeFp::new(3), CladeFp::new(5), CladeFp::new(7)];
 
         assert_eq!(
             calc_rf_dist(&sorted_split_fps_a, &sorted_split_fps_b),
