@@ -2,7 +2,6 @@
 //       to refer to nodes when needed (e.g., a Vec-backed tree).
 
 use crate::refs::LightRef;
-use std::iter;
 
 pub trait TreeLike<N: NodeLike>: Sized {
     fn root_ref(&self) -> Option<LightRef<N>>;
@@ -37,93 +36,6 @@ pub trait NodeLike: Sized {
         self.child_ref_iter().next().is_none()
     }
 }
-
-#[derive(Debug, PartialEq, Eq)]
-struct SimpleNode<T> {
-    value: T,
-    child_refs: Vec<LightRef<SimpleNode<T>>>,
-}
-
-#[derive(Debug, PartialEq, Eq)]
-struct SimpleTree<T> {
-    root_ref: Option<LightRef<SimpleNode<T>>>,
-}
-
-impl<T> TreeLike<SimpleNode<T>> for SimpleTree<T> {
-    fn root_ref(&self) -> Option<LightRef<SimpleNode<T>>> {
-        self.root_ref.clone()
-    }
-}
-impl<T> NodeLike for SimpleNode<T> {
-    fn child_ref_iter(&self) -> impl DoubleEndedIterator<Item=LightRef<SimpleNode<T>>> {
-        self.child_refs.iter().map(LightRef::clone)
-    }
-}
-
-// AMAZINGLY, deduced from staring at long assembly listing, when using LightRef<T> =~ NonNull<T> :
-//
-// (1) child_refs (: Option<(LightRef<BinaryNode<T>>, LightRef<BinaryNode<T>>)>)
-//     really is stored as two pointers, with a NULL on the first pointer signalling
-//     `None`
-// (2) All the child_ref_iter() boilerplate (even child_ref_iter().rev()) gets *completely*
-//     eliminated, and is replaced by testing for a leaf (left == NULL), and if not,
-//     a direct reading of the left and right pointers!
-//
-// Indeed, a preorder iteration through a tree with a simple action on every visit is compiled
-// into nearly optimal assembly of pointer chasing!  (a few needless stores to the stack
-// that don't cause hazards => they go to L1 and are almost hidden by ILP; and a needless test
-// for an empty stack right after pushing left & right pointers, which is almost hidden by
-// what should be perfect branch prediction).
-//
-// Rust + LLVM are extraordinary...
-//
-#[derive(Debug, PartialEq, Eq)]
-struct BinaryNode<T> {
-    value: T,
-    child_refs: Option<(LightRef<BinaryNode<T>>, LightRef<BinaryNode<T>>)>,
-}
-
-#[derive(Debug, PartialEq, Eq)]
-struct BinaryTree<T> {
-    root_ref: Option<LightRef<BinaryNode<T>>>,
-}
-
-impl<T> TreeLike<BinaryNode<T>> for BinaryTree<T> {
-    fn root_ref(&self) -> Option<LightRef<BinaryNode<T>>> {
-        self.root_ref.clone()
-    }
-}
-enum MyIter<T> {
-    Zero(iter::Empty<T>),
-    Two(std::array::IntoIter<T, 2>),
-}
-
-impl<T> Iterator for MyIter<T> {
-    type Item = T;
-    fn next(&mut self) -> Option<Self::Item> {
-        match self {
-            MyIter::Zero(iter) => iter.next(),
-            MyIter::Two(iter) => iter.next(),
-        }
-    }
-}
-impl<T> DoubleEndedIterator for MyIter<T> {
-    fn next_back(&mut self) -> Option<Self::Item> {
-        match self {
-            MyIter::Zero(iter) => iter.next_back(),
-            MyIter::Two(iter) => iter.next_back(),
-        }
-    }
-}
-impl<T> NodeLike for BinaryNode<T> {
-    fn child_ref_iter(&self) -> impl DoubleEndedIterator<Item=LightRef<BinaryNode<T>>> {
-        match &self.child_refs {
-            None => MyIter::Zero(iter::empty()),
-            Some((l, r)) => MyIter::Two([l.clone(), r.clone()].into_iter()),
-        }
-    }
-}
-
 
 // Various traversals
 // ==================
@@ -247,6 +159,98 @@ impl<N: NodeLike> Iterator for TraversalIterator<N> {
 mod tests {
     use super::*;
     use crate::refs::{TestPool, Pool};
+    use std::iter;
+
+    // -- N-ary tree (SimpleNode / SimpleTree) --
+
+    #[derive(Debug, PartialEq, Eq)]
+    struct SimpleNode<T> {
+        value: T,
+        child_refs: Vec<LightRef<SimpleNode<T>>>,
+    }
+
+    #[derive(Debug, PartialEq, Eq)]
+    struct SimpleTree<T> {
+        root_ref: Option<LightRef<SimpleNode<T>>>,
+    }
+
+    impl<T> TreeLike<SimpleNode<T>> for SimpleTree<T> {
+        fn root_ref(&self) -> Option<LightRef<SimpleNode<T>>> {
+            self.root_ref.clone()
+        }
+    }
+    impl<T> NodeLike for SimpleNode<T> {
+        fn child_ref_iter(&self) -> impl DoubleEndedIterator<Item=LightRef<SimpleNode<T>>> {
+            self.child_refs.iter().map(LightRef::clone)
+        }
+    }
+
+    // -- Binary tree (BinaryNode / BinaryTree) --
+    //
+    // AMAZINGLY, deduced from staring at long assembly listing, when using LightRef<T> =~ NonNull<T> :
+    //
+    // (1) child_refs (: Option<(LightRef<BinaryNode<T>>, LightRef<BinaryNode<T>>)>)
+    //     really is stored as two pointers, with a NULL on the first pointer signalling
+    //     `None`
+    // (2) All the child_ref_iter() boilerplate (even child_ref_iter().rev()) gets *completely*
+    //     eliminated, and is replaced by testing for a leaf (left == NULL), and if not,
+    //     a direct reading of the left and right pointers!
+    //
+    // Indeed, a preorder iteration through a tree with a simple action on every visit is compiled
+    // into nearly optimal assembly of pointer chasing!  (a few needless stores to the stack
+    // that don't cause hazards => they go to L1 and are almost hidden by ILP; and a needless test
+    // for an empty stack right after pushing left & right pointers, which is almost hidden by
+    // what should be perfect branch prediction).
+    //
+    // Rust + LLVM are extraordinary...
+
+    #[derive(Debug, PartialEq, Eq)]
+    struct BinaryNode<T> {
+        value: T,
+        child_refs: Option<(LightRef<BinaryNode<T>>, LightRef<BinaryNode<T>>)>,
+    }
+
+    #[derive(Debug, PartialEq, Eq)]
+    struct BinaryTree<T> {
+        root_ref: Option<LightRef<BinaryNode<T>>>,
+    }
+
+    impl<T> TreeLike<BinaryNode<T>> for BinaryTree<T> {
+        fn root_ref(&self) -> Option<LightRef<BinaryNode<T>>> {
+            self.root_ref.clone()
+        }
+    }
+    enum MyIter<T> {
+        Zero(iter::Empty<T>),
+        Two(std::array::IntoIter<T, 2>),
+    }
+    impl<T> Iterator for MyIter<T> {
+        type Item = T;
+        fn next(&mut self) -> Option<Self::Item> {
+            match self {
+                MyIter::Zero(iter) => iter.next(),
+                MyIter::Two(iter) => iter.next(),
+            }
+        }
+    }
+    impl<T> DoubleEndedIterator for MyIter<T> {
+        fn next_back(&mut self) -> Option<Self::Item> {
+            match self {
+                MyIter::Zero(iter) => iter.next_back(),
+                MyIter::Two(iter) => iter.next_back(),
+            }
+        }
+    }
+    impl<T> NodeLike for BinaryNode<T> {
+        fn child_ref_iter(&self) -> impl DoubleEndedIterator<Item=LightRef<BinaryNode<T>>> {
+            match &self.child_refs {
+                None => MyIter::Zero(iter::empty()),
+                Some((l, r)) => MyIter::Two([l.clone(), r.clone()].into_iter()),
+            }
+        }
+    }
+
+    // -- Tests --
 
     #[test]
     fn any_order_iter() {
@@ -369,99 +373,77 @@ mod tests {
         ]);
     }
 
-    // Trees where all nodes are in a vector and "pointers" are indices
-    // TODO: Revive this once NodeRef's can be punchier than LightRef<N> where necessary
-    // struct VecBackedTree {
-    //     node_refs: Vec<LightRef<VecBackedNode>>,
-    //     root_index: usize,
-    // }
-    // impl VecBackedTree {
-    //     fn index_order_iter(&self) -> impl Iterator<Item=LightRef<VecBackedNode>> {
-    //         self.node_refs.iter().map(LightRef::clone)
-    //     }
-    // }
-    // impl TreeLike<VecBackedNode> for VecBackedTree {
-    //     fn root_ref(&self) -> Option<LightRef<VecBackedNode>> {
-    //         if self.root_index < 0 {
-    //             None
-    //         } else {
-    //             Some(self.node_refs[self.root_index].clone())
-    //         }
-    //     }
-    // 
-    //     fn any_order_iter(&self) -> impl Iterator<Item=LightRef<VecBackedNode>> {
-    //         self.index_order_iter()
-    //     }
-    // }
-    // struct VecBackedNode {
-    //     value: i32,
-    //     child_indices: Vec<usize>,
-    // }
-    // impl NodeLike<VecBackedTree> for VecBackedNode {
-    //     fn child_ref_iter(
-    //         &self,
-    //         tree: &VecBackedTree,
-    //     ) -> impl DoubleEndedIterator<Item=LightRef<VecBackedNode>> {
-    //         self.child_indices
-    //             .iter()
-    //             .map(|&c| tree.node_refs[c].clone())
-    //     }
-    // }
-    // 
-    // #[test]
-    // fn any_order_iter_vec_backed_tree() {
-    //     let pool = TestPool::new();
-    //     let node0_ref = pool.alloc(VecBackedNode {
-    //         value: 1,
-    //         child_indices: vec![1, 2],
-    //     });
-    //     let node1_ref = pool.alloc(VecBackedNode {
-    //         value: 2,
-    //         child_indices: vec![],
-    //     });
-    //     let node2_ref = pool.alloc(VecBackedNode {
-    //         value: 3,
-    //         child_indices: vec![],
-    //     });
-    //     let tree = VecBackedTree {
-    //         node_refs: vec![node0_ref, node1_ref, node2_ref],
-    //         root_index: 0,
-    //     };
-    // 
-    //     let mut sum_values = 0;
-    //     for node_ref in tree.iter() {
-    //         sum_values += node_ref.borrow().value;
-    //     }
-    //     assert_eq!(sum_values, 6);
-    // }
-    // 
-    // #[test]
-    // fn any_order_iter_vec_backed_tree_mut() {
-    //     let pool = TestPool::new();
-    //     let node0_ref = pool.alloc(VecBackedNode {
-    //         value: 1,
-    //         child_indices: vec![1, 2],
-    //     });
-    //     let node1_ref = pool.alloc(VecBackedNode {
-    //         value: 2,
-    //         child_indices: vec![],
-    //     });
-    //     let node2_ref = pool.alloc(VecBackedNode {
-    //         value: 3,
-    //         child_indices: vec![],
-    //     });
-    //     let tree = VecBackedTree {
-    //         node_refs: vec![node0_ref, node1_ref, node2_ref],
-    //         root_index: 0,
-    //     };
-    // 
-    //     for node_ref in tree.iter() {
-    //         node_ref.borrow_mut().value *= 2;
-    //     }
-    //     let values = tree
-    //         .index_order_iter()
-    //         .map(|node_ref| node_ref.borrow().value)
-    //         .collect::<Vec<i32>>();
-    //     assert_eq!(values, vec![2, 4, 6]);
-    // }
+    // Analogous tests for BinaryNode / BinaryTree
+
+    #[test]
+    fn binary_any_order_iter() {
+        let pool = TestPool::new();
+        let child1_ref = pool.alloc(BinaryNode {
+            value: 2,
+            child_refs: None,
+        });
+        let child2_ref = pool.alloc(BinaryNode {
+            value: 3,
+            child_refs: None,
+        });
+        let tree = BinaryTree {
+            root_ref: Some(pool.alloc(BinaryNode {
+                value: 1,
+                child_refs: Some((child1_ref, child2_ref)),
+            })),
+        };
+
+        let mut sum_values = 0;
+        for node_ref in tree.any_order_iter() {
+            sum_values += node_ref.borrow().value;
+        }
+        assert_eq!(sum_values, 6);
+    }
+
+    #[test]
+    fn binary_post_order_iter() {
+        let pool = TestPool::new();
+        let tree = BinaryTree {
+            root_ref: Some(pool.alloc(BinaryNode {
+                value: 1,
+                child_refs: Some((
+                    pool.alloc(BinaryNode { value: 2, child_refs: None }),
+                    pool.alloc(BinaryNode { value: 3, child_refs: None }),
+                )),
+            })),
+        };
+
+        let values: Vec<i32> = tree
+            .postorder_iter()
+            .map(|node_ref| node_ref.borrow().value)
+            .collect();
+        assert_eq!(values, vec![2, 3, 1]);
+    }
+
+    #[test]
+    fn binary_traversal_iter() {
+        let pool = TestPool::new();
+        let tree = BinaryTree {
+            root_ref: Some(pool.alloc(BinaryNode {
+                value: 1,
+                child_refs: Some((
+                    pool.alloc(BinaryNode { value: 2, child_refs: None }),
+                    pool.alloc(BinaryNode { value: 3, child_refs: None }),
+                )),
+            })),
+        };
+
+        let actions: Vec<(TraversalAction, i32)> = tree
+            .traversal_iter()
+            .map(|(action, node_ref)| (action, node_ref.borrow().value))
+            .collect();
+        assert_eq!(actions, vec![
+            (TraversalAction::Enter, 1),
+            (TraversalAction::Enter, 2),
+            (TraversalAction::Exit, 2),
+            (TraversalAction::Enter, 3),
+            (TraversalAction::Exit, 3),
+            (TraversalAction::Exit, 1),
+        ]);
+    }
 }
