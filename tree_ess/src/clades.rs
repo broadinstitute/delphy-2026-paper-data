@@ -64,24 +64,11 @@ pub fn calc_rf_dist(sorted_split_fps_a: &[CladeFp], sorted_split_fps_b: &[CladeF
 pub enum CladeDefinition {
     TipClade {
         name: String,
-        fp: CladeFp,
     },
     InnerNodeClade {
         subclade1: CladeFp,
         subclade2: CladeFp,
     },
-}
-
-impl CladeDefinition {
-    pub fn fp(&self) -> CladeFp {
-        match self {
-            CladeDefinition::TipClade { fp, .. } => *fp,
-            CladeDefinition::InnerNodeClade {
-                subclade1,
-                subclade2,
-            } => subclade1.union(subclade2),
-        }
-    }
 }
 
 pub type CladeMap = HashMap<CladeFp, CladeDefinition>;
@@ -90,7 +77,7 @@ pub fn tips_in_clade(fp: &CladeFp, clade_map: &CladeMap) -> Vec<String> {
     fn go(fp: &CladeFp, clade_map: &CladeMap, result: &mut Vec<String>) {
         match clade_map.get(fp) {
             None => {}
-            Some(CladeDefinition::TipClade { name, .. }) => result.push(name.clone()),
+            Some(CladeDefinition::TipClade { name }) => result.push(name.clone()),
             Some(CladeDefinition::InnerNodeClade {
                 subclade1,
                 subclade2,
@@ -119,11 +106,12 @@ pub fn catalog_tree_clades(
     clade_map: &mut CladeMap,
     include_trivial: bool,
 ) -> Vec<CladeFp> {
-    let mut node_clade_defn = CladeDefinition::InnerNodeClade {
+    let mut fp = CladeFp::empty();
+    let mut clade_def = CladeDefinition::InnerNodeClade {
         subclade1: CladeFp::empty(),
         subclade2: CladeFp::empty(),
     };
-    let mut node_clade_defn_stack: Vec<CladeDefinition> = vec![];  // Always `InnerNodeClade`s
+    let mut work_stack: Vec<(CladeFp, CladeDefinition)> = vec![];
 
     let mut clade_fps: Vec<CladeFp> = Vec::new();
 
@@ -132,39 +120,32 @@ pub fn catalog_tree_clades(
         match action {
             TraversalAction::Enter => {
                 // Shift focus from parent to node
-                node_clade_defn_stack.push(node_clade_defn);
-                node_clade_defn = {
-                    if node.is_tip() {
-                        CladeDefinition::TipClade {
-                            name: node.name.clone(),
-                            fp: *tip_fps.get(node.name.as_str()).expect("Unknown tip name"),
-                        }
-                    } else {
-                        CladeDefinition::InnerNodeClade {
-                            subclade1: CladeFp::empty(),
-                            subclade2: CladeFp::empty(),
-                        }
-                    }
-                };
+                work_stack.push((fp, clade_def));
 
-                // Invariant: at this point, node_clade_defn refers to the
-                // (partial) clade definition for the current node after entering it
+                if node.is_tip() {
+                    fp = *tip_fps.get(node.name.as_str()).expect("Unknown tip name");
+                    clade_def = CladeDefinition::TipClade {
+                        name: node.name.clone(),
+                    };
+                } else {
+                    fp = CladeFp::empty();
+                    clade_def = CladeDefinition::InnerNodeClade {
+                        subclade1: CladeFp::empty(),
+                        subclade2: CladeFp::empty(),
+                    };
+                }
             }
             TraversalAction::Exit => {
-                // Invariant: at this point, node_clade_defn refers to the
-                // (complete) clade definition for the current node before exiting it
-
-                let node_fp = node_clade_defn.fp();
-                clade_map.entry(node_fp).or_insert(node_clade_defn);
+                clade_map.entry(fp).or_insert(clade_def);
 
                 let is_trivial = node.is_tip() || node_ref == tree.root;
                 if include_trivial || !is_trivial {
-                    clade_fps.push(node_fp);
+                    clade_fps.push(fp);
                 }
 
-                // Shift focus from node to parent, merging this node's fingerprint into it
-                let parent_clade_defn = node_clade_defn_stack.pop().unwrap();
-                node_clade_defn = match parent_clade_defn {
+                // Shift focus from node to parent, merging this node's fp
+                let (parent_fp, parent_clade_def) = work_stack.pop().unwrap();
+                clade_def = match parent_clade_def {
                     CladeDefinition::TipClade { .. } => unreachable!(),
                     CladeDefinition::InnerNodeClade {
                         subclade1,
@@ -172,19 +153,20 @@ pub fn catalog_tree_clades(
                     } => {
                         if subclade1.is_empty() {
                             CladeDefinition::InnerNodeClade {
-                                subclade1: node_fp,
+                                subclade1: fp,
                                 subclade2: CladeFp::empty(),
                             }
                         } else if subclade2.is_empty() {
                             CladeDefinition::InnerNodeClade {
                                 subclade1,
-                                subclade2: node_fp,
+                                subclade2: fp,
                             }
                         } else {
                             panic!("Non-bifurcating tree?")
                         }
                     }
                 };
+                fp = parent_fp.union(&fp);
             }
         }
     }

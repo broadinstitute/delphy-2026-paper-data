@@ -444,21 +444,18 @@ mod tests {
                     fp_a,
                     TipClade {
                         name: name_a.to_string(),
-                        fp: fp_a
                     }
                 ),
                 (
                     fp_b,
                     TipClade {
                         name: name_b.to_string(),
-                        fp: fp_b
                     }
                 ),
                 (
                     fp_c,
                     TipClade {
                         name: name_c.to_string(),
-                        fp: fp_c
                     }
                 ),
                 (
