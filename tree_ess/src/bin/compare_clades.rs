@@ -23,6 +23,7 @@ use std::io::BufReader;
 use std::io;
 use tree_ess::burnin::BurninSpec;
 use tree_ess::clade_fp::{assign_tip_fps, calc_rf_dist, CladeFp};
+use tree_ess::dates::parse_tip_date;
 use tree_ess::ess::calc_frechet_ess;
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
@@ -53,34 +54,6 @@ struct Args {
     /// Only output clades with support >= this threshold in at least one file (default: 0)
     #[arg(long, default_value = "0")]
     min_support: f64,
-}
-
-// -- Date parsing --
-
-fn parse_tip_date(name: &str) -> Option<f64> {
-    let date_str = name.rsplit('|').next()?;
-    let parts: Vec<&str> = date_str.split('-').collect();
-    if parts.len() != 3 {
-        return None; // Only full YYYY-MM-DD dates
-    }
-    let year: i32 = parts[0].parse().ok()?;
-    let month: u32 = parts[1].parse().ok()?;
-    let day: u32 = parts[2].parse().ok()?;
-    if !(1..=12).contains(&month) || !(1..=31).contains(&day) {
-        return None;
-    }
-    Some(decimal_date(year, month, day))
-}
-
-fn decimal_date(year: i32, month: u32, day: u32) -> f64 {
-    let is_leap = (year % 4 == 0) && (year % 100 != 0 || year % 400 == 0);
-    let days_in_year: f64 = if is_leap { 366.0 } else { 365.0 };
-    let days_before_month: [u32; 12] = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-    let mut doy = days_before_month[(month - 1) as usize] + day;
-    if is_leap && month > 2 {
-        doy += 1;
-    }
-    year as f64 + (doy as f64 - 1.0) / days_in_year
 }
 
 // -- Clade definitions --
@@ -638,35 +611,6 @@ mod tests {
     use itertools::Itertools;
     use tree_ess::newick::NewickNode;
     use tree_ess::refs::Pool;
-
-    #[test]
-    fn test_parse_tip_date_full() {
-        assert!((parse_tip_date("EBOV-20547|2015-09-07").unwrap() - 2015.6822).abs() < 0.01);
-    }
-
-    #[test]
-    fn test_parse_tip_date_partial_month() {
-        assert_eq!(parse_tip_date("OP415257|9000312|UK|2022-08"), None);
-    }
-
-    #[test]
-    fn test_parse_tip_date_no_pipe() {
-        assert_eq!(parse_tip_date("just_a_name"), None);
-    }
-
-    #[test]
-    fn test_decimal_date() {
-        // Jan 1 of a non-leap year
-        assert!((decimal_date(2023, 1, 1) - 2023.0).abs() < 1e-6);
-        // Dec 31 of a non-leap year
-        assert!((decimal_date(2023, 12, 31) - (2023.0 + 364.0 / 365.0)).abs() < 1e-6);
-    }
-
-    #[test]
-    fn test_decimal_date_leap_year() {
-        // March 1 of a leap year
-        assert!((decimal_date(2024, 3, 1) - (2024.0 + 60.0 / 366.0)).abs() < 1e-6);
-    }
 
     #[test]
     fn test_process_tree_basic() {
