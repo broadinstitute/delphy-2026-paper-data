@@ -5,8 +5,7 @@
 extern crate tree_ess;
 
 use clap::Parser;
-use itertools;
-use itertools::{EitherOrBoth, Itertools};
+use itertools::Itertools;
 use ndarray::{s, Array1, Array2, ArrayView2};
 use rand::SeedableRng;
 use rand_pcg::Pcg64Mcg;
@@ -17,7 +16,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io;
 use tree_ess::burnin::BurninSpec;
-use tree_ess::clade_fp::{assign_tip_fps, CladeFp};
+use tree_ess::clade_fp::{assign_tip_fps, calc_rf_dist, CladeFp};
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
@@ -321,25 +320,6 @@ fn calc_sorted_splits(
     result
 }
 
-fn calc_rf_dist(
-    sorted_split_fps_a: &[CladeFp],
-    sorted_split_fps_b: &[CladeFp],
-) -> u64 {
-    use EitherOrBoth::{Both, Left, Right};
-    let mut distance = 0;
-    for pair in itertools::merge_join_by(
-        sorted_split_fps_a.iter(),
-        sorted_split_fps_b.iter(),
-        |a, b| a.cmp(b),
-    ) {
-        match pair {
-            Both(_, _) => (),
-            Left(_) | Right(_) => distance += 1,
-        }
-    }
-    distance
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -387,17 +367,6 @@ mod tests {
                 CladeFp::new(0b1100), // {C,D} || {A,B,root}
                 CladeFp::new(0b1111), // {A,B,C,D} || {root}
             ]
-        );
-    }
-
-    #[test]
-    fn calc_rs_dist_test() {
-        let sorted_split_fps_a = vec![CladeFp::new(1), CladeFp::new(3), CladeFp::new(4), CladeFp::new(7)];
-        let sorted_split_fps_b = vec![CladeFp::new(2), CladeFp::new(3), CladeFp::new(5), CladeFp::new(7)];
-
-        assert_eq!(
-            calc_rf_dist(&sorted_split_fps_a, &sorted_split_fps_b),
-            4
         );
     }
 }

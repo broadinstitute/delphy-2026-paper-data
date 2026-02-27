@@ -11,7 +11,7 @@
 extern crate tree_ess;
 
 use clap::Parser;
-use itertools::{EitherOrBoth, Itertools};
+use itertools::Itertools;
 use ndarray::{Array1, Array2};
 use rand::SeedableRng;
 use rand_pcg::Pcg64Mcg;
@@ -22,7 +22,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io;
 use tree_ess::burnin::BurninSpec;
-use tree_ess::clade_fp::{assign_tip_fps, CladeFp};
+use tree_ess::clade_fp::{assign_tip_fps, calc_rf_dist, CladeFp};
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
@@ -151,24 +151,6 @@ fn tips_in_clade(fp: &CladeFp, clade_map: &CladeMap) -> Vec<String> {
     go(fp, clade_map, &mut result);
     result.sort();
     result
-}
-
-// -- RF distance (from calc_tree_ess.rs) --
-
-fn calc_rf_dist(sorted_split_fps_a: &[CladeFp], sorted_split_fps_b: &[CladeFp]) -> u64 {
-    use EitherOrBoth::{Both, Left, Right};
-    let mut distance = 0;
-    for pair in itertools::merge_join_by(
-        sorted_split_fps_a,
-        sorted_split_fps_b,
-        |a, b| a.cmp(b),
-    ) {
-        match pair {
-            Both(_, _) => (),
-            Left(_) | Right(_) => distance += 1,
-        }
-    }
-    distance
 }
 
 // -- Per-tree processing --

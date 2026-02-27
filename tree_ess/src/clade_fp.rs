@@ -1,3 +1,4 @@
+use itertools::EitherOrBoth;
 use rand::Rng;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -43,6 +44,24 @@ pub fn assign_tip_fps(tree: &NewickTree, rng: &mut dyn Rng) -> HashMap<String, C
         }
     }
     result
+}
+
+/// Compute the Robinson-Foulds distance between two trees represented as
+/// sorted slices of clade fingerprints.
+pub fn calc_rf_dist(sorted_split_fps_a: &[CladeFp], sorted_split_fps_b: &[CladeFp]) -> u64 {
+    use EitherOrBoth::{Both, Left, Right};
+    let mut distance = 0;
+    for pair in itertools::merge_join_by(
+        sorted_split_fps_a,
+        sorted_split_fps_b,
+        |a, b| a.cmp(b),
+    ) {
+        match pair {
+            Both(_, _) => (),
+            Left(_) | Right(_) => distance += 1,
+        }
+    }
+    distance
 }
 
 #[cfg(test)]
@@ -142,5 +161,25 @@ mod tests {
         }
         let unique: HashSet<CladeFp> = values.into_iter().collect();
         assert_eq!(unique.len(), 3);
+    }
+
+    #[test]
+    fn rf_dist_identical_is_zero() {
+        let a = vec![CladeFp::new(1), CladeFp::new(3), CladeFp::new(7)];
+        assert_eq!(calc_rf_dist(&a, &a), 0);
+    }
+
+    #[test]
+    fn rf_dist_completely_disjoint() {
+        let a = vec![CladeFp::new(1), CladeFp::new(3)];
+        let b = vec![CladeFp::new(2), CladeFp::new(4)];
+        assert_eq!(calc_rf_dist(&a, &b), 4);
+    }
+
+    #[test]
+    fn rf_dist_partial_overlap() {
+        let a = vec![CladeFp::new(1), CladeFp::new(3), CladeFp::new(4), CladeFp::new(7)];
+        let b = vec![CladeFp::new(2), CladeFp::new(3), CladeFp::new(5), CladeFp::new(7)];
+        assert_eq!(calc_rf_dist(&a, &b), 4);
     }
 }
