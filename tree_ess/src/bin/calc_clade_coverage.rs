@@ -16,10 +16,12 @@ use rand::SeedableRng;
 use rand_pcg::Pcg64Mcg;
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
+use std::fs;
 use std::fs::File;
 use std::io::BufReader;
 use tree_ess::burnin::BurninSpec;
 use tree_ess::clades::{catalog_tree_clades, assign_tip_fps, CladeFp, CladeMap};
+use tree_ess::newick;
 use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
 use tree_ess::trees::{NodeLike, TreeLike};
@@ -31,7 +33,7 @@ use tree_ess::trees::{NodeLike, TreeLike};
 )]
 #[command(name = "calc_clade_coverage")]
 struct Args {
-    /// NEXUS file containing the true (generating) tree
+    /// True (generating) tree file (.nwk or .nexus)
     true_tree: String,
 
     /// BEAST/Delphy .trees file with posterior tree samples
@@ -81,16 +83,23 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Step 1: Parse inputs
 
     eprintln!("Reading true tree from {}...", args.true_tree);
-    let file = File::open(&args.true_tree)?;
-    let reader = BufReader::new(file);
-    let true_trees = NexusReader::parse(reader, 0, 1, &pool)?;
-    assert!(
-        true_trees.len() == 1,
-        "Expected exactly 1 tree in {}, found {}",
-        args.true_tree,
-        true_trees.len()
-    );
-    let true_tree = &true_trees[0].1;
+    let true_tree;
+    if args.true_tree.ends_with(".nwk") || args.true_tree.ends_with(".newick") {
+        let newick_str = fs::read_to_string(&args.true_tree)?;
+        true_tree = newick::Parser::parse(newick_str.trim(), &pool)
+            .map_err(|e| format!("Failed to parse Newick file {}: {:?}", args.true_tree, e))?;
+    } else {
+        let file = File::open(&args.true_tree)?;
+        let reader = BufReader::new(file);
+        let mut true_trees = NexusReader::parse(reader, 0, 1, &pool)?;
+        assert!(
+            true_trees.len() == 1,
+            "Expected exactly 1 tree in {}, found {}",
+            args.true_tree,
+            true_trees.len()
+        );
+        true_tree = true_trees.pop().unwrap().1;
+    }
 
     eprintln!("Reading posterior trees from {}...", args.posterior_trees);
     let file = File::open(&args.posterior_trees)?;
@@ -152,7 +161,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     eprintln!("Extracting true tree clades...");
     // false => only non-trivial clades (excluding tips and root)
     let true_clade_fps: HashSet<CladeFp> =
-        catalog_tree_clades(true_tree, &tip_fps, &mut clade_map, false)
+        catalog_tree_clades(&true_tree, &tip_fps, &mut clade_map, false)
             .into_iter().collect();
     eprintln!("  {} non-trivial clades in true tree", true_clade_fps.len());
 
@@ -218,7 +227,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tree_ess::newick::NewickNode;
+    use tree_ess::newick::{NewickNode, NewickTree};
     use tree_ess::refs::{Pool, TestPool};
 
     fn make_tip_fps() -> HashMap<String, CladeFp> {
