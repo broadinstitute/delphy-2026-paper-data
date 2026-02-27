@@ -12,7 +12,7 @@ extern crate tree_ess;
 
 use clap::Parser;
 use itertools::Itertools;
-use ndarray::{Array1, Array2};
+use ndarray::Array2;
 use rand::SeedableRng;
 use rand_pcg::Pcg64Mcg;
 use serde::Serialize;
@@ -23,6 +23,7 @@ use std::io::BufReader;
 use std::io;
 use tree_ess::burnin::BurninSpec;
 use tree_ess::clade_fp::{assign_tip_fps, calc_rf_dist, CladeFp};
+use tree_ess::ess::calc_frechet_ess;
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
@@ -327,13 +328,10 @@ struct CladeAccumulator {
     date_sq_sum: f64,
 }
 
-// -- ESS computation (adapted from calc_tree_ess.rs) --
+// -- Tree ESS (Frechet correlation ESS over RF distance matrix) --
 
-fn compute_ess(sorted_clade_fps: &[Vec<CladeFp>]) -> f64 {
+fn calc_tree_ess(sorted_clade_fps: &[Vec<CladeFp>]) -> f64 {
     let n = sorted_clade_fps.len();
-    if n <= 1 {
-        return n as f64;
-    }
 
     // All-pairs RF distance matrix
     let mut rf_dist = Array2::<f64>::zeros((n, n));
@@ -347,41 +345,7 @@ fn compute_ess(sorted_clade_fps: &[Vec<CladeFp>]) -> f64 {
         }
     }
 
-    // Var[tau] = 1/(n(n-1)) sum_{i<j} d^2
-    let mut var_tau = 0.0;
-    for &d in rf_dist.iter() {
-        var_tau += d * d;
-    }
-    var_tau /= 2.0 * (n as f64) * ((n - 1) as f64);
-
-    if var_tau == 0.0 {
-        return n as f64; // All trees identical
-    }
-
-    // E[Delta_s^2] at each lag s
-    let mut mean_delta_s_2 = Array1::<f64>::zeros(n);
-    for s in 0..n {
-        for i in 0..(n - s) {
-            let d = rf_dist[(i, i + s)];
-            mean_delta_s_2[s] += d * d;
-        }
-        mean_delta_s_2[s] /= (n - s) as f64;
-    }
-
-    let rho_s = 1.0 - 0.5 * mean_delta_s_2 / var_tau;
-
-    // ACT = 1 + 2 * sum_{s=1}^{smax-1} rho_s[s]
-    // smax = first s where rho_s[s-1] + rho_s[s] <= 0
-    let mut smax = 1;
-    while (smax < n) && ((rho_s[smax - 1] + rho_s[smax]) > 0.0) {
-        smax += 1;
-    }
-    let mut act = 1.0;
-    for s in 1..smax {
-        act += 2.0 * rho_s[s];
-    }
-
-    n as f64 / act
+    calc_frechet_ess(&rf_dist.view()).frechet_ess
 }
 
 // -- Output types --
@@ -471,7 +435,7 @@ fn process_trees(
     }
 
     eprintln!("Computing tree ESS for {}...", file_path);
-    let ess = compute_ess(&all_sorted_clade_fps);
+    let ess = calc_tree_ess(&all_sorted_clade_fps);
     eprintln!("  ESS = {:.1}", ess);
 
     Ok(FileProcessingResult {

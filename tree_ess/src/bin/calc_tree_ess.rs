@@ -5,8 +5,7 @@
 extern crate tree_ess;
 
 use clap::Parser;
-use itertools::Itertools;
-use ndarray::{s, Array1, Array2, ArrayView2};
+use ndarray::{s, Array2, ArrayView2};
 use rand::SeedableRng;
 use rand_pcg::Pcg64Mcg;
 use serde::Serialize;
@@ -17,6 +16,7 @@ use std::io::BufReader;
 use std::io;
 use tree_ess::burnin::BurninSpec;
 use tree_ess::clade_fp::{assign_tip_fps, calc_rf_dist, CladeFp};
+use tree_ess::ess::calc_frechet_ess;
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
@@ -194,63 +194,19 @@ fn main() -> Result<(), Box<dyn Error>> {
             rf_dist_matrix.slice(s![first_prod_sample_idx..n, first_prod_sample_idx..n]);
         let prod_n = n - first_prod_sample_idx;
 
-        // Calculate Frechet covariance at lag s (rho_s in Eq (18) of Magee et al 2024).
-        //
-        // We simplify their expressions because Var(tau_t) and Var(tau_{t+s}) are statistically
-        // identical (why should the variance at different points in the chain be different when
-        // averaged over all possible chains?), and we can thus use all pairwise distances to get
-        // a slightly better estimate for them (Eq (15) instead of the equations following Eq (18)).
-        // With that simplification, we get,
-        //
-        //   rho_s = 1 - (1/2) E[Delta_s^2] / Var[X],
-        //
-        // where
-        //
-        //   Var[tau] = 1/2 1/n sum_{i=1}^n 1/(n-1) sum_{j != i} d^2(x_i, x_j)   (1/2 <-> d(i,j) = d(j,i))
-        //            = 1/(n (n-1)) sum_{i=1}^n sum_{j=i+1}^n d^2(x_i, x_j)
-        //   E[Delta_s^2] = 1/(n-s) sum_{i=1}^{n-s} d^2(x_i, x_{i+s})
-
-        let mut var_tau = 0.0;
-        for d_ij in prod_d_ij.iter() {
-            var_tau += d_ij * d_ij;
-        }
-        var_tau /= 2.0 * (prod_n as f64) * ((prod_n - 1) as f64);
-
-        let mut mean_delta_s_2 = Array1::<f64>::zeros(prod_n);
-        for s in 0..prod_n {
-            for i in 0..(prod_n - s) {
-                let d_ij = prod_d_ij[(i, i + s)];
-                mean_delta_s_2[s] += d_ij * d_ij;
-            }
-            mean_delta_s_2[s] /= (prod_n - s) as f64;
-        }
-
-        let rho_s = 1.0 - 0.5 * mean_delta_s_2 / var_tau;
-
-        // Calculate auto-correlation time as 1 + 2 * sum_{s=1}^{smax-1} rho_s[s],
-        // where smax is the first s for which rho_s[s-1] + rho_s[s] <= 0
-        // (i.e., rho_s[s] drops below 0, and it's not just a fluke)
-        let mut smax = 1;
-        while (smax < prod_n) && ((rho_s[smax - 1] + rho_s[smax]) > 0.0) {
-            smax += 1;
-        }
-        let mut act = 1.0;
-        for s in 1..smax {
-            act += 2.0 * rho_s[s];
-        }
-        let ess = prod_n as f64 / act;
+        let frechet_ess_result = calc_frechet_ess(&prod_d_ij);
 
         chain.results = Some(ChainResults {
             num_samples: chain.samples.len() as u64,
             burn_in_samples: first_prod_sample_idx,
             d_ij: Some(array2_to_vec_vec(&rf_dist_matrix.view())),
-            rho_s: rho_s.iter().copied().collect_vec(),
-            auto_correlation_time: act,
-            effective_sample_size: ess,
+            rho_s: frechet_ess_result.rho_s,
+            auto_correlation_time: frechet_ess_result.auto_correlation_time,
+            effective_sample_size: frechet_ess_result.frechet_ess,
         });
         eprintln!(
             "For {}: N = {}, ACT = {}, ESS = {}",
-            chain.file_path, prod_n, act, ess
+            chain.file_path, prod_n, frechet_ess_result.auto_correlation_time, frechet_ess_result.frechet_ess
         );
     }
 
