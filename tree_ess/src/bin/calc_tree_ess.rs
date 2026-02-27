@@ -8,6 +8,8 @@ use clap::Parser;
 use itertools;
 use itertools::{EitherOrBoth, Itertools};
 use ndarray::{s, Array1, Array2, ArrayView2};
+use rand::{Rng, SeedableRng};
+use rand_pcg::Pcg64Mcg;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::error::Error;
@@ -20,6 +22,24 @@ use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
 use tree_ess::trees::NodeLike;
 use tree_ess::trees::{TraversalAction, TreeLike};
+
+// -- Clade fingerprint (same as compare_clades.rs / calc_clade_coverage.rs) --
+
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Clone, Copy)]
+struct CladeFp(u64);
+impl CladeFp {
+    fn empty() -> CladeFp {
+        CladeFp(0)
+    }
+
+    fn random(rng: &mut dyn Rng) -> CladeFp {
+        CladeFp(rng.next_u64())
+    }
+
+    fn union(&self, other: &CladeFp) -> CladeFp {
+        CladeFp(self.0 ^ other.0)
+    }
+}
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -51,7 +71,7 @@ struct Sample {
     global_sample_num: usize,
     state: u64,
     //tree: NewickTree,
-    sorted_split_fingerprints: Vec<u64>,
+    sorted_split_fps: Vec<CladeFp>,
 }
 
 #[derive(Serialize)]
@@ -80,9 +100,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
     let burnin_spec = BurninSpec::from_options(args.burnin_pct, args.burnin_trees);
 
+    let mut rng = Pcg64Mcg::seed_from_u64(1);
+
     let mut chains = vec![];
     let mut next_global_sample_num = 0;
-    let mut tip_name_2_fingerprint_opt = None;
+    let mut tip_name_2_fp_opt = None;
     for file_path in args.files {
         let file = File::open(&file_path)?;
         let reader = BufReader::new(file);
@@ -96,8 +118,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         );
 
         // Assign fingerprints to tips in first tree (the same tips should appear in every tree!)
-        let tip_name_2_fingerprint =
-            tip_name_2_fingerprint_opt.get_or_insert_with(|| assign_tip_fingerprints(&trees[0].1));
+        let tip_name_2_fp =
+            tip_name_2_fp_opt.get_or_insert_with(|| assign_tip_fps(&trees[0].1, &mut rng));
 
         let mut samples = vec![];
         for (state, tree) in trees.into_iter() {
@@ -106,13 +128,13 @@ fn main() -> Result<(), Box<dyn Error>> {
             // in exactly one of those, wlog Y.  We represent the split by the fingerprint of the
             // nodes in X (all inner nodes are unlabeled).  Since the splits {{<single tip>}, {<rest>}}
             // are in every tree, we don't materialize those
-            let sorted_splits = calc_sorted_splits(&tree, &tip_name_2_fingerprint);
+            let sorted_splits = calc_sorted_splits(&tree, &tip_name_2_fp);
 
             samples.push(Sample {
                 global_sample_num: next_global_sample_num,
                 state,
                 //tree,
-                sorted_split_fingerprints: sorted_splits,
+                sorted_split_fps: sorted_splits,
             });
 
             next_global_sample_num += 1;
@@ -152,14 +174,14 @@ fn main() -> Result<(), Box<dyn Error>> {
                 );
 
                 let ii = sample_i.global_sample_num;
-                let sorted_split_fingerprints_i = &sample_i.sorted_split_fingerprints;
+                let sorted_split_fps_i = &sample_i.sorted_split_fps;
                 for j in (i + 1)..n_b {
                     let sample_j = &chain_b.samples[j];
                     let jj = sample_j.global_sample_num;
-                    let sorted_split_fingerprints_j = &sample_j.sorted_split_fingerprints;
+                    let sorted_split_fps_j = &sample_j.sorted_split_fps;
 
                     let d_u64 =
-                        calc_rf_dist(sorted_split_fingerprints_i, sorted_split_fingerprints_j);
+                        calc_rf_dist(sorted_split_fps_i, sorted_split_fps_j);
                     let d = d_u64 as f64;
 
                     all_rf_dist_matrix[(ii, jj)] = d;
@@ -282,13 +304,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn assign_tip_fingerprints(tree: &NewickTree) -> HashMap<String, u64> {
+fn assign_tip_fps(tree: &NewickTree, rng: &mut dyn Rng) -> HashMap<String, CladeFp> {
     let mut result = HashMap::new();
     for node_ref in tree.any_order_iter() {
         let node = node_ref.borrow();
         if node.is_tip() {
             assert!(!node.name.is_empty(), "Tip with no name!");
-            result.insert(node.name.clone(), rand::random());
+            result.insert(node.name.clone(), CladeFp::random(rng));
         }
     }
     result
@@ -296,30 +318,30 @@ fn assign_tip_fingerprints(tree: &NewickTree) -> HashMap<String, u64> {
 
 fn calc_sorted_splits(
     tree: &NewickTree,
-    tip_name_2_fingerprint: &HashMap<String, u64>,
-) -> Vec<u64> {
-    let mut partial_fingerprints: Vec<u64> = Vec::new();
-    let mut result: Vec<u64> = Vec::new();
+    tip_name_2_fp: &HashMap<String, CladeFp>,
+) -> Vec<CladeFp> {
+    let mut partial_fps: Vec<CladeFp> = Vec::new();
+    let mut result: Vec<CladeFp> = Vec::new();
     for (action, node_ref) in tree.traversal_iter() {
         match action {
             TraversalAction::Enter => {
                 if node_ref.borrow().is_tip() {
-                    partial_fingerprints.push(
-                        *tip_name_2_fingerprint
+                    partial_fps.push(
+                        *tip_name_2_fp
                             .get(node_ref.borrow().name.as_str())
                             .unwrap(),
                     );
                 } else {
-                    partial_fingerprints.push(0);
+                    partial_fps.push(CladeFp::empty());
                 }
             }
             TraversalAction::Exit => {
-                let fingerprint = partial_fingerprints.pop().expect("Improper nesting?");
+                let fp = partial_fps.pop().expect("Improper nesting?");
                 if !node_ref.borrow().is_tip() {
-                    result.push(fingerprint);
+                    result.push(fp);
                 }
-                if let Some(parent_fingerprint) = partial_fingerprints.last_mut() {
-                    *parent_fingerprint ^= fingerprint; // fp(node) = XOR_{children i} fp(i)
+                if let Some(parent_fp) = partial_fps.last_mut() {
+                    *parent_fp = parent_fp.union(&fp); // fp(node) = XOR_{children i} fp(i)
                 }
             }
         }
@@ -329,14 +351,14 @@ fn calc_sorted_splits(
 }
 
 fn calc_rf_dist(
-    sorted_split_fingerprints_a: &Vec<u64>,
-    sorted_split_fingerprints_b: &Vec<u64>,
+    sorted_split_fps_a: &[CladeFp],
+    sorted_split_fps_b: &[CladeFp],
 ) -> u64 {
     use EitherOrBoth::{Both, Left, Right};
     let mut distance = 0;
     for pair in itertools::merge_join_by(
-        sorted_split_fingerprints_a.iter(),
-        sorted_split_fingerprints_b.iter(),
+        sorted_split_fps_a.iter(),
+        sorted_split_fps_b.iter(),
         |a, b| a.cmp(b),
     ) {
         match pair {
@@ -378,32 +400,32 @@ mod tests {
                 )),
             ],
         )));
-        let tip_name_2_fingerprint = HashMap::from([
-            (String::from("A"), 0b0001),
-            (String::from("B"), 0b0010),
-            (String::from("C"), 0b0100),
-            (String::from("D"), 0b1000),
+        let tip_name_2_fp = HashMap::from([
+            (String::from("A"), CladeFp(0b0001)),
+            (String::from("B"), CladeFp(0b0010)),
+            (String::from("C"), CladeFp(0b0100)),
+            (String::from("D"), CladeFp(0b1000)),
         ]);
 
-        let splits = calc_sorted_splits(&tree, &tip_name_2_fingerprint);
+        let splits = calc_sorted_splits(&tree, &tip_name_2_fp);
 
         assert_eq!(
             splits,
             vec![
-                0b0011, // {A,B} || {C,D,root}
-                0b1100, // {C,D} || {A,B,root}
-                0b1111, // {A,B,C,D} || {root}
+                CladeFp(0b0011), // {A,B} || {C,D,root}
+                CladeFp(0b1100), // {C,D} || {A,B,root}
+                CladeFp(0b1111), // {A,B,C,D} || {root}
             ]
         );
     }
 
     #[test]
     fn calc_rs_dist_test() {
-        let sorted_split_fingerprints_a = vec![1, 3, 4, 7];
-        let sorted_split_fingerprints_b = vec![2, 3, 5, 7];
+        let sorted_split_fps_a = vec![CladeFp(1), CladeFp(3), CladeFp(4), CladeFp(7)];
+        let sorted_split_fps_b = vec![CladeFp(2), CladeFp(3), CladeFp(5), CladeFp(7)];
 
         assert_eq!(
-            calc_rf_dist(&sorted_split_fingerprints_a, &sorted_split_fingerprints_b),
+            calc_rf_dist(&sorted_split_fps_a, &sorted_split_fps_b),
             4
         );
     }
