@@ -13,6 +13,7 @@ Usage:
 """
 
 import argparse
+import concurrent.futures
 import io
 import json
 import math
@@ -30,6 +31,7 @@ from scipy.stats import binom
 # ---------------------------------------------------------------------------
 
 LOGANALYSER = "../../loganalyser277"
+CALC_CLADE_COVERAGE = "../../tree_ess/target/release/calc-clade-coverage"
 
 # (display_name, log_column_name / loganalyser column prefix)
 PARAMS = [
@@ -224,6 +226,99 @@ def compute_normalized_ranks(true_vals, script_dir, n, burnin_frac, params):
 
 
 # ---------------------------------------------------------------------------
+# Step 5: Clade coverage
+# ---------------------------------------------------------------------------
+
+def _run_one_clade_coverage(i, script_dir, burnin_pct, num_bins, header):
+    """Run calc-clade-coverage for a single replicate.  Returns (i, stdout)."""
+    sim_tag = f"sim_{i:03d}"
+    true_tree = os.path.join("sims", sim_tag, "sim.nwk")
+    posterior_trees = os.path.join("sims", sim_tag, "delphy.trees")
+
+    cmd = [
+        CALC_CLADE_COVERAGE,
+        "--burnin-pct", str(burnin_pct),
+        "--num-bins", str(num_bins),
+        "--replicate", sim_tag,
+        true_tree,
+        posterior_trees,
+    ]
+    if header:
+        cmd.append("--header")
+
+    result = subprocess.run(
+        cmd, capture_output=True, text=True, cwd=script_dir)
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"calc-clade-coverage failed for {sim_tag}:\n{result.stderr}")
+
+    return (i, result.stdout.strip())
+
+
+def compute_clade_coverage(script_dir, analyses_dir, n, burnin_pct, num_bins):
+    """Run calc-clade-coverage per replicate, aggregate, and save results."""
+    raw_lines = [None] * n
+    num_workers = os.cpu_count()
+    done = 0
+
+    with concurrent.futures.ProcessPoolExecutor(
+            max_workers=num_workers) as executor:
+        futures = {
+            executor.submit(
+                _run_one_clade_coverage, i, script_dir, burnin_pct,
+                num_bins, header=(i == 0)): i
+            for i in range(n)
+        }
+        for future in concurrent.futures.as_completed(futures):
+            i, line = future.result()
+            raw_lines[i] = line
+            done += 1
+            if done % 50 == 0 or done == n:
+                print(f"  {done}/{n} replicates processed")
+
+    # Save raw per-replicate TSV
+    raw_path = os.path.join(analyses_dir, "clade_coverage_raw.tsv")
+    with open(raw_path, "w") as f:
+        f.write("\n".join(raw_lines) + "\n")
+    print(f"  Saved {raw_path}")
+
+    # Parse and aggregate
+    raw_df = pd.read_csv(io.StringIO("\n".join(raw_lines)), sep="\t")
+
+    # Extract bin boundaries from column names (totals_0_10, totals_10_20, ...).
+    # Preserve the column order from calc-clade-coverage output, which is
+    # already in ascending bin order.
+    total_cols = [c for c in raw_df.columns if c.startswith("totals_")]
+    bins = []
+    for col in total_cols:
+        parts = col.replace("totals_", "").split("_")
+        lo, hi = int(parts[0]), int(parts[1])
+        bins.append((lo, hi))
+
+    agg_rows = []
+    for lo, hi in bins:
+        total = int(raw_df[f"totals_{lo}_{hi}"].sum())
+        true_hits = int(raw_df[f"true_hits_{lo}_{hi}"].sum())
+        frac = true_hits / total if total > 0 else float("nan")
+        agg_rows.append((lo, hi, total, true_hits, frac))
+
+    # Save aggregated TSV
+    agg_path = os.path.join(analyses_dir, "clade_coverage.tsv")
+    with open(agg_path, "w") as f:
+        f.write("bin_lo\tbin_hi\ttotal\ttrue_hits\tfraction\n")
+        for lo, hi, total, true_hits, frac in agg_rows:
+            f.write(f"{lo}\t{hi}\t{total}\t{true_hits}\t{frac:.6f}\n")
+    print(f"  Saved {agg_path}")
+
+    # Print human-readable summary
+    print(f"\nClade coverage (aggregated across {n} replicates):")
+    print(f"  {'Bin':>10} {'Total':>8} {'True hits':>10} {'Fraction':>10}")
+    print(f"  {'-'*10} {'-'*8} {'-'*10} {'-'*10}")
+    for lo, hi, total, true_hits, frac in agg_rows:
+        print(f"  {lo:>3}-{hi:<3}%   {total:>8} {true_hits:>10} {frac:>10.4f}")
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -233,6 +328,8 @@ def main():
                         help="Number of simulation replicates (default: 200)")
     parser.add_argument("--burnin", type=int, default=30,
                         help="Burnin percentage (default: 30)")
+    parser.add_argument("--num-coverage-bins", type=int, default=20,
+                        help="Number of bins for clade coverage (default: 20)")
     parser.add_argument("--ignore-low-ess", action="store_true",
                         help="Continue even if some observables have low ESS")
     args = parser.parse_args()
@@ -303,6 +400,11 @@ def main():
             vals = "\t".join(str(ranks[name][i]) for name in param_names)
             f.write(f"{i}\t{vals}\n")
     print(f"  Saved {ranks_path}")
+
+    # Step 5: Clade coverage
+    print(f"\nComputing clade coverage...")
+    compute_clade_coverage(script_dir, analyses_dir, n, burnin_pct,
+                           args.num_coverage_bins)
 
     print("\nDone.  Run 04_plot.py to generate plots.")
 

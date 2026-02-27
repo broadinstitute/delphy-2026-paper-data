@@ -73,6 +73,25 @@ def plot_ecdf(ranks, name, plots_dir):
     plt.close(fig)
 
 
+def plot_clade_coverage(cc_df, plots_dir):
+    """Plot standalone clade coverage bar chart."""
+    fig, ax = plt.subplots(figsize=(6, 4.5))
+    midpoints = (cc_df["bin_lo"].values + cc_df["bin_hi"].values) / 2.0 / 100.0
+    width = (cc_df["bin_hi"].values[0] - cc_df["bin_lo"].values[0]) / 100.0
+    ax.bar(midpoints, cc_df["fraction"].values, width=width * 0.85,
+           edgecolor="black", alpha=0.7)
+    ax.plot([0, 1], [0, 1], "r--", alpha=0.7, label="x = y")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.set_xlabel("Posterior clade support")
+    ax.set_ylabel("Fraction present in true tree")
+    ax.set_title("Clade coverage")
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(os.path.join(plots_dir, "clade_coverage.pdf"))
+    plt.close(fig)
+
+
 def plot_scatter(true_df, la_df, name, col, n, plots_dir):
     """Plot true vs posterior mean with HPD error bars."""
     fig, ax = plt.subplots(figsize=(5, 4.5))
@@ -112,13 +131,12 @@ def plot_scatter(true_df, la_df, name, col, n, plots_dir):
 # Summary plot
 # ---------------------------------------------------------------------------
 
-def plot_summary(true_df, la_df, ranks_df, coverage_df, params, n, plots_dir):
+def plot_summary(true_df, la_df, ranks_df, coverage_df, cc_df, params, n,
+                 plots_dir):
     """Generate combined multi-panel summary figure."""
     num_params = len(params)
-    fig, axes = plt.subplots(num_params, 3, figsize=(14, 3.2 * num_params))
-
-    if num_params == 1:
-        axes = axes[np.newaxis, :]
+    num_rows = num_params + 1  # extra row for clade coverage
+    fig, axes = plt.subplots(num_rows, 3, figsize=(14, 3.2 * num_rows))
 
     # Build coverage lookup
     coverage = dict(zip(coverage_df["Parameter"], coverage_df["Coverage"]))
@@ -131,8 +149,6 @@ def plot_summary(true_df, la_df, ranks_df, coverage_df, params, n, plots_dir):
                 edgecolor="black", alpha=0.7)
         ax.axhline(n / num_bins, color="red", linestyle="--")
         ax.set_title(f"{name}")
-        if row == num_params - 1:
-            ax.set_xlabel("Normalized rank")
         ax.set_ylabel("Count")
 
         # Column 2: ECDF
@@ -148,8 +164,6 @@ def plot_summary(true_df, la_df, ranks_df, coverage_df, params, n, plots_dir):
                         color="red", alpha=0.15)
         cov = coverage[name]
         ax.set_title(f"Coverage: {cov:.0%}")
-        if row == num_params - 1:
-            ax.set_xlabel("Normalized rank")
         ax.set_ylabel("CDF")
 
         # Column 3: Scatter with HPD bars (from loganalyser)
@@ -175,8 +189,6 @@ def plot_summary(true_df, la_df, ranks_df, coverage_df, params, n, plots_dir):
                 [lo_bound - margin, hi_bound + margin],
                 "r--", alpha=0.5)
         ax.set_title(f"{name}")
-        if row == num_params - 1:
-            ax.set_xlabel("True")
         ax.set_ylabel("Posterior mean")
 
         # Zoomed inset for kappa
@@ -217,6 +229,28 @@ def plot_summary(true_df, la_df, ranks_df, coverage_df, params, n, plots_dir):
                     color="gray", linewidth=0.7)
                 ax.add_artist(con)
 
+    # Clade coverage row (bottom, spanning all 3 columns)
+    cc_row = num_params
+    # Hide the two right-hand axes
+    axes[cc_row, 1].set_visible(False)
+    axes[cc_row, 2].set_visible(False)
+    # Make the left axis span all 3 columns
+    pos0 = axes[cc_row, 0].get_position()
+    pos2 = axes[cc_row, 2].get_position()
+    axes[cc_row, 0].set_position([pos0.x0, pos0.y0,
+                                  pos2.x1 - pos0.x0, pos0.height])
+    ax = axes[cc_row, 0]
+    midpoints = (cc_df["bin_lo"].values + cc_df["bin_hi"].values) / 2.0 / 100.0
+    width = (cc_df["bin_hi"].values[0] - cc_df["bin_lo"].values[0]) / 100.0
+    ax.bar(midpoints, cc_df["fraction"].values, width=width * 0.85,
+           edgecolor="black", alpha=0.7)
+    ax.plot([0, 1], [0, 1], "r--", alpha=0.7)
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.set_xlabel("Posterior clade support")
+    ax.set_ylabel("Fraction present in true tree")
+    ax.set_title("Clade coverage")
+
     # Column headers
     axes[0, 0].text(0.5, 1.15, "Rank histogram",
                     transform=axes[0, 0].transAxes,
@@ -229,6 +263,14 @@ def plot_summary(true_df, la_df, ranks_df, coverage_df, params, n, plots_dir):
                     ha="center", fontweight="bold")
 
     fig.tight_layout()
+
+    # Re-apply the clade coverage spanning after tight_layout
+    pos0 = axes[cc_row, 0].get_position()
+    # Get the right edge from a parameter row's column 2
+    pos2 = axes[0, 2].get_position()
+    axes[cc_row, 0].set_position([pos0.x0, pos0.y0,
+                                  pos2.x1 - pos0.x0, pos0.height])
+
     fig.savefig(os.path.join(plots_dir, "wcss_summary.pdf"))
     plt.close(fig)
 
@@ -254,6 +296,8 @@ def main():
     coverage_df = pd.read_csv(os.path.join(analyses_dir,
                                            "coverage_summary.txt"),
                               sep="\t")
+    cc_df = pd.read_csv(os.path.join(analyses_dir, "clade_coverage.tsv"),
+                         sep="\t")
 
     n = len(true_df)
 
@@ -264,9 +308,14 @@ def main():
         plot_ecdf(ranks_df[name].values, name, plots_dir)
         plot_scatter(true_df, la_df, name, col, n, plots_dir)
 
+    # Standalone clade coverage plot
+    print("Generating clade coverage plot...")
+    plot_clade_coverage(cc_df, plots_dir)
+
     # Summary multi-panel figure
     print("Generating summary plot...")
-    plot_summary(true_df, la_df, ranks_df, coverage_df, PARAMS, n, plots_dir)
+    plot_summary(true_df, la_df, ranks_df, coverage_df, cc_df, PARAMS, n,
+                 plots_dir)
 
     print(f"Plots saved to {plots_dir}/")
 
