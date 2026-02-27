@@ -20,7 +20,6 @@ use std::fs::File;
 use std::io::BufReader;
 use tree_ess::burnin::BurninSpec;
 use tree_ess::clades::{catalog_tree_clades, assign_tip_fps, CladeFp, CladeMap};
-use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
 use tree_ess::trees::{NodeLike, TreeLike};
