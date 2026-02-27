@@ -51,11 +51,7 @@ pub fn assign_tip_fps(tree: &NewickTree, rng: &mut dyn Rng) -> HashMap<String, C
 pub fn calc_rf_dist(sorted_split_fps_a: &[CladeFp], sorted_split_fps_b: &[CladeFp]) -> u64 {
     use EitherOrBoth::{Both, Left, Right};
     let mut distance = 0;
-    for pair in itertools::merge_join_by(
-        sorted_split_fps_a,
-        sorted_split_fps_b,
-        |a, b| a.cmp(b),
-    ) {
+    for pair in itertools::merge_join_by(sorted_split_fps_a, sorted_split_fps_b, |a, b| a.cmp(b)) {
         match pair {
             Both(_, _) => (),
             Left(_) | Right(_) => distance += 1,
@@ -83,19 +79,7 @@ impl CladeDefinition {
             CladeDefinition::InnerNodeClade {
                 subclade1,
                 subclade2,
-                ..
             } => subclade1.union(subclade2),
-        }
-    }
-
-    fn is_complete(&self) -> bool {
-        match self {
-            CladeDefinition::TipClade { .. } => true,
-            CladeDefinition::InnerNodeClade {
-                subclade1,
-                subclade2,
-                ..
-            } => !subclade1.is_empty() && !subclade2.is_empty(),
         }
     }
 }
@@ -103,10 +87,9 @@ impl CladeDefinition {
 pub type CladeMap = HashMap<CladeFp, CladeDefinition>;
 
 pub fn tips_in_clade(fp: &CladeFp, clade_map: &CladeMap) -> Vec<String> {
-
     fn go(fp: &CladeFp, clade_map: &CladeMap, result: &mut Vec<String>) {
         match clade_map.get(fp) {
-            None => { },
+            None => {}
             Some(CladeDefinition::TipClade { name, .. }) => result.push(name.clone()),
             Some(CladeDefinition::InnerNodeClade {
                 subclade1,
@@ -125,49 +108,36 @@ pub fn tips_in_clade(fp: &CladeFp, clade_map: &CladeMap) -> Vec<String> {
     result
 }
 
-pub struct CladeInTreeInfo {
-    pub time_from_root: f64,
-}
-
-/// Analyze the clades in a tree, populating a shared `CladeMap` with clade
-/// definitions (only adding clades not already present) and returning per-tree
-/// information (time from root) for each clade.
-pub fn analyze_tree_clades(
+/// Catalog all clades in a tree, populating a shared `CladeMap` with clade
+/// definitions (only adding clades not already present).  Returns a sorted
+/// vector of clade fingerprints found in this tree.  When `include_trivial`
+/// is false, tip singletons and the root clade are excluded from the
+/// returned vector (but still added to the `CladeMap`).
+pub fn catalog_tree_clades(
     tree: &NewickTree,
     tip_fps: &HashMap<String, CladeFp>,
     clade_map: &mut CladeMap,
-) -> HashMap<CladeFp, CladeInTreeInfo> {
-
+    include_trivial: bool,
+) -> Vec<CladeFp> {
     let mut node_clade_defn = CladeDefinition::InnerNodeClade {
         subclade1: CladeFp::empty(),
         subclade2: CladeFp::empty(),
     };
-    let mut node_clade_defn_stack: Vec<CladeDefinition> = vec![];
+    let mut node_clade_defn_stack: Vec<CladeDefinition> = vec![];  // Always `InnerNodeClade`s
 
-    let mut time_from_root = 0.0;
-    let mut time_from_root_stack: Vec<f64> = vec![];
-
-    let mut per_tree_info: HashMap<CladeFp, CladeInTreeInfo> = HashMap::new();
+    let mut clade_fps: Vec<CladeFp> = Vec::new();
 
     for (action, node_ref) in tree.traversal_iter() {
         let node = node_ref.borrow();
         match action {
             TraversalAction::Enter => {
                 // Shift focus from parent to node
-
-                time_from_root_stack.push(time_from_root);
-                if node_ref != tree.root {
-                    // root-to-root distance is 0 by definition; ignore branch length then
-                    time_from_root += node.branch_length
-                };
-
-                let new_clade_defn = {
+                node_clade_defn_stack.push(node_clade_defn);
+                node_clade_defn = {
                     if node.is_tip() {
                         CladeDefinition::TipClade {
                             name: node.name.clone(),
-                            fp: *tip_fps
-                                .get(node.name.as_str())
-                                .expect("Unknown tip name"),
+                            fp: *tip_fps.get(node.name.as_str()).expect("Unknown tip name"),
                         }
                     } else {
                         CladeDefinition::InnerNodeClade {
@@ -176,31 +146,26 @@ pub fn analyze_tree_clades(
                         }
                     }
                 };
-                node_clade_defn_stack.push(std::mem::replace(&mut node_clade_defn, new_clade_defn));
 
-                // Invariant: at this point, time_from_root and node_clade_defn refer to the
-                // time and (partial) fingerprint for the current node after entering it
+                // Invariant: at this point, node_clade_defn refers to the
+                // (partial) clade definition for the current node after entering it
             }
             TraversalAction::Exit => {
-                // Invariant: at this point, time_from_root and node_clade_defn refer to the
-                // time and (partial) fingerprint for the current node before exiting it
+                // Invariant: at this point, node_clade_defn refers to the
+                // (complete) clade definition for the current node before exiting it
 
-                assert!(node_clade_defn.is_complete());
                 let node_fp = node_clade_defn.fp();
+                clade_map.entry(node_fp).or_insert(node_clade_defn);
 
-                per_tree_info.insert(node_fp, CladeInTreeInfo { time_from_root });
-
-                // After this line, node_clade_defn becomes the parent's clade definition
-                let child_clade_defn =
-                    std::mem::replace(&mut node_clade_defn, node_clade_defn_stack.pop().unwrap());
-                clade_map.entry(node_fp).or_insert(child_clade_defn);
+                let is_trivial = node.is_tip() || node_ref == tree.root;
+                if include_trivial || !is_trivial {
+                    clade_fps.push(node_fp);
+                }
 
                 // Shift focus from node to parent, merging this node's fingerprint into it
-
-                // node_clade_defn is already the parent's clade definition; merge exited child's
-                // fingerprint if necessary
-                node_clade_defn = match node_clade_defn {
-                    CladeDefinition::TipClade { .. } => node_clade_defn,
+                let parent_clade_defn = node_clade_defn_stack.pop().unwrap();
+                node_clade_defn = match parent_clade_defn {
+                    CladeDefinition::TipClade { .. } => unreachable!(),
                     CladeDefinition::InnerNodeClade {
                         subclade1,
                         subclade2,
@@ -220,13 +185,65 @@ pub fn analyze_tree_clades(
                         }
                     }
                 };
-
-                time_from_root = time_from_root_stack.pop().unwrap();
             }
         }
     }
 
-    per_tree_info
+    clade_fps.sort();
+    clade_fps
+}
+
+/// Compute the time from root for every clade in a tree.
+/// Returns a map from clade fingerprint to time_from_root (accumulated
+/// branch length from root to that clade's MRCA node).
+pub fn calc_clade_times_from_root(
+    tree: &NewickTree,
+    tip_fps: &HashMap<String, CladeFp>,
+) -> HashMap<CladeFp, f64> {
+    // Each entry is (clade fingerprint, time from root)
+    let mut work_stack: Vec<(CladeFp, f64)> = Vec::new();
+
+    let mut fp = CladeFp::empty();
+    let mut time_from_root = 0.0;
+
+    let mut result: HashMap<CladeFp, f64> = HashMap::new();
+
+    for (action, node_ref) in tree.traversal_iter() {
+        let node = node_ref.borrow();
+        match action {
+            TraversalAction::Enter => {
+                // Shift focus from parent to node
+                work_stack.push((fp, time_from_root));
+
+                if node.is_tip() {
+                    fp = *tip_fps.get(node.name.as_str()).expect("Unknown tip name");
+                } else {
+                    fp = CladeFp::empty();
+                }
+
+                if node_ref != tree.root {
+                    // root-to-root distance is 0 by definition; ignore branch length then
+                    time_from_root += node.branch_length;
+                }
+
+                // Invariant: at this point, fp and time_from_root refer to the
+                // (partial) fingerprint and time for the current node after entering it
+            }
+            TraversalAction::Exit => {
+                // Invariant: at this point, fp and time_from_root refer to the
+                // (complete) fingerprint and time for the current node before exiting it
+
+                result.insert(fp, time_from_root);
+
+                // Shift focus from node to parent, merging this node's fingerprint into it
+                let (parent_fp, parent_time) = work_stack.pop().unwrap();
+                fp = parent_fp.union(&fp);
+                time_from_root = parent_time;
+            }
+        }
+    }
+
+    result
 }
 
 #[cfg(test)]
@@ -343,8 +360,18 @@ mod tests {
 
     #[test]
     fn rf_dist_partial_overlap() {
-        let a = vec![CladeFp::new(1), CladeFp::new(3), CladeFp::new(4), CladeFp::new(7)];
-        let b = vec![CladeFp::new(2), CladeFp::new(3), CladeFp::new(5), CladeFp::new(7)];
+        let a = vec![
+            CladeFp::new(1),
+            CladeFp::new(3),
+            CladeFp::new(4),
+            CladeFp::new(7),
+        ];
+        let b = vec![
+            CladeFp::new(2),
+            CladeFp::new(3),
+            CladeFp::new(5),
+            CladeFp::new(7),
+        ];
         assert_eq!(calc_rf_dist(&a, &b), 4);
     }
 }

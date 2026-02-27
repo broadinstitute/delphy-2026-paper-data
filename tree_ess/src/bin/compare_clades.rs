@@ -11,7 +11,6 @@
 extern crate tree_ess;
 
 use clap::Parser;
-use itertools::Itertools;
 use ndarray::Array2;
 use rand::SeedableRng;
 use rand_pcg::Pcg64Mcg;
@@ -22,7 +21,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io;
 use tree_ess::burnin::BurninSpec;
-use tree_ess::clades::{analyze_tree_clades, assign_tip_fps, calc_rf_dist, tips_in_clade, CladeDefinition, CladeFp, CladeMap};
+use tree_ess::clades::{calc_clade_times_from_root, catalog_tree_clades, assign_tip_fps, calc_rf_dist, tips_in_clade, CladeDefinition, CladeFp, CladeMap};
 use tree_ess::dates::find_root_date;
 use tree_ess::ess::calc_frechet_ess;
 use tree_ess::newick::NewickTree;
@@ -58,13 +57,9 @@ struct Args {
 
 // -- Per-tree processing --
 
-struct CladeInTreeInfo {
-    date: f64,
-}
-
 struct TreeResult {
     sorted_clade_fps: Vec<CladeFp>,
-    clade_fps_2_info: HashMap<CladeFp, CladeInTreeInfo>,
+    clade_fps_2_dates: HashMap<CladeFp, f64>,
 }
 
 fn process_tree(
@@ -73,21 +68,20 @@ fn process_tree(
     clade_map: &mut CladeMap,
 ) -> TreeResult {
 
-    let per_tree_info = analyze_tree_clades(tree, tip_fps, clade_map);
+    let sorted_clade_fps = catalog_tree_clades(tree, tip_fps, clade_map, true);
+    let clade_times_from_root = calc_clade_times_from_root(tree, tip_fps);
 
     let root_date = find_root_date(tree)
         .expect("No tip found with an exact date!  Cannot deduce root date!");
 
-    let clade_fps_2_info: HashMap<CladeFp, CladeInTreeInfo> = per_tree_info
+    let clade_fps_2_dates: HashMap<CladeFp, f64> = clade_times_from_root
         .into_iter()
-        .map(|(fp, info)| (fp, CladeInTreeInfo { date: root_date + info.time_from_root }))
+        .map(|(fp, time_from_root)| (fp, root_date + time_from_root))
         .collect();
-
-    let sorted_clade_fps: Vec<CladeFp> = clade_fps_2_info.keys().cloned().sorted().collect();
 
     TreeResult {
         sorted_clade_fps,
-        clade_fps_2_info,
+        clade_fps_2_dates,
     }
 }
 
@@ -195,11 +189,11 @@ fn process_trees(
         let result = process_tree(&tree, tip_fps, clade_map);
 
         // Accumulate per-clade statistics
-        for (&clade_fp, info) in &result.clade_fps_2_info {
+        for (&clade_fp, &date) in &result.clade_fps_2_dates {
             let acc = accumulators.entry(clade_fp).or_default();
             acc.count += 1;
-            acc.date_sum += info.date;
-            acc.date_sq_sum += info.date * info.date;
+            acc.date_sum += date;
+            acc.date_sq_sum += date * date;
         }
 
         all_sorted_clade_fps.push(result.sorted_clade_fps);
