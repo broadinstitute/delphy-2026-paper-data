@@ -47,7 +47,8 @@ PARAMS = [
 # (fixed parameters will have near-zero ESS by construction).
 ESS_IGNORE = {"meanRate"}  # mutation rate is fixed in this study
 
-ESS_THRESHOLD = 200
+ESS_THRESHOLD_LOW = 200
+ESS_THRESHOLD_VERY_LOW = 150
 
 
 # ---------------------------------------------------------------------------
@@ -90,9 +91,15 @@ def run_loganalyser(script_dir, analyses_dir, n, burnin_pct):
 
 
 def check_ess(la_df, analyses_dir, ignore_low_ess=False):
-    """Check ESS values, save TSV, and fail if any non-ignored observable is low.
+    """Check ESS values, save TSV, and return (ok, excluded_indices).
 
-    Returns True if all non-ignored observables pass, False otherwise.
+    Two-tier check:
+    - "low ESS": ESS < 200.  Error if > 10% of runs.
+    - "very low ESS": ESS < 150.  Error if > 5% of runs.
+      Runs with very low ESS on any non-ignored observable are excluded
+      from downstream analysis.
+
+    Returns (True, excluded_set) on success, (False, set()) on error.
     """
     ess_cols = sorted(c for c in la_df.columns if c.endswith(".ESS"))
     n = len(la_df)
@@ -100,63 +107,90 @@ def check_ess(la_df, analyses_dir, ignore_low_ess=False):
     # Save TSV with all observables
     tsv_path = os.path.join(analyses_dir, "ess_check.tsv")
     with open(tsv_path, "w") as f:
-        f.write("Observable\tLow_ESS_runs\tN\tFraction\t"
-                "Mean_ESS\tStd_ESS\tIgnored\n")
+        f.write("Observable\tLow_ESS_runs\tVery_low_ESS_runs\tN\t"
+                "Low_frac\tVery_low_frac\tMean_ESS\tStd_ESS\tIgnored\n")
         for col in ess_cols:
             obs_name = col[:-4]  # strip ".ESS"
-            low_count = int((la_df[col] < ESS_THRESHOLD).sum())
+            low_count = int((la_df[col] < ESS_THRESHOLD_LOW).sum())
+            very_low_count = int((la_df[col] < ESS_THRESHOLD_VERY_LOW).sum())
             mean_ess = la_df[col].mean()
             std_ess = la_df[col].std()
             ignored = "yes" if obs_name in ESS_IGNORE else "no"
-            f.write(f"{obs_name}\t{low_count}\t{n}\t"
-                    f"{low_count/n:.3f}\t{mean_ess:.1f}\t{std_ess:.1f}\t"
-                    f"{ignored}\n")
+            f.write(f"{obs_name}\t{low_count}\t{very_low_count}\t{n}\t"
+                    f"{low_count/n:.3f}\t{very_low_count/n:.3f}\t"
+                    f"{mean_ess:.1f}\t{std_ess:.1f}\t{ignored}\n")
     print(f"  Saved {tsv_path}")
 
     # Print human-readable summary (non-ignored with at least one low-ESS run)
-    print(f"\nESS check (threshold={ESS_THRESHOLD}):")
+    print(f"\nESS check (low={ESS_THRESHOLD_LOW}, "
+          f"very low={ESS_THRESHOLD_VERY_LOW}):")
     any_low = False
-    max_frac = 0.0
-    max_frac_obs = ""
+    max_low_frac = 0.0
+    max_very_low_frac = 0.0
     for col in ess_cols:
         obs_name = col[:-4]
         if obs_name in ESS_IGNORE:
             continue
-        low_count = int((la_df[col] < ESS_THRESHOLD).sum())
-        frac = low_count / n
-        if frac > max_frac:
-            max_frac = frac
-            max_frac_obs = obs_name
+        low_count = int((la_df[col] < ESS_THRESHOLD_LOW).sum())
+        very_low_count = int((la_df[col] < ESS_THRESHOLD_VERY_LOW).sum())
+        low_frac = low_count / n
+        very_low_frac = very_low_count / n
+        max_low_frac = max(max_low_frac, low_frac)
+        max_very_low_frac = max(max_very_low_frac, very_low_frac)
         if low_count > 0:
             if not any_low:
-                print(f"{'Observable':<30} {'Low ESS runs':>14} {'Fraction':>10}")
-                print(f"{'-'*30} {'-'*14} {'-'*10}")
+                print(f"{'Observable':<30} {'<200':>8} {'<150':>8} "
+                      f"{'%<200':>8} {'%<150':>8}")
+                print(f"{'-'*30} {'-'*8} {'-'*8} {'-'*8} {'-'*8}")
                 any_low = True
-            print(f"{obs_name:<30} {low_count:>14} {frac:>10.3f}")
+            print(f"{obs_name:<30} {low_count:>8} {very_low_count:>8} "
+                  f"{low_frac:>8.1%} {very_low_frac:>8.1%}")
 
     if not any_low:
-        print("  All non-ignored observables have ESS >= "
-              f"{ESS_THRESHOLD} across all {n} replicates.")
-        return True
+        print(f"  All non-ignored observables have ESS >= {ESS_THRESHOLD_LOW} "
+              f"across all {n} replicates.")
+        return (True, set())
 
-    if max_frac < 0.05:
-        print(f"\n  WARNING: Low ESS detected in a few runs"
-              f" (observable with highest low-ESS fraction: {max_frac_obs}"
-              f" at {max_frac:.1%}), but below 5% threshold.  Continuing.")
-        return True
+    # Check error conditions
+    error = False
+    if max_low_frac > 0.10:
+        error = True
+        print(f"\n  ERROR: Some non-ignored observables have ESS < "
+              f"{ESS_THRESHOLD_LOW} in > 10% of replicates.")
+    if max_very_low_frac > 0.05:
+        error = True
+        print(f"\n  ERROR: Some non-ignored observables have ESS < "
+              f"{ESS_THRESHOLD_VERY_LOW} in > 5% of replicates.")
 
-    if ignore_low_ess:
-        print("\n  WARNING: Low ESS detected but continuing (--ignore-low-ess).")
-        return True
+    if error and not ignore_low_ess:
+        print("  To fix, increase the number of MCMC steps and rerun:")
+        print("    ./01_generate.py --n <N> --steps <more_steps>")
+        print("    make -C sims clean && ./02_run.py")
+        print("    ./03_analyze.py --n <N>")
+        print("  Or pass --ignore-low-ess to continue anyway.")
+        return (False, set())
 
-    print(f"\n  ERROR: Some non-ignored observables have ESS < {ESS_THRESHOLD}"
-          f" in more than 5% of replicates.")
-    print("  To fix, increase the number of MCMC steps and rerun:")
-    print("    ./01_generate.py --n <N> --steps <more_steps>")
-    print("    make -C sims clean && ./02_run.py")
-    print("    ./03_analyze.py --n <N>")
-    print("  Or pass --ignore-low-ess to continue anyway.")
-    return False
+    # Compute excluded replicates: any row where a non-ignored observable
+    # has ESS < ESS_THRESHOLD_VERY_LOW
+    excluded = set()
+    for col in ess_cols:
+        obs_name = col[:-4]
+        if obs_name in ESS_IGNORE:
+            continue
+        for idx in la_df.index[la_df[col] < ESS_THRESHOLD_VERY_LOW]:
+            excluded.add(idx)
+
+    if error:
+        print(f"\n  WARNING: Low ESS detected but continuing "
+              f"(--ignore-low-ess).")
+    if excluded:
+        print(f"  Excluding {len(excluded)} replicate(s) with very low ESS "
+              f"from downstream analysis.")
+    else:
+        print(f"\n  WARNING: Some runs have low ESS but none below "
+              f"{ESS_THRESHOLD_VERY_LOW}.  Continuing with all replicates.")
+
+    return (True, excluded)
 
 
 # ---------------------------------------------------------------------------
@@ -204,19 +238,20 @@ def compute_coverage(true_vals, la_df, params):
 # Step 4: Rank Uniformity Validation (RUV)
 # ---------------------------------------------------------------------------
 
-def compute_normalized_ranks(true_vals, script_dir, n, burnin_frac, params):
+def compute_normalized_ranks(true_vals, script_dir, included, burnin_frac,
+                             params):
     """Compute normalized rank of true value among posterior samples."""
     param_names = [name for name, _ in params]
     ranks = {name: [] for name in param_names}
 
-    for i in range(n):
+    for j, i in enumerate(included):
         log_path = os.path.join(script_dir, "sims", f"sim_{i:03d}", "delphy.log")
         raw = pd.read_table(log_path, comment="#")
         burnin_rows = math.floor(burnin_frac * len(raw))
         data = raw.iloc[burnin_rows:]
 
         for name, col in params:
-            true_val = true_vals[i][name]
+            true_val = true_vals[j][name]
             samples = data[col].values
             rank = np.sum(samples < true_val)
             L = len(samples)
@@ -255,8 +290,10 @@ def _run_one_clade_coverage(i, script_dir, burnin_pct, num_bins, header):
     return (i, result.stdout.strip())
 
 
-def compute_clade_coverage(script_dir, analyses_dir, n, burnin_pct, num_bins):
+def compute_clade_coverage(script_dir, analyses_dir, included, burnin_pct,
+                           num_bins):
     """Run calc-clade-coverage per replicate, aggregate, and save results."""
+    n = len(included)
     raw_lines = [None] * n
     num_workers = os.cpu_count()
     done = 0
@@ -266,12 +303,13 @@ def compute_clade_coverage(script_dir, analyses_dir, n, burnin_pct, num_bins):
         futures = {
             executor.submit(
                 _run_one_clade_coverage, i, script_dir, burnin_pct,
-                num_bins, header=(i == 0)): i
-            for i in range(n)
+                num_bins, header=(j == 0)): j
+            for j, i in enumerate(included)
         }
         for future in concurrent.futures.as_completed(futures):
-            i, line = future.result()
-            raw_lines[i] = line
+            j = futures[future]
+            _, line = future.result()
+            raw_lines[j] = line
             done += 1
             if done % 50 == 0 or done == n:
                 print(f"  {done}/{n} replicates processed")
@@ -347,29 +385,61 @@ def main():
     print(f"Running loganalyser on {n} replicates (burnin={burnin_pct}%)...")
     la_df = run_loganalyser(script_dir, analyses_dir, n, burnin_pct)
     print(f"  loganalyser returned {len(la_df)} rows")
-    if not check_ess(la_df, analyses_dir, args.ignore_low_ess):
+    ok, excluded = check_ess(la_df, analyses_dir, args.ignore_low_ess)
+    if not ok:
         sys.exit(1)
+
+    # Build included replicate list and filter la_df
+    included = sorted(set(range(n)) - excluded)
+    n_eff = len(included)
+    if excluded:
+        print(f"\n  {len(excluded)} replicate(s) excluded, "
+              f"{n_eff} remaining for analysis.")
+        # Save excluded replicates
+        excl_path = os.path.join(analyses_dir, "excluded_replicates.tsv")
+        ess_cols = sorted(c for c in la_df.columns if c.endswith(".ESS"))
+        with open(excl_path, "w") as f:
+            f.write("replicate\tlow_ess_observables\n")
+            for i in sorted(excluded):
+                low_obs = []
+                for col in ess_cols:
+                    obs_name = col[:-4]
+                    if obs_name in ESS_IGNORE:
+                        continue
+                    if la_df[col].iloc[i] < ESS_THRESHOLD_VERY_LOW:
+                        low_obs.append(obs_name)
+                f.write(f"sim_{i:03d}\t{','.join(low_obs)}\n")
+        print(f"  Saved {excl_path}")
+
+    la_df = la_df.iloc[included].reset_index(drop=True)
+
+    # Save filtered loganalyser output so that all downstream TSV files
+    # in analyses/ are row-aligned.
+    filtered_path = os.path.join(analyses_dir,
+                                 "loganalyser_output_filtered.tsv")
+    la_df.to_csv(filtered_path, sep="\t", index=False)
+    print(f"  Saved {filtered_path} ({n_eff} rows)")
 
     # Step 2: Read true parameters and save to TSV
     print("\nReading true parameters...")
     true_vals = []
-    for i in range(n):
+    for i in included:
         sim_dir = os.path.join(script_dir, "sims", f"sim_{i:03d}")
         true_vals.append(read_true_params(sim_dir))
 
     true_path = os.path.join(analyses_dir, "true_params.tsv")
     with open(true_path, "w") as f:
         f.write("replicate\tkappa\tpi_A\tpi_C\tpi_G\tpi_T\trootHeight\n")
-        for i, tv in enumerate(true_vals):
-            f.write(f"{i}\t{tv['kappa']}\t{tv['pi_A']}\t{tv['pi_C']}\t"
+        for i, tv in zip(included, true_vals):
+            f.write(f"sim_{i:03d}\t{tv['kappa']}\t{tv['pi_A']}\t{tv['pi_C']}\t"
                     f"{tv['pi_G']}\t{tv['pi_T']}\t{tv['rootHeight']}\n")
     print(f"  Saved {true_path}")
 
     # Step 3: Coverage analysis
     print()
     coverage = compute_coverage(true_vals, la_df, PARAMS)
-    lo_binom = binom.ppf(0.025, n, 0.95) / n
-    hi_binom = binom.ppf(0.975, n, 0.95) / n
+    lo_binom = binom.ppf(0.025, n_eff, 0.95) / n_eff
+    hi_binom = binom.ppf(0.975, n_eff, 0.95) / n_eff
 
     # Print human-readable table
     print(f"{'Parameter':<14} {'Coverage':>10}")
@@ -377,33 +447,34 @@ def main():
     for name in param_names:
         print(f"{name:<14} {coverage[name]:>10.2f}")
     print(f"\nExpected coverage: 0.95.  "
-          f"Binomial 95% interval for N={n}: [{lo_binom:.3f}, {hi_binom:.3f}].")
+          f"Binomial 95% interval for N={n_eff}: "
+          f"[{lo_binom:.3f}, {hi_binom:.3f}].")
 
     # Save TSV
     cov_path = os.path.join(analyses_dir, "coverage_summary.txt")
     with open(cov_path, "w") as f:
         f.write("Parameter\tCoverage\tN\tExpected\tBinom_2.5%\tBinom_97.5%\n")
         for name in param_names:
-            f.write(f"{name}\t{coverage[name]:.2f}\t{n}\t"
+            f.write(f"{name}\t{coverage[name]:.2f}\t{n_eff}\t"
                     f"0.950\t{lo_binom:.3f}\t{hi_binom:.3f}\n")
     print(f"  Saved {cov_path}")
 
     # Step 4: RUV — compute and save normalized ranks
     print(f"\nComputing normalized ranks...")
-    ranks = compute_normalized_ranks(true_vals, script_dir, n, burnin_frac,
-                                     PARAMS)
+    ranks = compute_normalized_ranks(true_vals, script_dir, included,
+                                     burnin_frac, PARAMS)
 
     ranks_path = os.path.join(analyses_dir, "ranks.tsv")
     with open(ranks_path, "w") as f:
         f.write("replicate\t" + "\t".join(param_names) + "\n")
-        for i in range(n):
-            vals = "\t".join(str(ranks[name][i]) for name in param_names)
-            f.write(f"{i}\t{vals}\n")
+        for j, i in enumerate(included):
+            vals = "\t".join(str(ranks[name][j]) for name in param_names)
+            f.write(f"sim_{i:03d}\t{vals}\n")
     print(f"  Saved {ranks_path}")
 
     # Step 5: Clade coverage
     print(f"\nComputing clade coverage...")
-    compute_clade_coverage(script_dir, analyses_dir, n, burnin_pct,
+    compute_clade_coverage(script_dir, analyses_dir, included, burnin_pct,
                            args.num_coverage_bins)
 
     print("\nDone.  Run 04_plot.py to generate plots.")

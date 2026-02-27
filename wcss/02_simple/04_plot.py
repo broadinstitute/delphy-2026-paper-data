@@ -287,7 +287,8 @@ def main():
 
     # Read all inputs from analyses/
     print("Reading analysis results...")
-    la_df = pd.read_csv(os.path.join(analyses_dir, "loganalyser_output.tsv"),
+    la_df = pd.read_csv(os.path.join(analyses_dir,
+                                     "loganalyser_output_filtered.tsv"),
                         sep="\t")
     true_df = pd.read_csv(os.path.join(analyses_dir, "true_params.tsv"),
                           sep="\t")
