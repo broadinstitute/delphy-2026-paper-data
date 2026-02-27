@@ -1,5 +1,9 @@
 use rand::Rng;
 use serde::Serialize;
+use std::collections::HashMap;
+
+use crate::newick::NewickTree;
+use crate::trees::{NodeLike, TreeLike};
 
 /// A clade fingerprint represents a set of tips.
 /// Singletons are represented directly as a random fingerprint.
@@ -27,6 +31,18 @@ impl CladeFp {
     pub fn is_empty(&self) -> bool {
         self.0 == 0
     }
+}
+
+pub fn assign_tip_fps(tree: &NewickTree, rng: &mut dyn Rng) -> HashMap<String, CladeFp> {
+    let mut result = HashMap::new();
+    for node_ref in tree.any_order_iter() {
+        let node = node_ref.borrow();
+        if node.is_tip() {
+            assert!(!node.name.is_empty(), "Tip with no name!");
+            result.insert(node.name.clone(), CladeFp::random(rng));
+        }
+    }
+    result
 }
 
 #[cfg(test)]
@@ -88,5 +104,43 @@ mod tests {
             );
         }
         assert_eq!(seen.len(), (1 << n) - 1);
+    }
+
+    #[test]
+    fn assign_tip_fps_returns_distinct_nonempty_fps_for_each_tip() {
+        use crate::newick::NewickNode;
+        use crate::refs::{Pool, TestPool};
+
+        let pool = TestPool::new();
+        let tree = NewickTree::new(pool.alloc(NewickNode::inner_node(
+            "root",
+            0.0,
+            vec![
+                pool.alloc(NewickNode::inner_node(
+                    "",
+                    0.0,
+                    vec![
+                        pool.alloc(NewickNode::leaf("A", 0.0)),
+                        pool.alloc(NewickNode::leaf("B", 0.0)),
+                    ],
+                )),
+                pool.alloc(NewickNode::leaf("C", 0.0)),
+            ],
+        )));
+
+        let mut rng = Pcg64Mcg::seed_from_u64(42);
+        let tip_fps = assign_tip_fps(&tree, &mut rng);
+
+        assert_eq!(tip_fps.len(), 3);
+        assert!(tip_fps.contains_key("A"));
+        assert!(tip_fps.contains_key("B"));
+        assert!(tip_fps.contains_key("C"));
+
+        let values: Vec<CladeFp> = tip_fps.values().copied().collect();
+        for fp in &values {
+            assert!(!fp.is_empty());
+        }
+        let unique: HashSet<CladeFp> = values.into_iter().collect();
+        assert_eq!(unique.len(), 3);
     }
 }

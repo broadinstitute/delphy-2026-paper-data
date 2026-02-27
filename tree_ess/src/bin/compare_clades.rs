@@ -13,7 +13,7 @@ extern crate tree_ess;
 use clap::Parser;
 use itertools::{EitherOrBoth, Itertools};
 use ndarray::{Array1, Array2};
-use rand::{Rng, SeedableRng};
+use rand::SeedableRng;
 use rand_pcg::Pcg64Mcg;
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
@@ -22,7 +22,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io;
 use tree_ess::burnin::BurninSpec;
-use tree_ess::clade_fp::CladeFp;
+use tree_ess::clade_fp::{assign_tip_fps, CladeFp};
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
@@ -150,23 +150,6 @@ fn tips_in_clade(fp: &CladeFp, clade_map: &CladeMap) -> Vec<String> {
     let mut result: Vec<String> = Vec::new();
     go(fp, clade_map, &mut result);
     result.sort();
-    result
-}
-
-// -- Tip fingerprints (from calc_tree_ess.rs) --
-
-fn assign_tip_fps(
-    tree: &NewickTree,
-    rng: &mut dyn Rng,
-) -> HashMap<String, CladeFp> {
-    let mut result = HashMap::new();
-    for node_ref in tree.any_order_iter() {
-        let node = node_ref.borrow();
-        if node.is_tip() {
-            assert!(!node.name.is_empty(), "Tip with no name!");
-            result.insert(node.name.clone(), CladeFp::random(rng));
-        }
-    }
     result
 }
 

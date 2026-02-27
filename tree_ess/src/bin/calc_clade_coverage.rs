@@ -12,14 +12,14 @@
 extern crate tree_ess;
 
 use clap::Parser;
-use rand::{Rng, SeedableRng};
+use rand::SeedableRng;
 use rand_pcg::Pcg64Mcg;
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use tree_ess::burnin::BurninSpec;
-use tree_ess::clade_fp::CladeFp;
+use tree_ess::clade_fp::{assign_tip_fps, CladeFp};
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
@@ -57,20 +57,6 @@ struct Args {
     /// Prepend a TSV header line before the data line
     #[arg(long)]
     header: bool,
-}
-
-// -- Tip fingerprint assignment (same pattern as compare_clades.rs) --
-
-fn assign_tip_fps(tree: &NewickTree, rng: &mut dyn Rng) -> HashMap<String, CladeFp> {
-    let mut result = HashMap::new();
-    for node_ref in tree.any_order_iter() {
-        let node = node_ref.borrow();
-        if node.is_tip() {
-            assert!(!node.name.is_empty(), "Tip with no name!");
-            result.insert(node.name.clone(), CladeFp::random(rng));
-        }
-    }
-    result
 }
 
 /// Traverse a tree and return clade fingerprints for all non-trivial clades
