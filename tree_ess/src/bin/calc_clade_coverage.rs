@@ -18,7 +18,7 @@ use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
-use std::cmp;
+use tree_ess::burnin::BurninSpec;
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
@@ -56,25 +56,6 @@ struct Args {
     /// Prepend a TSV header line before the data line
     #[arg(long)]
     header: bool,
-}
-
-// -- Burn-in (same pattern as calc_tree_ess.rs and compare_clades.rs) --
-
-#[derive(Debug)]
-enum BurninSpec {
-    Fract(f64),
-    Trees(usize),
-}
-impl BurninSpec {
-    fn first_sample_idx(&self, num_trees: usize) -> usize {
-        match *self {
-            BurninSpec::Fract(pct) => {
-                assert!((0.0..=1.0).contains(&pct));
-                (num_trees as f64 * pct).floor() as usize
-            }
-            BurninSpec::Trees(burnin_trees) => cmp::min(num_trees, burnin_trees),
-        }
-    }
 }
 
 // -- Clade fingerprint (same as compare_clades.rs) --
@@ -155,21 +136,14 @@ fn extract_nontrivial_clades(
 
 fn compute_bin_index(support: f64, bin_width: f64, num_bins: usize) -> usize {
     let b = (support / bin_width).floor() as usize;
-    cmp::min(b, num_bins - 1)
+    b.min(num_bins - 1)
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
     let pool = AllocPool::new();
     let args = Args::parse();
 
-    let burnin_spec = if let Some(pct) = args.burnin_pct {
-        assert!((0.0..=100.0).contains(&pct));
-        BurninSpec::Fract(pct / 100.0)
-    } else if let Some(burnin_trees) = args.burnin_trees {
-        BurninSpec::Trees(burnin_trees)
-    } else {
-        BurninSpec::Fract(0.10)
-    };
+    let burnin_spec = BurninSpec::from_options(args.burnin_pct, args.burnin_trees);
 
     let num_bins = args.num_bins;
     assert!(num_bins >= 1, "num-bins must be at least 1");

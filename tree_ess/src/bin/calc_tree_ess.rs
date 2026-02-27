@@ -13,7 +13,8 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
-use std::{cmp, io};
+use std::io;
+use tree_ess::burnin::BurninSpec;
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
@@ -39,23 +40,6 @@ struct Args {
     /// Enable compact output format (don't output whole Robison-Foulds distance matrix)
     #[arg(short, long)]
     compact: bool,
-}
-
-#[derive(Debug)]
-enum BurninSpec {
-    Fract(f64),
-    Trees(usize),
-}
-impl BurninSpec {
-    fn first_sample_idx(&self, num_trees: usize) -> usize {
-        match *self {
-            BurninSpec::Fract(pct) => {
-                assert!((0.0..=1.0).contains(&pct));
-                (num_trees as f64 * pct).floor() as usize
-            }
-            BurninSpec::Trees(burnin_trees) => cmp::min(num_trees, burnin_trees),
-        }
-    }
 }
 
 struct Chain {
@@ -94,15 +78,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let pool = AllocPool::new();
 
     let args = Args::parse();
-    let burnin_spec;
-    if let Some(pct) = args.burnin_pct {
-        assert!((0.0..=100.0).contains(&pct));
-        burnin_spec = BurninSpec::Fract(pct / 100.0);
-    } else if let Some(burnin_trees) = args.burnin_trees {
-        burnin_spec = BurninSpec::Trees(burnin_trees);
-    } else {
-        burnin_spec = BurninSpec::Fract(0.10);
-    }
+    let burnin_spec = BurninSpec::from_options(args.burnin_pct, args.burnin_trees);
 
     let mut chains = vec![];
     let mut next_global_sample_num = 0;
