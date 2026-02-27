@@ -1,0 +1,20 @@
+#NEXUS
+
+Begin taxa;
+    Dimensions ntax=4;
+        Taxlabels
+            A
+            B
+            C
+            D
+            ;
+End;
+Begin trees;
+    Translate
+        1 A,
+        2 B,
+        3 C,
+        4 D
+;
+tree STATE_0 = ((1,2),(3,4));
+End;

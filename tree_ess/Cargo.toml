@@ -30,3 +30,7 @@ path = "src/bin/calc_tree_ess.rs"
 [[bin]]
 name = "compare-clades"
 path = "src/bin/compare_clades.rs"
+
+[[bin]]
+name = "calc-clade-coverage"
+path = "src/bin/calc_clade_coverage.rs"

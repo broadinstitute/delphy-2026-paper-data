@@ -119,6 +119,8 @@ impl NexusReader {
                 break;
             }
 
+            // TODO: Relax this to accept arbitrary tree IDs (e.g., "tree foo = ..."),
+            // not just the "tree STATE_NNN" format used by BEAST and Delphy .trees files.
             check(line.starts_with("tree STATE_"))?;
             let state_start = line.find('_').unwrap() + 1;
             let state_end = line

@@ -57,3 +57,75 @@ A well-calibrated simulation study for Delphy would involve:
 3. **Checking** that the true generating values fall within the 95% HPD ~95% of the time, and that parameter ranks are uniformly distributed.
 
 This would validate that Delphy's MCMC machinery is correctly sampling from the posterior.
+
+---
+
+## Clade Coverage Validation
+
+- <https://github.com/rbouckaert/DeveloperManual> (section "Clade coverage")
+- <https://github.com/christiaanjs/beast-validation/blob/master/src/beastvalidation/experimenter/CladeCoverageCalculator.java>
+
+Coverage and RUV validate scalar parameters, but a phylogenetic MCMC also
+infers tree topology.  Clade coverage validation checks whether the
+posterior clade probabilities are well-calibrated — that is, whether a
+clade assigned posterior probability *p* is truly present in the generating
+tree about *p* fraction of the time.
+
+### Key insight
+
+In each simulation replicate, we draw model parameters and a tree from the
+prior, then simulate data.  This is equivalent to first drawing data from
+P(Data) and then drawing a single model (including tree) from the posterior
+P(Model | Data).  The true tree is therefore *one sample from the
+posterior*.
+
+This means that for any clade with posterior frequency *p*, asking "is this
+clade present in the true tree?" is a Bernoulli trial with success
+probability *p*.  If the model is well-calibrated, clades with posterior
+frequency ~75% should appear in the true tree ~75% of the time.
+
+To test this, we group all such Bernoulli trials by their success
+probability into bins (e.g., 70–80%) and check whether the observed
+success rate matches the bin's expected rate.  Since a single replicate
+provides few trials per bin, we pool trials across many replicates to
+gather enough statistics.
+
+### Procedure
+
+Run *N* simulation replicates.  Each replicate has:
+- A **true tree** (from the simulation), which defines a set of true clades.
+- A **posterior sample of trees** (from MCMC inference), which defines a
+  set of observed clades, each with a posterior frequency (the fraction of
+  posterior trees containing that clade).
+
+For each replicate independently:
+
+1. Collect all clades that appear in any posterior tree and compute each
+   clade's **posterior frequency** (count / number of posterior trees).
+   Bin each clade by its posterior frequency into one of *K* equal-width
+   bins (e.g., 0–10%, 10–20%, ..., 90–100%).  Increment a global
+   **totals** counter for the appropriate bin.
+
+2. For each clade in the **true tree**, look it up in that replicate's
+   posterior clades.  If found, bin it by its posterior frequency and
+   increment a global **true hits** counter for that bin.  If not found
+   in the posterior at all, count it in the 0% bin.
+
+The totals and true-hits counters accumulate across all *N* replicates.
+For each bin *b*, the bar height is:
+
+> (true hits in bin *b*) / (total clades in bin *b*) x 100%
+
+This is the observed success rate of the Bernoulli trials in that bin.
+
+### Interpretation
+
+Plot these fractions as a bar chart with a diagonal *x = y* reference
+line:
+
+- **Well-calibrated:** bars track the diagonal.  Clades with 70–80%
+  posterior frequency are truly present ~75% of the time.
+- **Over-confident:** bars fall below the diagonal.  The model assigns
+  higher clade probabilities than warranted.
+- **Under-confident:** bars rise above the diagonal.  The model is too
+  conservative in its clade support.
