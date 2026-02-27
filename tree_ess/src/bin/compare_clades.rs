@@ -472,7 +472,6 @@ mod tests {
                     InnerNodeClade {
                         subclade1: fp_a,
                         subclade2: fp_b,
-                        size: 2
                     }
                 ),
                 (
@@ -480,7 +479,6 @@ mod tests {
                     InnerNodeClade {
                         subclade1: fp_ab,
                         subclade2: fp_c,
-                        size: 3
                     }
                 ),
             ])

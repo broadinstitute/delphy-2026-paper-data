@@ -73,7 +73,6 @@ pub enum CladeDefinition {
     InnerNodeClade {
         subclade1: CladeFp,
         subclade2: CladeFp,
-        size: usize,
     },
 }
 
@@ -86,13 +85,6 @@ impl CladeDefinition {
                 subclade2,
                 ..
             } => subclade1.union(subclade2),
-        }
-    }
-
-    pub fn size(&self) -> usize {
-        match self {
-            CladeDefinition::TipClade { .. } => 1,
-            CladeDefinition::InnerNodeClade { size, .. } => *size,
         }
     }
 
@@ -149,7 +141,6 @@ pub fn analyze_tree_clades(
     let mut node_clade_defn = CladeDefinition::InnerNodeClade {
         subclade1: CladeFp::empty(),
         subclade2: CladeFp::empty(),
-        size: 0,
     };
     let mut node_clade_defn_stack: Vec<CladeDefinition> = vec![];
 
@@ -182,7 +173,6 @@ pub fn analyze_tree_clades(
                         CladeDefinition::InnerNodeClade {
                             subclade1: CladeFp::empty(),
                             subclade2: CladeFp::empty(),
-                            size: 0,
                         }
                     }
                 };
@@ -203,7 +193,6 @@ pub fn analyze_tree_clades(
                 // After this line, node_clade_defn becomes the parent's clade definition
                 let child_clade_defn =
                     std::mem::replace(&mut node_clade_defn, node_clade_defn_stack.pop().unwrap());
-                let child_clade_size = child_clade_defn.size();
                 clade_map.entry(node_fp).or_insert(child_clade_defn);
 
                 // Shift focus from node to parent, merging this node's fingerprint into it
@@ -215,19 +204,16 @@ pub fn analyze_tree_clades(
                     CladeDefinition::InnerNodeClade {
                         subclade1,
                         subclade2,
-                        size,
                     } => {
                         if subclade1.is_empty() {
                             CladeDefinition::InnerNodeClade {
                                 subclade1: node_fp,
                                 subclade2: CladeFp::empty(),
-                                size: child_clade_size,
                             }
                         } else if subclade2.is_empty() {
                             CladeDefinition::InnerNodeClade {
                                 subclade1,
                                 subclade2: node_fp,
-                                size: size + child_clade_size,
                             }
                         } else {
                             panic!("Non-bifurcating tree?")

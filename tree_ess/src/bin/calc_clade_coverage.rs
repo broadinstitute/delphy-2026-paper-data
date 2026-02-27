@@ -19,7 +19,7 @@ use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use tree_ess::burnin::BurninSpec;
-use tree_ess::clades::{analyze_tree_clades, assign_tip_fps, CladeDefinition, CladeFp, CladeMap};
+use tree_ess::clades::{analyze_tree_clades, assign_tip_fps, CladeFp, CladeMap};
 use tree_ess::newick::NewickTree;
 use tree_ess::nexus_reader::NexusReader;
 use tree_ess::refs::AllocPool;
@@ -59,22 +59,14 @@ struct Args {
     header: bool,
 }
 
-/// Return clade fingerprints for all non-trivial clades in a tree
-/// (excluding tip singletons and the root clade).
-fn extract_nontrivial_clades(
+/// Return all clade fingerprints in a tree (tips, inner nodes, and root).
+fn extract_clades(
     tree: &NewickTree,
     tip_fps: &HashMap<String, CladeFp>,
 ) -> Vec<CladeFp> {
-    let num_tips = tip_fps.len();
     let mut clade_map = CladeMap::new();
     analyze_tree_clades(tree, tip_fps, &mut clade_map);
-    clade_map.into_iter()
-        .filter_map(|(fp, defn)| match defn {
-            CladeDefinition::InnerNodeClade { size, .. }
-                if size < num_tips => Some(fp),
-            _ => None,
-        })
-        .collect()
+    clade_map.into_keys().collect()
 }
 
 // -- Binning --
@@ -138,6 +130,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         "Tip mismatch between true tree and posterior trees"
     );
 
+    // Precompute tip and root fingerprints for filtering
+    let tip_fp_set: HashSet<CladeFp> = tip_fps.values().copied().collect();
+    let root_fp = tip_fps.values().fold(CladeFp::empty(), |acc, fp| acc.union(fp));
+
     // Apply burn-in
     let num_total = posterior_trees.len();
     let num_burnin = burnin_spec.first_sample_idx(num_total);
@@ -156,9 +152,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         if i < num_burnin {
             continue;
         }
-        let clades = extract_nontrivial_clades(tree, &tip_fps);
-        for &fp in &clades {
-            *clade_counts.entry(fp).or_insert(0) += 1;
+        for fp in extract_clades(tree, &tip_fps) {
+            if !tip_fp_set.contains(&fp) && fp != root_fp {
+                *clade_counts.entry(fp).or_insert(0) += 1;
+            }
         }
     }
     eprintln!(
@@ -169,7 +166,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Step 3: Merge true tree clades into posterior support map
     eprintln!("Extracting true tree clades...");
     let true_clade_fps: HashSet<CladeFp> =
-        extract_nontrivial_clades(true_tree, &tip_fps).into_iter().collect();
+        extract_clades(true_tree, &tip_fps).into_iter()
+            .filter(|fp| !tip_fp_set.contains(fp) && *fp != root_fp)
+            .collect();
     eprintln!("  {} non-trivial clades in true tree", true_clade_fps.len());
 
     // Ensure every true clade is in the counts map (with 0 if not seen in posterior)
@@ -298,22 +297,32 @@ mod tests {
         )))
     }
 
+    fn is_nontrivial(fp: &CladeFp, tip_fp_set: &HashSet<CladeFp>, root_fp: &CladeFp) -> bool {
+        !tip_fp_set.contains(fp) && fp != root_fp
+    }
+
     #[test]
     fn test_identical_trees() {
         let pool = TestPool::new();
         let tip_fps = make_tip_fps();
+        let tip_fp_set: HashSet<CladeFp> = tip_fps.values().copied().collect();
+        let root_fp = tip_fps.values().fold(CladeFp::empty(), |acc, fp| acc.union(fp));
 
         let tree = make_tree_ab_cd(&pool);
 
         // Simulate 1 posterior tree identical to the true tree
         let mut clade_counts: HashMap<CladeFp, usize> = HashMap::new();
-        for &fp in &extract_nontrivial_clades(&tree, &tip_fps) {
-            *clade_counts.entry(fp).or_insert(0) += 1;
+        for fp in extract_clades(&tree, &tip_fps) {
+            if is_nontrivial(&fp, &tip_fp_set, &root_fp) {
+                *clade_counts.entry(fp).or_insert(0) += 1;
+            }
         }
 
         // True tree clades
         let true_clade_fps: HashSet<CladeFp> =
-            extract_nontrivial_clades(&tree, &tip_fps).into_iter().collect();
+            extract_clades(&tree, &tip_fps).into_iter()
+                .filter(|fp| is_nontrivial(fp, &tip_fp_set, &root_fp))
+                .collect();
 
         // Merge
         for &fp in &true_clade_fps {
@@ -352,19 +361,25 @@ mod tests {
     fn test_completely_different_trees() {
         let pool = TestPool::new();
         let tip_fps = make_tip_fps();
+        let tip_fp_set: HashSet<CladeFp> = tip_fps.values().copied().collect();
+        let root_fp = tip_fps.values().fold(CladeFp::empty(), |acc, fp| acc.union(fp));
 
         let posterior_tree = make_tree_ab_cd(&pool);
         let true_tree = make_tree_ac_bd(&pool);
 
         // Posterior clades: {A,B} and {C,D}
         let mut clade_counts: HashMap<CladeFp, usize> = HashMap::new();
-        for &fp in &extract_nontrivial_clades(&posterior_tree, &tip_fps) {
-            *clade_counts.entry(fp).or_insert(0) += 1;
+        for fp in extract_clades(&posterior_tree, &tip_fps) {
+            if is_nontrivial(&fp, &tip_fp_set, &root_fp) {
+                *clade_counts.entry(fp).or_insert(0) += 1;
+            }
         }
 
         // True tree clades: {A,C} and {B,D}
         let true_clade_fps: HashSet<CladeFp> =
-            extract_nontrivial_clades(&true_tree, &tip_fps).into_iter().collect();
+            extract_clades(&true_tree, &tip_fps).into_iter()
+                .filter(|fp| is_nontrivial(fp, &tip_fp_set, &root_fp))
+                .collect();
 
         // No overlap
         for &fp in &true_clade_fps {
