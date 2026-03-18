@@ -56,9 +56,6 @@ ESS_IGNORE = set()  # no fixed parameters to ignore in this study
 ESS_THRESHOLD_LOW = 200
 ESS_THRESHOLD_VERY_LOW = 150
 
-# Delphy's time epoch for to_linear_year conversion
-DELPHY_EPOCH = date(2020, 1, 1)
-
 
 # ---------------------------------------------------------------------------
 # Step 1: Run loganalyser
@@ -409,9 +406,14 @@ def compute_clade_coverage(script_dir, analyses_dir, included, burnin_pct,
 # ---------------------------------------------------------------------------
 
 def date_to_linear_year(d):
-    """Convert a date to Delphy's linear year: 2020.0 + days_since_epoch / 365."""
-    days = (d - DELPHY_EPOCH).days
-    return 2020.0 + days / 365.0
+    """Convert a date to a fractional year, calendar-aware (matching Delphy's to_linear_year).
+
+    Uses year + day_of_year / days_in_year, which accounts for leap years.
+    """
+    y_start = date(d.year, 1, 1)
+    y_end = date(d.year + 1, 1, 1)
+    days_in_year = (y_end - y_start).days
+    return d.year + (d - y_start).days / days_in_year
 
 
 def parse_complete_maple_dates(maple_path):
@@ -473,7 +475,17 @@ def analyze_tip_dates(script_dir, analyses_dir, included, burnin_frac):
         # Read true dates from COMPLETE MAPLE
         true_dates = parse_complete_maple_dates(complete_maple)
 
-        # Extract rootHeight and age(root) samples
+        # With the fixed Delphy (v1.3.1+), all three log columns use
+        # calendar-aware conversions:
+        #   rootHeight = to_linear_year(beast_t0) - to_linear_year(root.t)
+        #   age(root)  = to_linear_year(root.t)
+        #   age(TIP)   = to_linear_year(beast_t0) - to_linear_year(tip.t)
+        #
+        # So: rootHeight + age(root) - age(TIP)
+        #   = [to_linear_year(beast_t0) - to_linear_year(root.t)]
+        #     + to_linear_year(root.t)
+        #     - [to_linear_year(beast_t0) - to_linear_year(tip.t)]
+        #   = to_linear_year(tip.t)
         root_height_samples = data["rootHeight"].values
         age_root_samples = data["age(root)"].values
 
@@ -505,9 +517,9 @@ def analyze_tip_dates(script_dir, analyses_dir, included, burnin_frac):
 
             # Convert posterior samples to calendar years
             age_tip_samples = data[col].values
-            posterior_calendar_years = (root_height_samples +
-                                       age_root_samples -
-                                       age_tip_samples)
+            posterior_calendar_years = (root_height_samples
+                                       + age_root_samples
+                                       - age_tip_samples)
 
             # Compute rank and HPD
             rank = np.sum(posterior_calendar_years < true_calendar_year)
