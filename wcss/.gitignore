@@ -1,0 +1,8 @@
+# Local state for orchestrating cloud runs (see cloud_setup.py)
+.wcss-cloud/
+
+# Raw results files are too large for git; released via Zenodo instead
+*/sims/**/*.log
+*/sims/**/*.trees
+*/sims/**/*.dphy
+*/sims/**/.done
