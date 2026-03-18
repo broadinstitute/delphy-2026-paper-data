@@ -1,0 +1,454 @@
+#!/usr/bin/env python3
+"""Generate all simulation inputs and a Makefile for the tight-priors WCSS.
+
+Supports configurable priors on mu and g.  After simulation, collects
+mutation count statistics and generates diagnostic plots.
+
+Usage:
+    ./01_generate.py
+    ./01_generate.py --n 10 --steps 20000000
+    ./01_generate.py --mu-prior-mean 5e-4 --mu-prior-stddev 3e-4
+    ./01_generate.py --g-prior-exponential-with-mean 0.5
+"""
+
+import argparse
+import json
+import math
+import os
+import subprocess
+import sys
+from datetime import date, timedelta
+
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import laplace
+
+
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
+
+NUM_TIPS = 200
+NUM_SITES = 30000
+T0 = "2026-01-01"
+TIP_DATE_START = date(2025, 1, 1)
+TIP_DATE_END = date(2025, 12, 31)
+
+# Inverse-Gamma prior on n0 (in years): mean=3, stddev=1
+N0_PRIOR_MEAN = 3.0
+N0_PRIOR_STDDEV = 1.0
+N0_PRIOR_ALPHA = 2.0 + N0_PRIOR_MEAN**2 / N0_PRIOR_STDDEV**2  # 11.0
+N0_PRIOR_BETA = N0_PRIOR_MEAN * (N0_PRIOR_ALPHA - 1.0)         # 30.0
+
+# Delphy's hardcoded kappa prior: log(kappa) ~ Normal(mean=1.0, std=1.25)
+KAPPA_MEAN_LOG = 1.0
+KAPPA_SIGMA_LOG = 1.25
+
+# Mu prior: Gamma distribution specified via mean and stddev
+# Default: Exponential with mean 1e-3 (alpha=1, beta=1000)
+DEFAULT_MU_PRIOR_MEAN = 1e-3
+DEFAULT_MU_PRIOR_STDDEV = 1e-3
+
+# G prior: Truncated Laplace(mu, scale) on [g_min, g_max]
+# Default: Exponential with mean 1.0 (mu=0, scale=1, g_min=0)
+DEFAULT_G_PRIOR_MU = 0.0
+DEFAULT_G_PRIOR_SCALE = 1.0
+DEFAULT_G_MIN = 0.0
+DEFAULT_G_MAX = float("inf")
+
+# Missing data parameters
+MISSING_DATA_MEAN_NUM_GAPS = 3.0
+MISSING_DATA_MEAN_GAP_LENGTH = 500.0
+MISSING_DATA_MEAN_NUM_MISSING_SITES = 3.0
+
+# Delphy run parameters (defaults; --steps overrides STEPS)
+DEFAULT_STEPS = 1_000_000_000
+
+# Fixed seed for tip date generation (reproducibility)
+TIP_SEED = 42
+
+# Default master seed for replicate parameter sampling
+DEFAULT_MASTER_SEED = 2025
+
+# Path to binaries (relative to the 08_tight_priors directory)
+SAPLING_REL = "../../sapling"
+DELPHY_REL = "../../delphy"
+
+
+# ---------------------------------------------------------------------------
+# Step 1: Generate tips file
+# ---------------------------------------------------------------------------
+
+def generate_tips_file(out_path):
+    """Write tips.txt with 200 tips, dates uniform over 2025."""
+    rng = np.random.default_rng(TIP_SEED)
+    num_days = (TIP_DATE_END - TIP_DATE_START).days  # 364
+    day_offsets = rng.integers(0, num_days + 1, size=NUM_TIPS)
+
+    with open(out_path, "w") as f:
+        for i in range(NUM_TIPS):
+            tip_date = TIP_DATE_START + timedelta(days=int(day_offsets[i]))
+            f.write(f"TIP_{i:03d}|{tip_date.isoformat()}\n")
+
+    print(f"Wrote {out_path} ({NUM_TIPS} tips)")
+
+
+# ---------------------------------------------------------------------------
+# Step 2: Run Sapling for each replicate
+# ---------------------------------------------------------------------------
+
+def sample_prior_params(rng, mu_prior_mean, mu_prior_stddev,
+                        g_prior_mu, g_prior_scale, g_min, g_max):
+    """Sample n0, g, mu, kappa and pi from their priors."""
+    # n0 ~ InvGamma(alpha, beta): sample 1/n0 ~ Gamma(alpha, 1/beta)
+    inv_n0 = rng.gamma(N0_PRIOR_ALPHA, 1.0 / N0_PRIOR_BETA)
+    n0 = 1.0 / inv_n0
+
+    # g ~ Truncated Laplace(g_prior_mu, g_prior_scale) on [g_min, g_max]
+    # Inverse transform sampling via scipy
+    u_lo = laplace.cdf(g_min, loc=g_prior_mu, scale=g_prior_scale)
+    u_hi = laplace.cdf(g_max, loc=g_prior_mu, scale=g_prior_scale)
+    u = rng.uniform(u_lo, u_hi)
+    g = laplace.ppf(u, loc=g_prior_mu, scale=g_prior_scale)
+
+    # mu ~ Gamma(alpha, beta) where alpha = (mean/stddev)^2, beta = mean/stddev^2
+    mu_alpha = (mu_prior_mean / mu_prior_stddev) ** 2
+    mu_beta = mu_prior_mean / mu_prior_stddev ** 2
+    mu = rng.gamma(mu_alpha, 1.0 / mu_beta)
+
+    pi = rng.dirichlet([1.0, 1.0, 1.0, 1.0])
+    log_kappa = rng.normal(KAPPA_MEAN_LOG, KAPPA_SIGMA_LOG)
+    kappa = np.exp(log_kappa)
+    return n0, g, mu, kappa, pi
+
+
+def run_sapling(i, n0, g, mu, kappa, pi, replicate_seed, tips_file,
+                script_dir):
+    """Run Sapling to simulate data for replicate i."""
+    sim_dir = os.path.join(script_dir, "sims", f"sim_{i:03d}")
+    os.makedirs(sim_dir, exist_ok=True)
+
+    cmd = [
+        os.path.join(script_dir, SAPLING_REL),
+        "--tip-file", tips_file,
+        "--t0", T0,
+        "--exp-pop-n0", str(n0),
+        "--exp-pop-g", str(g),
+        "--mu", str(mu),
+        "--hky-kappa", str(kappa),
+        "--hky-pi-A", str(pi[0]),
+        "--hky-pi-C", str(pi[1]),
+        "--hky-pi-G", str(pi[2]),
+        "--hky-pi-T", str(pi[3]),
+        "--missing-data-mean-num-gaps", str(MISSING_DATA_MEAN_NUM_GAPS),
+        "--missing-data-mean-gap-length", str(MISSING_DATA_MEAN_GAP_LENGTH),
+        "--missing-data-mean-num-missing-sites", str(MISSING_DATA_MEAN_NUM_MISSING_SITES),
+        "--num-sites", str(NUM_SITES),
+        "--seed", str(replicate_seed),
+        "--out-maple", os.path.join(sim_dir, "sim.maple"),
+        "--out-info", os.path.join(sim_dir, "sim_info.json"),
+        "--out-newick", os.path.join(sim_dir, "sim.nwk"),
+        "--out-nexus", os.path.join(sim_dir, "sim.nexus"),
+        "--out-fasta", os.path.join(sim_dir, "sim.fasta"),
+    ]
+
+    print(f"  Replicate {i:03d}: n0={n0:.4f}, g={g:.4f}, mu={mu:.6e}, "
+          f"kappa={kappa:.4f}, "
+          f"pi=({pi[0]:.4f}, {pi[1]:.4f}, {pi[2]:.4f}, {pi[3]:.4f})")
+    subprocess.run(cmd, check=True)
+
+
+# ---------------------------------------------------------------------------
+# Step 3: Generate Makefile
+# ---------------------------------------------------------------------------
+
+def generate_makefile(n, steps, script_dir, mu_prior_mean, mu_prior_stddev,
+                      g_prior_mu, g_prior_scale, g_min, g_max):
+    """Generate a Makefile in sims/ to drive all Delphy runs."""
+    makefile_path = os.path.join(script_dir, "sims", "Makefile")
+    log_every = steps // 1000
+    tree_every = steps // 1000
+
+    # Delphy path is relative to sims/, one level deeper than script_dir
+    delphy_from_sims = os.path.join("..", DELPHY_REL)
+
+    lines = []
+    lines.append("# Auto-generated by 01_generate.py — do not edit")
+    lines.append(f"DELPHY = {delphy_from_sims}")
+    lines.append("")
+    lines.append("SIM_DIRS := $(wildcard sim_[0-9]*)")
+    lines.append("")
+    lines.append("all: $(addsuffix /.done,$(SIM_DIRS))")
+    lines.append("")
+    lines.append("sim_%/.done: sim_%/sim.maple")
+    lines.append(f"\t$(DELPHY) \\")
+    lines.append(f"\t  --v0-in-maple $< \\")
+    lines.append(f"\t  --v0-steps {steps} \\")
+    lines.append(f"\t  --v0-out-log-file sim_$*/delphy.log \\")
+    lines.append(f"\t  --v0-log-every {log_every} \\")
+    lines.append(f"\t  --v0-out-trees-file sim_$*/delphy.trees \\")
+    lines.append(f"\t  --v0-tree-every {tree_every} \\")
+    lines.append(f"\t  --v0-out-delphy-file sim_$*/delphy.dphy \\")
+    lines.append(f"\t  --v0-delphy-snapshot-every {tree_every} \\")
+    lines.append(f"\t  --v0-mu-prior-mean {mu_prior_mean:g} \\")
+    lines.append(f"\t  --v0-mu-prior-stddev {mu_prior_stddev:g} \\")
+    lines.append(f"\t  --v0-pop-n0-prior-mean {N0_PRIOR_MEAN:g} \\")
+    lines.append(f"\t  --v0-pop-n0-prior-stddev {N0_PRIOR_STDDEV:g} \\")
+    lines.append(f"\t  --v0-pop-g-prior-mu {g_prior_mu:g} \\")
+    lines.append(f"\t  --v0-pop-g-prior-scale {g_prior_scale:g} \\")
+    if math.isfinite(g_min):
+        lines.append(f"\t  --v0-pop-growth-rate-min {g_min:g} \\")
+    if math.isfinite(g_max):
+        lines.append(f"\t  --v0-pop-growth-rate-max {g_max:g} \\")
+    lines.append(f"\t&& touch $@")
+    lines.append("")
+    lines.append("clean:")
+    lines.append("\trm -f sim_*/delphy.* sim_*/.done")
+    lines.append("")
+    lines.append(".PHONY: all clean")
+    lines.append("")
+
+    with open(makefile_path, "w") as f:
+        f.write("\n".join(lines))
+
+    print(f"Wrote {makefile_path}")
+
+
+# ---------------------------------------------------------------------------
+# Step 4: Mutation count statistics and plots
+# ---------------------------------------------------------------------------
+
+def collect_mutation_counts(script_dir, n):
+    """Read num_mutations, mu, and g from each replicate's sim_info.json."""
+    records = []
+    for i in range(n):
+        info_path = os.path.join(script_dir, "sims", f"sim_{i:03d}",
+                                 "sim_info.json")
+        with open(info_path) as f:
+            info = json.load(f)
+        records.append({
+            "replicate": f"sim_{i:03d}",
+            "num_mutations": info["tree_stats"]["num_mutations"],
+            "mu": info["subst_model"]["mu"],
+            "g": info["pop_model"]["g"],
+        })
+    return records
+
+
+def save_mutation_counts(records, script_dir):
+    """Save mutation counts to TSV."""
+    tsv_path = os.path.join(script_dir, "sims", "mutation_counts.tsv")
+    with open(tsv_path, "w") as f:
+        f.write("replicate\tnum_mutations\tmu\tg\n")
+        for r in records:
+            f.write(f"{r['replicate']}\t{r['num_mutations']}\t"
+                    f"{r['mu']}\t{r['g']}\n")
+    print(f"  Saved {tsv_path}")
+
+
+def print_mutation_count_stats(records):
+    """Print summary statistics for mutation counts."""
+    counts = np.array([r["num_mutations"] for r in records])
+    print(f"\nMutation count statistics ({len(counts)} replicates):")
+    print(f"  Min:    {np.min(counts)}")
+    print(f"  p5:     {np.percentile(counts, 5):.0f}")
+    print(f"  Median: {np.median(counts):.0f}")
+    print(f"  Mean:   {np.mean(counts):.1f}")
+    print(f"  p95:    {np.percentile(counts, 95):.0f}")
+    print(f"  Max:    {np.max(counts)}")
+    print(f"  Target (2 * {NUM_TIPS} tips): {2 * NUM_TIPS}")
+
+
+def plot_mutation_counts(records, script_dir):
+    """Generate histogram and eCDF of mutation counts."""
+    plots_dir = os.path.join(script_dir, "plots")
+    os.makedirs(plots_dir, exist_ok=True)
+
+    counts = np.array([r["num_mutations"] for r in records])
+    target = 2 * NUM_TIPS
+
+    # Histogram
+    fig, ax = plt.subplots(figsize=(6, 4))
+    ax.hist(counts, bins=30, edgecolor="black", alpha=0.7)
+    ax.axvline(target, color="red", linestyle="--",
+               label=f"2 x {NUM_TIPS} tips = {target}")
+    ax.set_xlabel("Number of mutations")
+    ax.set_ylabel("Count")
+    ax.set_title("Mutation counts across replicates")
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(os.path.join(plots_dir, "mutation_counts_histogram.pdf"))
+    plt.close(fig)
+    print(f"  Saved {os.path.join(plots_dir, 'mutation_counts_histogram.pdf')}")
+
+    # eCDF
+    fig, ax = plt.subplots(figsize=(6, 4))
+    sorted_counts = np.sort(counts)
+    ecdf = np.arange(1, len(sorted_counts) + 1) / len(sorted_counts)
+    ax.step(sorted_counts, ecdf, where="post")
+    ax.axvline(target, color="red", linestyle="--",
+               label=f"2 x {NUM_TIPS} tips = {target}")
+    ax.set_xlabel("Number of mutations")
+    ax.set_ylabel("Cumulative probability")
+    ax.set_title("Mutation counts eCDF")
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(os.path.join(plots_dir, "mutation_counts_ecdf.pdf"))
+    plt.close(fig)
+    print(f"  Saved {os.path.join(plots_dir, 'mutation_counts_ecdf.pdf')}")
+
+
+# ---------------------------------------------------------------------------
+# G prior CLI resolution
+# ---------------------------------------------------------------------------
+
+def resolve_g_prior(args):
+    """Resolve g prior parameters from CLI arguments.
+
+    Returns (g_prior_mu, g_prior_scale, g_min, g_max).
+    """
+    has_direct = any(x is not None for x in [
+        args.g_prior_mu, args.g_prior_scale, args.g_min, args.g_max])
+    has_exp = args.g_prior_exponential_with_mean is not None
+
+    if has_direct and has_exp:
+        print("ERROR: --g-prior-exponential-with-mean is mutually exclusive "
+              "with --g-prior-mu, --g-prior-scale, --g-min, --g-max",
+              file=sys.stderr)
+        sys.exit(1)
+
+    if has_exp:
+        exp_mean = args.g_prior_exponential_with_mean
+        if exp_mean == 0.0:
+            print("ERROR: --g-prior-exponential-with-mean must be nonzero",
+                  file=sys.stderr)
+            sys.exit(1)
+        g_prior_mu = 0.0
+        g_prior_scale = abs(exp_mean)
+        if exp_mean > 0.0:
+            g_min = 0.0
+            g_max = float("inf")
+        else:
+            g_min = float("-inf")
+            g_max = 0.0
+        return g_prior_mu, g_prior_scale, g_min, g_max
+
+    # Direct params (use defaults for any not specified)
+    g_prior_mu = (args.g_prior_mu if args.g_prior_mu is not None
+                  else DEFAULT_G_PRIOR_MU)
+    g_prior_scale = (args.g_prior_scale if args.g_prior_scale is not None
+                     else DEFAULT_G_PRIOR_SCALE)
+    g_min = args.g_min if args.g_min is not None else DEFAULT_G_MIN
+    g_max = args.g_max if args.g_max is not None else DEFAULT_G_MAX
+
+    return g_prior_mu, g_prior_scale, g_min, g_max
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Generate WCSS simulation inputs and Makefile")
+    parser.add_argument("--n", type=int, default=200,
+                        help="Number of simulation replicates (default: 200)")
+    parser.add_argument("--steps", type=int, default=DEFAULT_STEPS,
+                        help=f"MCMC steps per replicate (default: {DEFAULT_STEPS})")
+    parser.add_argument("--master-seed", type=int, default=DEFAULT_MASTER_SEED,
+                        help=f"Master seed for parameter sampling (default: {DEFAULT_MASTER_SEED})")
+
+    # Mu prior
+    parser.add_argument("--mu-prior-mean", type=float,
+                        default=DEFAULT_MU_PRIOR_MEAN,
+                        help=f"Mean of the Gamma prior on mu, subst/site/year "
+                             f"(default: {DEFAULT_MU_PRIOR_MEAN})")
+    parser.add_argument("--mu-prior-stddev", type=float,
+                        default=DEFAULT_MU_PRIOR_STDDEV,
+                        help=f"Std dev of the Gamma prior on mu, subst/site/year "
+                             f"(default: {DEFAULT_MU_PRIOR_STDDEV})")
+
+    # G prior (direct Laplace)
+    parser.add_argument("--g-prior-mu", type=float, default=None,
+                        help="Location of the Laplace prior on g, "
+                             "e-foldings/year")
+    parser.add_argument("--g-prior-scale", type=float, default=None,
+                        help="Scale of the Laplace prior on g, "
+                             "e-foldings/year")
+    parser.add_argument("--g-min", type=float, default=None,
+                        help="Lower bound on g, e-foldings/year")
+    parser.add_argument("--g-max", type=float, default=None,
+                        help="Upper bound on g, e-foldings/year")
+
+    # G prior (exponential shorthand)
+    parser.add_argument("--g-prior-exponential-with-mean", type=float,
+                        default=None,
+                        help="Shorthand: Exponential prior on g with "
+                             "this mean, e-foldings/year")
+
+    args = parser.parse_args()
+
+    n = args.n
+    steps = args.steps
+    master_seed = args.master_seed
+    mu_prior_mean = args.mu_prior_mean
+    mu_prior_stddev = args.mu_prior_stddev
+    g_prior_mu, g_prior_scale, g_min, g_max = resolve_g_prior(args)
+
+    # All paths relative to this script's directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+
+    print(f"Generating WCSS with {n} replicates (master seed: {master_seed})")
+    print(f"  mu prior: Gamma(mean={mu_prior_mean:g}, "
+          f"stddev={mu_prior_stddev:g})")
+    g_bounds = ""
+    if math.isfinite(g_min):
+        g_bounds += f", g_min={g_min:g}"
+    if math.isfinite(g_max):
+        g_bounds += f", g_max={g_max:g}"
+    print(f"  g prior:  Laplace(mu={g_prior_mu:g}, "
+          f"scale={g_prior_scale:g}{g_bounds})")
+    print()
+
+    # Ensure sims/ directory exists
+    sims_dir = os.path.join(script_dir, "sims")
+    os.makedirs(sims_dir, exist_ok=True)
+
+    # Step 1: tips file
+    tips_file = os.path.join(sims_dir, "tips.txt")
+    generate_tips_file(tips_file)
+    print()
+
+    # Step 2: simulate each replicate
+    print("Running Sapling simulations:")
+    for i in range(n):
+        rng = np.random.default_rng(master_seed + i)
+        n0, g, mu, kappa, pi = sample_prior_params(
+            rng, mu_prior_mean, mu_prior_stddev,
+            g_prior_mu, g_prior_scale, g_min, g_max)
+        replicate_seed = int(rng.integers(0, 2**31))
+        run_sapling(i, n0, g, mu, kappa, pi, replicate_seed, tips_file,
+                    script_dir)
+    print()
+
+    # Step 3: Makefile
+    generate_makefile(n, steps, script_dir, mu_prior_mean, mu_prior_stddev,
+                      g_prior_mu, g_prior_scale, g_min, g_max)
+    print()
+
+    # Step 4: Mutation count statistics and plots
+    print("Collecting mutation count statistics...")
+    records = collect_mutation_counts(script_dir, n)
+    save_mutation_counts(records, script_dir)
+    print_mutation_count_stats(records)
+    print()
+    print("Generating mutation count plots...")
+    plot_mutation_counts(records, script_dir)
+    print()
+
+    print("Done!  Next step:")
+    print(f"  ./02_run.py   # run Delphy on all {n} replicates")
+
+
+if __name__ == "__main__":
+    main()
