@@ -55,13 +55,24 @@ ESS_THRESHOLD_VERY_LOW = 150
 
 
 # ---------------------------------------------------------------------------
+# Step 0: Digest log files
+# ---------------------------------------------------------------------------
+
+def digest_log_file(src_path, dst_path):
+    """Produce delphy-digested.log from delphy.log (symlink, no-op)."""
+    if os.path.islink(dst_path) or os.path.exists(dst_path):
+        os.remove(dst_path)
+    os.symlink(os.path.basename(src_path), dst_path)
+
+
+# ---------------------------------------------------------------------------
 # Step 1: Run loganalyser
 # ---------------------------------------------------------------------------
 
 def run_loganalyser(script_dir, analyses_dir, n, burnin_pct):
     """Run BEAST 2's loganalyser, save raw TSV, return results as DataFrame."""
     log_files = [
-        os.path.join("sims", f"sim_{i:03d}", "delphy.log")
+        os.path.join("sims", f"sim_{i:03d}", "delphy-digested.log")
         for i in range(n)
     ]
     cmd = [LOGANALYSER, "-oneline", "-burnin", str(burnin_pct)] + log_files
@@ -258,7 +269,7 @@ def compute_normalized_ranks(true_vals, script_dir, included, burnin_frac,
     ranks = {name: [] for name in param_names}
 
     for j, i in enumerate(included):
-        log_path = os.path.join(script_dir, "sims", f"sim_{i:03d}", "delphy.log")
+        log_path = os.path.join(script_dir, "sims", f"sim_{i:03d}", "delphy-digested.log")
         raw = pd.read_table(log_path, comment="#")
         burnin_rows = math.floor(burnin_frac * len(raw))
         data = raw.iloc[burnin_rows:]
@@ -396,8 +407,17 @@ def main():
 
     param_names = [name for name, _ in PARAMS]
 
+    # Step 0: Digest log files
+    print("Digesting log files...")
+    for i in range(n):
+        sim_dir = os.path.join(script_dir, "sims", f"sim_{i:03d}")
+        digest_log_file(
+            os.path.join(sim_dir, "delphy.log"),
+            os.path.join(sim_dir, "delphy-digested.log"))
+    print(f"  Digested {n} log files")
+
     # Step 1: Run loganalyser and ESS check
-    print(f"Running loganalyser on {n} replicates (burnin={burnin_pct}%)...")
+    print(f"\nRunning loganalyser on {n} replicates (burnin={burnin_pct}%)...")
     la_df = run_loganalyser(script_dir, analyses_dir, n, burnin_pct)
     print(f"  loganalyser returned {len(la_df)} rows")
     ok, excluded = check_ess(la_df, analyses_dir, args.ignore_low_ess,

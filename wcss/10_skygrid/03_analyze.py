@@ -66,12 +66,12 @@ GAMMA_COLS = [
 
 
 # ---------------------------------------------------------------------------
-# Augment log files with N_bar column
+# Step 0: Digest log files
 # ---------------------------------------------------------------------------
 
-def augment_log_file(log_path, aug_path):
-    """Read delphy.log, compute N_bar, write delphy_augmented.log (streaming)."""
-    with open(log_path) as fin, open(aug_path, "w") as fout:
+def digest_log_file(src_path, dst_path):
+    """Produce delphy-digested.log: add computed N_bar column."""
+    with open(src_path) as fin, open(dst_path, "w") as fout:
         gamma_indices = None
         for line in fin:
             if line.startswith("#"):
@@ -98,7 +98,7 @@ def augment_log_file(log_path, aug_path):
 def run_loganalyser(script_dir, analyses_dir, n, burnin_pct):
     """Run BEAST 2's loganalyser, save raw TSV, return results as DataFrame."""
     log_files = [
-        os.path.join("sims", f"sim_{i:03d}", "delphy_augmented.log")
+        os.path.join("sims", f"sim_{i:03d}", "delphy-digested.log")
         for i in range(n)
     ]
     cmd = [LOGANALYSER, "-oneline", "-burnin", str(burnin_pct)] + log_files
@@ -308,7 +308,7 @@ def compute_normalized_ranks(true_vals, script_dir, included, burnin_frac,
 
     for j, i in enumerate(included):
         log_path = os.path.join(script_dir, "sims", f"sim_{i:03d}",
-                                "delphy_augmented.log")
+                                "delphy-digested.log")
         raw = pd.read_table(log_path, comment="#")
         burnin_rows = math.floor(burnin_frac * len(raw))
         data = raw.iloc[burnin_rows:]
@@ -446,14 +446,14 @@ def main():
 
     param_names = [name for name, _ in PARAMS]
 
-    # Step 0: Augment log files with N_bar column
-    print(f"Augmenting log files with N_bar column...")
+    # Step 0: Digest log files
+    print("Digesting log files...")
     for i in range(n):
         sim_dir = os.path.join(script_dir, "sims", f"sim_{i:03d}")
-        log_path = os.path.join(sim_dir, "delphy.log")
-        aug_path = os.path.join(sim_dir, "delphy_augmented.log")
-        augment_log_file(log_path, aug_path)
-    print(f"  Augmented {n} log files")
+        digest_log_file(
+            os.path.join(sim_dir, "delphy.log"),
+            os.path.join(sim_dir, "delphy-digested.log"))
+    print(f"  Digested {n} log files")
 
     # Step 1: Run loganalyser and ESS check
     print(f"\nRunning loganalyser on {n} replicates (burnin={burnin_pct}%)...")

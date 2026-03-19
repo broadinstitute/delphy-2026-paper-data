@@ -185,7 +185,7 @@ def generate_makefile(n, steps, script_dir):
     lines.append(f"\t&& touch $@")
     lines.append("")
     lines.append("clean:")
-    lines.append("\trm -f sim_*/delphy.* sim_*/.done")
+    lines.append("\trm -f sim_*/delphy.* sim_*/delphy-digested.log sim_*/.done")
     lines.append("")
     lines.append(".PHONY: all clean")
     lines.append("")

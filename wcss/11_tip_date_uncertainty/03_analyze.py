@@ -58,11 +58,11 @@ ESS_THRESHOLD_VERY_LOW = 150
 
 
 # ---------------------------------------------------------------------------
-# Step 1: Run loganalyser
+# Step 0: Digest log files
 # ---------------------------------------------------------------------------
 
-def _strip_age_columns(src_path, dst_path):
-    """Copy a Delphy log file, removing age(...) columns.
+def digest_log_file(src_path, dst_path):
+    """Produce delphy-digested.log: strip age(...) columns.
 
     Loganalyser requires all log files to have the same columns, but each
     replicate has different age(TIP_XXX|...) columns for uncertain tips.
@@ -81,22 +81,17 @@ def _strip_age_columns(src_path, dst_path):
             fout.write("\t".join(fields[i] for i in keep_cols) + "\n")
 
 
+# ---------------------------------------------------------------------------
+# Step 1: Run loganalyser
+# ---------------------------------------------------------------------------
+
 def run_loganalyser(script_dir, analyses_dir, n, burnin_pct):
-    """Run BEAST 2's loganalyser, save raw TSV, return results as DataFrame.
-
-    Strips age(...) columns into delphy-digested.log files first, since
-    they vary across replicates and loganalyser requires uniform columns.
-    """
-    digested_files = []
-    for i in range(n):
-        src = os.path.join(script_dir, "sims", f"sim_{i:03d}", "delphy.log")
-        dst = os.path.join(script_dir, "sims", f"sim_{i:03d}",
-                           "delphy-digested.log")
-        _strip_age_columns(src, dst)
-        digested_files.append(os.path.join("sims", f"sim_{i:03d}",
-                                           "delphy-digested.log"))
-
-    cmd = [LOGANALYSER, "-oneline", "-burnin", str(burnin_pct)] + digested_files
+    """Run BEAST 2's loganalyser, save raw TSV, return results as DataFrame."""
+    log_files = [
+        os.path.join("sims", f"sim_{i:03d}", "delphy-digested.log")
+        for i in range(n)
+    ]
+    cmd = [LOGANALYSER, "-oneline", "-burnin", str(burnin_pct)] + log_files
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=script_dir)
     if result.returncode != 0:
         raise RuntimeError(f"loganalyser failed:\n{result.stderr}")
@@ -290,7 +285,7 @@ def compute_normalized_ranks(true_vals, script_dir, included, burnin_frac,
     ranks = {name: [] for name in param_names}
 
     for j, i in enumerate(included):
-        log_path = os.path.join(script_dir, "sims", f"sim_{i:03d}", "delphy.log")
+        log_path = os.path.join(script_dir, "sims", f"sim_{i:03d}", "delphy-digested.log")
         raw = pd.read_table(log_path, comment="#")
         burnin_rows = math.floor(burnin_frac * len(raw))
         data = raw.iloc[burnin_rows:]
@@ -744,8 +739,17 @@ def main():
 
     param_names = [name for name, _ in PARAMS]
 
-    # Step 0: Produce tip-date log files and run per-replicate loganalyser
-    print("Producing tip-date log files...")
+    # Step 0: Digest log files
+    print("Digesting log files...")
+    for i in range(n):
+        sim_dir = os.path.join(script_dir, "sims", f"sim_{i:03d}")
+        digest_log_file(
+            os.path.join(sim_dir, "delphy.log"),
+            os.path.join(sim_dir, "delphy-digested.log"))
+    print(f"  Digested {n} log files")
+
+    # Step 0b: Produce tip-date log files and run per-replicate loganalyser
+    print("\nProducing tip-date log files...")
     for i in range(n):
         sim_dir = os.path.join(script_dir, "sims", f"sim_{i:03d}")
         produce_tips_log(
