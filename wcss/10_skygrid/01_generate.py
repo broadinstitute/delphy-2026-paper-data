@@ -246,7 +246,7 @@ def generate_makefile(n, steps, script_dir):
 # ---------------------------------------------------------------------------
 
 def collect_mutation_counts(script_dir, n):
-    """Read num_mutations, mu, and g from each replicate's sim_info.json."""
+    """Read num_mutations from each replicate's sim_info.json."""
     records = []
     for i in range(n):
         info_path = os.path.join(script_dir, "sims", f"sim_{i:03d}",
@@ -256,8 +256,6 @@ def collect_mutation_counts(script_dir, n):
         records.append({
             "replicate": f"sim_{i:03d}",
             "num_mutations": info["tree_stats"]["num_mutations"],
-            "mu": info["subst_model"]["mu"],
-            "g": info["pop_model"]["g"],
         })
     return records
 
@@ -266,10 +264,9 @@ def save_mutation_counts(records, script_dir):
     """Save mutation counts to TSV."""
     tsv_path = os.path.join(script_dir, "sims", "mutation_counts.tsv")
     with open(tsv_path, "w") as f:
-        f.write("replicate\tnum_mutations\tmu\tg\n")
+        f.write("replicate\tnum_mutations\n")
         for r in records:
-            f.write(f"{r['replicate']}\t{r['num_mutations']}\t"
-                    f"{r['mu']}\t{r['g']}\n")
+            f.write(f"{r['replicate']}\t{r['num_mutations']}\n")
     print(f"  Saved {tsv_path}")
 
 
