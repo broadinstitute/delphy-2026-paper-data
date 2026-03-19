@@ -118,9 +118,10 @@ Parse the tip names and dates from the COMPLETE file's header.
 ### Reading posterior tip dates from Delphy log files
 
 Delphy's log file includes columns `age(TIP_XXX|...)` for each tip
-with an uncertain date.  The value is `(beast_t0 - tip_t) / 365.0`,
-where `beast_t0 = max(tip_t)` across all tips (varies per MCMC step
-if the latest tip itself has an uncertain date).
+with an uncertain date.  The value is
+`to_linear_year(beast_t0) - to_linear_year(tip_t)`, where
+`beast_t0 = max(tip_t)` across all tips (varies per MCMC step if
+the latest tip itself has an uncertain date).
 
 To convert to an absolute calendar date, use the identity:
 
@@ -135,24 +136,30 @@ cancels out `beast_t0` and gives the tip date in calendar years
 The true tip date is similarly converted to a calendar year for
 comparison.
 
-### Custom analysis (not using loganalyser)
+### Using loganalyser for tip-date analysis
 
-Because different replicates have different sets of uncertain tips
-(and therefore different `age(TIP_XXX|...)` columns), loganalyser
-cannot be used for tip-date analysis.  Instead, `03_analyze.py`
-reads the raw posterior samples directly:
+Different replicates have different sets of uncertain tips (and
+therefore different `age(TIP_XXX|...)` columns), so loganalyser
+cannot be used in batch mode across replicates.  Instead, we:
 
-1. **For each replicate**, identify uncertain tips and their log
-   columns.
-2. **Read the raw log file**, apply burnin, extract posterior samples
-   for each uncertain tip's `age(TIP_XXX|...)`, `rootHeight`, and
-   `age(root)`.
-3. **Convert to calendar years** using the formula above, for both
-   the posterior samples and the true value.
-4. **Compute normalized rank** of the true value within the posterior
-   samples.
-5. **Compute 95% HPD** from the posterior samples and check whether
-   the true value is covered.
+1. **Pre-compute derived tip calendar years** into `delphy-tips.log`.
+   For each replicate, read `delphy.log` and produce a new log file
+   containing `tipYear(TIP_XXX|...)` columns with the derived value
+   `rootHeight + age(root) - age(TIP)` (= `to_linear_year(tip.t)`).
+   The output has the same tab-separated format as a Delphy log file
+   (comment lines, `sample` column) so loganalyser can read it.
+2. **Run loganalyser per replicate** on `delphy-tips.log` with
+   `-oneline -burnin <pct>`.  This gives mean, 95% HPD, and ESS for
+   each tip.
+3. **Aggregate ESS** into two per-replicate summary values:
+   `minTipESS_month` (min ESS across month-uncertain tips) and
+   `minTipESS_year` (min ESS across year-uncertain tips).  Append
+   these as `.ESS` columns to `la_df` before `check_ess`, so they
+   participate in the standard two-tier ESS check.  Replicates with
+   no tips of a given type get `NaN` (ignored by the ESS check).
+4. **Compute normalized ranks** by reading raw samples directly from
+   `delphy-tips.log` (the derived `tipYear(...)` values are already
+   there, so no per-sample arithmetic is needed).
 
 ### Aggregation across replicates
 
@@ -232,8 +239,9 @@ No other changes to `run_sapling()`.  The normal `sim.maple` output
 
 The Delphy invocation is identical to `09_tight_priors_with_alpha`.
 
-The `clean` target adds `sim_*/delphy-digested.log` to the `rm`
-command (see Part 3 for why these files exist).
+The `clean` target adds `sim_*/delphy-digested.log` and
+`sim_*/delphy-tips.log` to the `rm` command (see Part 3 for why
+these files exist).
 
 ---
 
@@ -267,69 +275,111 @@ def _strip_age_columns(src_path, dst_path):
     """Copy src_path to dst_path, dropping any age(...) columns."""
 ```
 
-### New: `analyze_tip_dates()`
-
-After the standard parameter analysis (Steps 1–5), add a new step
-that analyzes tip-date posteriors:
+### New: `produce_tips_log()`
 
 ```python
-def analyze_tip_dates(script_dir, analyses_dir, included, burnin_frac):
+def produce_tips_log(src_path, dst_path):
+    """Produce delphy-tips.log with derived tip calendar years."""
 ```
 
-For each replicate `i` in `included`:
+Reads `delphy.log`, identifies `age(TIP_XXX|...)` columns, and for
+each row computes `tipYear = rootHeight + age(root) - age(TIP)`.
+Writes a new log file with columns `tipYear(TIP_XXX|...)` plus the
+`sample` column.  Comment lines are preserved.
 
-1. Read the Delphy log file header to find `age(...)` columns.
-   Classify each as month-uncertain or year-uncertain based on the
-   date format in the column name (see "Identifying uncertain tips").
-   Extract the tip name (everything between `age(` and `|`).
-2. Read true tip dates from `sim-COMPLETE.maple` (parse tip names
-   and dates from the MAPLE header).
-3. Apply burnin to the log file, extract posterior samples for each
-   uncertain tip's `age(TIP_XXX|...)`, `rootHeight`, and `age(root)`.
-4. Convert to calendar years using the formula above, for both
-   the posterior samples and the true value.
-5. Compute normalized rank of the true value within the posterior
-   samples.
-6. Compute 95% HPD: sort posterior samples, find the shortest
-   interval containing 95% of samples.  Check whether the true
-   value falls within.
+### New: `run_tip_loganalyser()`
 
-Collect results into two lists (month, year) and save:
+```python
+def run_tip_loganalyser(script_dir, n, burnin_pct):
+    """Run loganalyser per-replicate on delphy-tips.log files."""
+```
 
+Runs loganalyser with `-oneline -burnin <pct>` on each of the `n`
+replicates' `delphy-tips.log` independently.  Parses the output to
+collect mean, 95% HPD, and ESS for each `tipYear(...)` column.
+
+Called before `check_ess` decides which replicates to exclude.
+
+Returns:
+- `tip_la_results`: dict mapping replicate index to list of
+  per-tip tuples (tip_prefix, uncertainty_type, mean, hpd_lo,
+  hpd_hi, ess).
+- `min_tip_ess_month`: list of min ESS across month-uncertain
+  tips per replicate (`NaN` if no month-uncertain tips).
+- `min_tip_ess_year`: list of min ESS across year-uncertain
+  tips per replicate (`NaN` if no year-uncertain tips).
+
+Can parallelize with `concurrent.futures.ProcessPoolExecutor`.
+
+### Modified: `analyze_tip_dates()`
+
+```python
+def analyze_tip_dates(script_dir, analyses_dir, included,
+                      burnin_frac, tip_la_results):
+```
+
+Takes the per-tip loganalyser results as input (mean, HPD from
+loganalyser).
+
+For the normalized rank computation, reads raw samples directly
+from `delphy-tips.log`.  The `tipYear(...)` values are already
+pre-computed, so no per-sample arithmetic is needed — just read
+the column and count how many samples are less than the true value.
+
+True tip dates are read from `sim-COMPLETE.maple` and converted to
+calendar years using:
+
+```python
+def date_to_linear_year(d):
+    y_start = date(d.year, 1, 1)
+    y_end = date(d.year + 1, 1, 1)
+    days_in_year = (y_end - y_start).days
+    return d.year + (d - y_start).days / days_in_year
+```
+
+This is calendar-aware (accounts for leap years), matching Delphy's
+`to_linear_year` in `core/dates.cpp` (fixed in v1.3.1).
+
+Outputs (unchanged):
 - `tip_date_ranks_month.tsv`
 - `tip_date_ranks_year.tsv`
 - `tip_date_coverage_summary.tsv`
 
-### Reading true tip dates from COMPLETE MAPLE
-
-The `-COMPLETE` MAPLE file has the same format as regular MAPLE but
-with exact dates.  Parse the `>TIP_XXX|YYYY-MM-DD` lines.
-
-**Important:** The true date must be converted to a calendar year
-using the same coordinate system as Delphy's posterior samples.
-Delphy uses `to_linear_year(t) = 2020.0 + t / 365.0`, where `t` is
-days since 2020-01-01.  The `rootHeight + age(root) - age(TIP)`
-formula produces values in this same system.  So the true date
-conversion is:
-
-```python
-from datetime import date
-days = (tip_date - date(2020, 1, 1)).days
-true_calendar_year = 2020.0 + days / 365.0
-```
-
-Do NOT use `year + (day_of_year - 1) / days_in_year`, which accounts
-for leap years differently and causes a systematic error of up to
-~5 days for dates 5 years from the epoch.
-
 ### Integration into main()
 
-After the existing Step 5 (clade coverage), add:
+**Step 0** (before the batch loganalyser):
+
+```python
+# Step 0: Produce tip-date log files and run per-replicate loganalyser
+print("Producing tip-date log files...")
+for i in range(n):
+    sim_dir = os.path.join(script_dir, "sims", f"sim_{i:03d}")
+    produce_tips_log(
+        os.path.join(sim_dir, "delphy.log"),
+        os.path.join(sim_dir, "delphy-tips.log"))
+print(f"  Produced {n} tip-date log files")
+
+print("Running per-replicate loganalyser on tip-date logs...")
+tip_la_results, min_tip_ess_month, min_tip_ess_year = \
+    run_tip_loganalyser(script_dir, n, burnin_pct)
+```
+
+**After Step 1** (batch loganalyser, which creates `la_df`), but
+**before `check_ess`**:
+
+```python
+# Append tip-date ESS columns to la_df for check_ess
+la_df["minTipESS_month.ESS"] = min_tip_ess_month
+la_df["minTipESS_year.ESS"] = min_tip_ess_year
+```
+
+**After Step 5** (clade coverage):
 
 ```python
 # Step 6: Tip-date analysis
 print("\nAnalyzing tip-date posteriors...")
-analyze_tip_dates(script_dir, analyses_dir, included, burnin_frac)
+analyze_tip_dates(script_dir, analyses_dir, included, burnin_frac,
+                  tip_la_results)
 ```
 
 ---
@@ -396,7 +446,10 @@ cd wcss/11_tip_date_uncertainty
 - **ESS for tip dates:**  Delphy samples exact tip dates via uniform
   proposals within the uncertain range (month or year).  With 200 tips
   and 20% uncertain, ~40 tip dates are sampled.  ESS should be fine
-  since each tip date is a low-dimensional parameter.
+  since each tip date is a low-dimensional parameter.  Per-replicate
+  loganalyser gives ESS for each tip; the minimum across month-
+  uncertain and year-uncertain tips feeds into `check_ess` for
+  replicate exclusion.
 
 - **Coverage for rootHeight:**  With uncertain tip dates, the root
   height depends on the sampled tip dates.  The true rootHeight from
