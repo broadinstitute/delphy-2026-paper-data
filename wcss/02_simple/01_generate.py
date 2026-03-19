@@ -7,11 +7,13 @@ Usage:
 """
 
 import argparse
+import json
 import os
 import subprocess
 import sys
 from datetime import date, timedelta
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -157,6 +159,90 @@ def generate_makefile(n, steps, script_dir):
 
 
 # ---------------------------------------------------------------------------
+# Step 4: Mutation count statistics and plots
+# ---------------------------------------------------------------------------
+
+def collect_mutation_counts(script_dir, n):
+    """Read num_mutations, mu, and g from each replicate's sim_info.json."""
+    records = []
+    for i in range(n):
+        info_path = os.path.join(script_dir, "sims", f"sim_{i:03d}",
+                                 "sim_info.json")
+        with open(info_path) as f:
+            info = json.load(f)
+        records.append({
+            "replicate": f"sim_{i:03d}",
+            "num_mutations": info["tree_stats"]["num_mutations"],
+            "mu": info["subst_model"]["mu"],
+            "g": info["pop_model"]["g"],
+        })
+    return records
+
+
+def save_mutation_counts(records, script_dir):
+    """Save mutation counts to TSV."""
+    tsv_path = os.path.join(script_dir, "sims", "mutation_counts.tsv")
+    with open(tsv_path, "w") as f:
+        f.write("replicate\tnum_mutations\tmu\tg\n")
+        for r in records:
+            f.write(f"{r['replicate']}\t{r['num_mutations']}\t"
+                    f"{r['mu']}\t{r['g']}\n")
+    print(f"  Saved {tsv_path}")
+
+
+def print_mutation_count_stats(records):
+    """Print summary statistics for mutation counts."""
+    counts = np.array([r["num_mutations"] for r in records])
+    print(f"\nMutation count statistics ({len(counts)} replicates):")
+    print(f"  Min:    {np.min(counts)}")
+    print(f"  p5:     {np.percentile(counts, 5):.0f}")
+    print(f"  Median: {np.median(counts):.0f}")
+    print(f"  Mean:   {np.mean(counts):.1f}")
+    print(f"  p95:    {np.percentile(counts, 95):.0f}")
+    print(f"  Max:    {np.max(counts)}")
+    print(f"  Target (2 * {NUM_TIPS} tips): {2 * NUM_TIPS}")
+
+
+def plot_mutation_counts(records, script_dir):
+    """Generate histogram and eCDF of mutation counts."""
+    plots_dir = os.path.join(script_dir, "plots")
+    os.makedirs(plots_dir, exist_ok=True)
+
+    counts = np.array([r["num_mutations"] for r in records])
+    target = 2 * NUM_TIPS
+
+    # Histogram
+    fig, ax = plt.subplots(figsize=(6, 4))
+    ax.hist(counts, bins=30, edgecolor="black", alpha=0.7)
+    ax.axvline(target, color="red", linestyle="--",
+               label=f"2 x {NUM_TIPS} tips = {target}")
+    ax.set_xlabel("Number of mutations")
+    ax.set_ylabel("Count")
+    ax.set_title("Mutation counts across replicates")
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(os.path.join(plots_dir, "mutation_counts_histogram.pdf"))
+    plt.close(fig)
+    print(f"  Saved {os.path.join(plots_dir, 'mutation_counts_histogram.pdf')}")
+
+    # eCDF
+    fig, ax = plt.subplots(figsize=(6, 4))
+    sorted_counts = np.sort(counts)
+    ecdf = np.arange(1, len(sorted_counts) + 1) / len(sorted_counts)
+    ax.step(sorted_counts, ecdf, where="post")
+    ax.axvline(target, color="red", linestyle="--",
+               label=f"2 x {NUM_TIPS} tips = {target}")
+    ax.set_xlabel("Number of mutations")
+    ax.set_ylabel("Cumulative probability")
+    ax.set_title("Mutation counts eCDF")
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(os.path.join(plots_dir, "mutation_counts_ecdf.pdf"))
+    plt.close(fig)
+    print(f"  Saved {os.path.join(plots_dir, 'mutation_counts_ecdf.pdf')}")
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -201,6 +287,16 @@ def main():
 
     # Step 3: Makefile
     generate_makefile(n, steps, script_dir)
+    print()
+
+    # Step 4: Mutation count statistics and plots
+    print("Collecting mutation count statistics...")
+    records = collect_mutation_counts(script_dir, n)
+    save_mutation_counts(records, script_dir)
+    print_mutation_count_stats(records)
+    print()
+    print("Generating mutation count plots...")
+    plot_mutation_counts(records, script_dir)
     print()
 
     print("Done!  Next step:")
