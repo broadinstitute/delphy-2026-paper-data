@@ -74,7 +74,8 @@ identical.
 Files in `wcss/06_missing_data/`:
 
 0. **`00_plan.md`** — Symlink to `../plans/06_missing_data.md`
-1. **`01_generate.py`** — Generate simulation inputs and Makefile
+1. **`01_generate.py`** — Generate simulation inputs, Makefile, and
+   mutation count diagnostics
 2. **`02_run.py`** — Run Delphy via `make -jN`
 3. **`03_analyze.py`** — Run loganalyser, check ESS, compute
    coverage/ranks

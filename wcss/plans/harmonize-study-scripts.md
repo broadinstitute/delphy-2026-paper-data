@@ -167,7 +167,7 @@ count statistics" in `01_generate.py` that:
 1. Reads `num_mutations` from each replicate's `sim_info.json`.
 2. Prints summary statistics (mean, std, min, max, quartiles).
 3. Saves a TSV (`sims/mutation_counts.tsv`).
-4. Generates a histogram and eCDF plot (`sims/mutation_counts_*.pdf`).
+4. Generates a histogram and eCDF plot (`plots/mutation_counts_*.pdf`).
 
 This is useful for sanity-checking simulated data regardless of which
 parameters are free, so it should be present in all studies.

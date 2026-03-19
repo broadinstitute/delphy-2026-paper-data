@@ -71,7 +71,8 @@ clade coverage, etc.) is identical to `04_free_exp_pop`.
 Files in `wcss/05_site_rate_heterogeneity/`:
 
 0. **`00_plan.md`** -- Symlink to `../plans/05_site_rate_heterogeneity.md`
-1. **`01_generate.py`** -- Generate simulation inputs and Makefile
+1. **`01_generate.py`** -- Generate simulation inputs, Makefile, and
+   mutation count diagnostics
 2. **`02_run.py`** -- Run Delphy via `make -jN`
 3. **`03_analyze.py`** -- Run loganalyser, check ESS, compute coverage/ranks
 4. **`04_plot.py`** -- Produce all plots from TSV files
@@ -214,6 +215,8 @@ wcss/05_site_rate_heterogeneity/
     ranks.tsv
     true_params.tsv
   plots/
+    mutation_counts_histogram.pdf
+    mutation_counts_ecdf.pdf
     clade_coverage.pdf
     ecdf_mu.pdf
     ecdf_alpha.pdf
@@ -237,6 +240,7 @@ wcss/05_site_rate_heterogeneity/
   sims/
     Makefile
     tips.txt
+    mutation_counts.tsv
     sim_000/
       sim.maple
       sim_info.json

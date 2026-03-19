@@ -57,7 +57,8 @@ identical to `04_free_exp_pop`.
 Files in `wcss/07_missing_data_no_alpha/`:
 
 0. **`00_plan.md`** — Symlink to `../plans/07_missing_data_no_alpha.md`
-1. **`01_generate.py`** — Generate simulation inputs and Makefile
+1. **`01_generate.py`** — Generate simulation inputs, Makefile, and
+   mutation count diagnostics
 2. **`02_run.py`** — Run Delphy via `make -jN`
 3. **`03_analyze.py`** — Run loganalyser, check ESS, compute
    coverage/ranks

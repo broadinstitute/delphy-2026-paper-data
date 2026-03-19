@@ -271,8 +271,8 @@ columns).  The digested files are kept for reproducibility and are
 cleaned up by `make clean`.
 
 ```python
-def _strip_age_columns(src_path, dst_path):
-    """Copy src_path to dst_path, dropping any age(...) columns."""
+def digest_log_file(src_path, dst_path):
+    """Produce delphy-digested.log: strip age(...) columns."""
 ```
 
 ### New: `produce_tips_log()`

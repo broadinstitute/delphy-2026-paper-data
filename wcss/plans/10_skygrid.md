@@ -110,11 +110,11 @@ In `03_analyze.py`, before calling loganalyser:
 1. For each replicate, read `delphy.log`.
 2. Compute `N_bar = exp(mean(skygrid.logPopSize1..5))` for each sample
    row.  (Values are in log-years, so N_bar is in years.)
-3. Write `delphy_augmented.log` in the same directory, with the `N_bar`
+3. Write `delphy-digested.log` in the same directory, with the `N_bar`
    column appended.
-4. Run loganalyser on the augmented log files instead of the originals.
+4. Run loganalyser on the digested log files instead of the originals.
 5. The rank computation (`compute_normalized_ranks`) also reads from the
-   augmented log files, so it can access the `N_bar` column.
+   digested log files, so it can access the `N_bar` column.
 
 This way, N_bar is treated identically to all other parameters throughout
 the entire pipeline (loganalyser, coverage, ranks, and plots).
@@ -164,7 +164,8 @@ Written by `01_generate.py` after running Sapling.  Read by
 Files in `wcss/10_skygrid/`:
 
 0. **`00_plan.md`** -- Symlink to `../plans/10_skygrid.md` (this plan)
-1. **`01_generate.py`** -- Generate simulation inputs and Makefile
+1. **`01_generate.py`** -- Generate simulation inputs, Makefile, and
+   mutation count diagnostics
 2. **`02_run.py`** -- Run Delphy via `make -jN`
 3. **`03_analyze.py`** -- Run loganalyser, check ESS, compute coverage/ranks
 4. **`04_plot.py`** -- Produce all plots from TSV files
@@ -223,7 +224,7 @@ Copy from `06_missing_data/01_generate.py` with these changes:
             f"(N = {math.exp(min_gamma):.4f} yr), "
             f"approaching low-gamma barrier territory")
   ```
-- Returns `(tau, gamma, mu, kappa, pi, alpha)` instead of
+- Returns `(tau, gamma, N_bar, mu, kappa, pi, alpha)` instead of
   `(n0, g, mu, kappa, pi, alpha)`.
 
 ### Sapling invocation changes
@@ -339,9 +340,9 @@ GAMMA_COLS = [
     "skygrid.logPopSize4", "skygrid.logPopSize5",
 ]
 
-def augment_log_file(log_path, aug_path):
-    """Read delphy.log, compute N_bar, write delphy_augmented.log (streaming)."""
-    with open(log_path) as fin, open(aug_path, "w") as fout:
+def digest_log_file(src_path, dst_path):
+    """Produce delphy-digested.log: add computed N_bar column."""
+    with open(src_path) as fin, open(dst_path, "w") as fout:
         gamma_indices = None
         for line in fin:
             if line.startswith("#"):
@@ -362,7 +363,7 @@ def augment_log_file(log_path, aug_path):
 ```
 
 Both loganalyser and `compute_normalized_ranks` read from
-`delphy_augmented.log` (not `delphy.log`), so the `N_bar` column is
+`delphy-digested.log` (not `delphy.log`), so the `N_bar` column is
 available to both.
 
 ### Read true parameters
@@ -484,6 +485,8 @@ wcss/10_skygrid/
     ranks.tsv
     true_params.tsv
   plots/
+    mutation_counts_histogram.pdf
+    mutation_counts_ecdf.pdf
     clade_coverage.pdf
     ecdf_mu.pdf
     ecdf_alpha.pdf
@@ -507,6 +510,7 @@ wcss/10_skygrid/
   sims/
     Makefile
     tips.txt
+    mutation_counts.tsv
     sim_000/
       sim.maple
       sim_info.json
@@ -515,7 +519,7 @@ wcss/10_skygrid/
       sim.nexus
       sim.fasta
       delphy.log
-      delphy_augmented.log
+      delphy-digested.log
       delphy.trees
       delphy.dphy
       .done

@@ -47,7 +47,8 @@ heterogeneity, clade coverage, etc.) is identical to `02_simple`.
 Files in `wcss/03_free_mu/`:
 
 0. **`00_plan.md`** — Symlink to `../plans/03_free_mu.md` (this plan)
-1. **`01_generate.py`** — Generate simulation inputs and Makefile
+1. **`01_generate.py`** — Generate simulation inputs, Makefile, and
+   mutation count diagnostics
 2. **`02_run.py`** — Run Delphy via `make -jN`
 3. **`03_analyze.py`** — Run loganalyser, check ESS, compute coverage/ranks
 4. **`04_plot.py`** — Produce all plots from TSV files
@@ -176,6 +177,8 @@ wcss/03_free_mu/
     ranks.tsv
     true_params.tsv
   plots/
+    mutation_counts_histogram.pdf
+    mutation_counts_ecdf.pdf
     clade_coverage.pdf
     ecdf_mu.pdf
     ecdf_kappa.pdf
@@ -190,6 +193,7 @@ wcss/03_free_mu/
   sims/
     Makefile
     tips.txt
+    mutation_counts.tsv
     sim_000/
       sim.maple
       sim_info.json
