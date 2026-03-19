@@ -8,8 +8,8 @@ Uses BEAST 2's loganalyser for posterior summary statistics (mean, HPD, ESS).
 Raw posterior samples are read only for Rank Uniformity Validation.
 
 Usage:
-    ./03_analyze.py --n 200
-    ./03_analyze.py --n 200 --burnin 30
+    ./03_analyze.py
+    ./03_analyze.py --n 10 --ignore-low-ess --force-include-all-replicates
 """
 
 import argparse
@@ -101,7 +101,8 @@ def run_loganalyser(script_dir, analyses_dir, n, burnin_pct):
     return df
 
 
-def check_ess(la_df, analyses_dir, ignore_low_ess=False):
+def check_ess(la_df, analyses_dir, ignore_low_ess=False,
+              force_include_all=False):
     """Check ESS values, save TSV, and return (ok, excluded_indices).
 
     Two-tier check:
@@ -184,6 +185,11 @@ def check_ess(la_df, analyses_dir, ignore_low_ess=False):
     # Compute excluded replicates: any row where a non-ignored observable
     # has ESS < ESS_THRESHOLD_VERY_LOW
     excluded = set()
+    if force_include_all:
+        if error:
+            print(f"\n  WARNING: Low ESS detected but keeping all replicates "
+                  f"(--force-include-all-replicates).")
+        return (True, excluded)
     for col in ess_cols:
         obs_name = col[:-4]
         if obs_name in ESS_IGNORE:
@@ -381,6 +387,8 @@ def main():
                         help="Number of bins for clade coverage (default: 20)")
     parser.add_argument("--ignore-low-ess", action="store_true",
                         help="Continue even if some observables have low ESS")
+    parser.add_argument("--force-include-all-replicates", action="store_true",
+                        help="Do not exclude any replicates regardless of ESS")
     args = parser.parse_args()
 
     n = args.n
@@ -405,7 +413,8 @@ def main():
     print(f"\nRunning loganalyser on {n} replicates (burnin={burnin_pct}%)...")
     la_df = run_loganalyser(script_dir, analyses_dir, n, burnin_pct)
     print(f"  loganalyser returned {len(la_df)} rows")
-    ok, excluded = check_ess(la_df, analyses_dir, args.ignore_low_ess)
+    ok, excluded = check_ess(la_df, analyses_dir, args.ignore_low_ess,
+                             args.force_include_all_replicates)
     if not ok:
         sys.exit(1)
 
@@ -449,10 +458,10 @@ def main():
 
     true_path = os.path.join(analyses_dir, "true_params.tsv")
     with open(true_path, "w") as f:
-        f.write("replicate\tkappa\tpi_A\tpi_C\tpi_G\tpi_T\trootHeight\n")
+        f.write("replicate\t" + "\t".join(param_names) + "\n")
         for i, tv in zip(included, true_vals):
-            f.write(f"sim_{i:03d}\t{tv['kappa']}\t{tv['pi_A']}\t{tv['pi_C']}\t"
-                    f"{tv['pi_G']}\t{tv['pi_T']}\t{tv['rootHeight']}\n")
+            vals = "\t".join(str(tv[name]) for name in param_names)
+            f.write(f"sim_{i:03d}\t{vals}\n")
     print(f"  Saved {true_path}")
 
     # Step 3: Coverage analysis
