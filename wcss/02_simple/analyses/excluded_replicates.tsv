@@ -1,0 +1,14 @@
+replicate	low_ess_observables
+sim_015	age(root),likelihood_really_logG,numMuts,posterior_for_Delphy,rootHeight,treeLength,treeLikelihood_really_logG
+sim_024	numMuts
+sim_025	age(root),likelihood_really_logG,numMuts,posterior_for_Delphy,rootHeight,treeLength,treeLikelihood_really_logG
+sim_059	numMuts
+sim_077	likelihood_really_logG,numMuts,posterior_for_Delphy,treeLikelihood_really_logG
+sim_079	likelihood_really_logG,numMuts,posterior_for_Delphy,treeLikelihood_really_logG
+sim_102	numMuts
+sim_146	numMuts
+sim_156	numMuts
+sim_159	numMuts
+sim_170	numMuts
+sim_176	age(root),rootHeight
+sim_181	numMuts
