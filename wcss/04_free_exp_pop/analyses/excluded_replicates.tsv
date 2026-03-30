@@ -1,0 +1,11 @@
+replicate	low_ess_observables
+sim_007	age(root),numMuts,rootHeight
+sim_009	coalescent,exponential.growthRate,posterior_for_Delphy,prior_for_Delphy,treeLength
+sim_031	age(root),clock.rate,coalescent,likelihood_really_logG,meanRate,numMuts,posterior_for_Delphy,prior_for_Delphy,rootHeight,treeLength,treeLikelihood_really_logG
+sim_034	age(root),likelihood_really_logG,numMuts,posterior_for_Delphy,rootHeight,treeLength,treeLikelihood_really_logG
+sim_048	age(root),clock.rate,coalescent,exponential.growthRate,exponential.popSize,meanRate,posterior_for_Delphy,prior_for_Delphy,rootHeight,treeLength
+sim_125	likelihood_really_logG,numMuts,posterior_for_Delphy,treeLikelihood_really_logG
+sim_153	coalescent,posterior_for_Delphy,prior_for_Delphy
+sim_164	likelihood_really_logG,numMuts,posterior_for_Delphy,treeLikelihood_really_logG
+sim_165	age(root),clock.rate,coalescent,likelihood_really_logG,meanRate,numMuts,posterior_for_Delphy,prior_for_Delphy,rootHeight,treeLength,treeLikelihood_really_logG
+sim_184	numMuts
