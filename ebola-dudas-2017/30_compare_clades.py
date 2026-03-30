@@ -143,6 +143,12 @@ if __name__ == "__main__":
             "BEAST X Alpha A", "Delphy Alpha A",
             "clade_comparison_beastX_alpha_a_vs_delphy_alpha_a",
         ),
+        (
+            str(here / "beastX_run_b" / "output.trees"),
+            str(here / "delphy_outputs_b" / "ebola_dudas_delphy.trees"),
+            "BEAST X B", "Delphy B",
+            "clade_comparison_beastX_b_vs_delphy_b",
+        ),
     ]
 
     for file_a, file_b, label_a, label_b, name in comparisons:
