@@ -1,0 +1,34 @@
+{
+  "args": "/home/pat/lab/work/2025/11_November/delphy-2026-paper-data/wcss/21_final_high_mutation/../../sapling --tip-file /home/pat/lab/work/2025/11_November/delphy-2026-paper-data/wcss/21_final_high_mutation/sims/sim_014/tips.txt --t0 2026-01-01 --const-pop-n0 1.0 --mu 0.0009450146085792097 --hky-kappa 2.8083377210275287 --hky-pi-A 0.32795895943358455 --hky-pi-C 0.09597738025094449 --hky-pi-G 0.1250328756092902 --hky-pi-T 0.45103078470618074 --num-sites 30000 --seed 1235607237 --out-maple /home/pat/lab/work/2025/11_November/delphy-2026-paper-data/wcss/21_final_high_mutation/sims/sim_014/sim.maple --out-info /home/pat/lab/work/2025/11_November/delphy-2026-paper-data/wcss/21_final_high_mutation/sims/sim_014/sim_info.json --out-newick /home/pat/lab/work/2025/11_November/delphy-2026-paper-data/wcss/21_final_high_mutation/sims/sim_014/sim.nwk --out-nexus /home/pat/lab/work/2025/11_November/delphy-2026-paper-data/wcss/21_final_high_mutation/sims/sim_014/sim.nexus --out-fasta /home/pat/lab/work/2025/11_November/delphy-2026-paper-data/wcss/21_final_high_mutation/sims/sim_014/sim.fasta",
+  "num_sites": 30000,
+  "pop_model": {
+    "n0": 1.0,
+    "type": "const"
+  },
+  "sampling_strategy": {
+    "tip_file": "/home/pat/lab/work/2025/11_November/delphy-2026-paper-data/wcss/21_final_high_mutation/sims/sim_014/tips.txt"
+  },
+  "sapling_build_number": 7,
+  "sapling_commit": "2de68b1",
+  "sapling_version": "0.2.0",
+  "seed": 1235607237,
+  "subst_model": {
+    "kappa": 2.8083377210275287,
+    "mu": 0.0009450146085792097,
+    "pi": [
+      0.32795895943358455,
+      0.09597738025094449,
+      0.1250328756092902,
+      0.45103078470618074
+    ],
+    "type": "hky"
+  },
+  "t0": "2026-01-01",
+  "tree_stats": {
+    "num_mutations": 1014,
+    "t_mrca": -1.4601746469480386,
+    "t_mrca_date": "2024-07-17",
+    "total_branch_length": 34.65246551659041,
+    "tree_height": 1.4574349209206412
+  }
+}
