@@ -1,0 +1,15 @@
+replicate	low_ess_observables
+sim_003	coalescent,likelihood_really_logG,minTipESS_year,numMuts,treeLength,treeLikelihood_really_logG
+sim_028	numMuts
+sim_046	likelihood_really_logG,numMuts,treeLikelihood_really_logG
+sim_053	coalescent,exponential.growthRate,minTipESS_year,numMuts
+sim_058	numMuts
+sim_071	numMuts
+sim_092	numMuts
+sim_097	minTipESS_year,numMuts
+sim_098	minTipESS_year
+sim_111	numMuts
+sim_139	numMuts
+sim_152	minTipESS_year
+sim_168	numMuts
+sim_192	numMuts
