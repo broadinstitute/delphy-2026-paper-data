@@ -1,0 +1,15 @@
+replicate	low_ess_observables
+sim_003	likelihood_really_logG,numMuts,treeLikelihood_really_logG
+sim_028	numMuts
+sim_046	age(root),likelihood_really_logG,numMuts,rootHeight,treeLikelihood_really_logG
+sim_055	numMuts
+sim_058	likelihood_really_logG,numMuts,treeLikelihood_really_logG
+sim_071	numMuts
+sim_096	numMuts
+sim_097	numMuts
+sim_107	numMuts
+sim_111	numMuts
+sim_139	numMuts
+sim_147	numMuts
+sim_168	numMuts
+sim_192	numMuts
