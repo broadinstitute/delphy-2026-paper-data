@@ -166,7 +166,6 @@ def run_sapling(i, tau, gamma, N_bar, mu, kappa, pi, alpha, replicate_seed,
         "--out-info", os.path.join(sim_dir, "sim_info.json"),
         "--out-newick", os.path.join(sim_dir, "sim.nwk"),
         "--out-nexus", os.path.join(sim_dir, "sim.nexus"),
-        "--out-fasta", os.path.join(sim_dir, "sim.fasta"),
     ]
 
     gamma_display = ", ".join(f"{g:.3f}" for g in gamma)

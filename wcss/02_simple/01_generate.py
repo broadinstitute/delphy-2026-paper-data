@@ -98,7 +98,6 @@ def run_sapling(i, kappa, pi, replicate_seed, tips_file, script_dir):
         "--out-info", os.path.join(sim_dir, "sim_info.json"),
         "--out-newick", os.path.join(sim_dir, "sim.nwk"),
         "--out-nexus", os.path.join(sim_dir, "sim.nexus"),
-        "--out-fasta", os.path.join(sim_dir, "sim.fasta"),
     ]
 
     print(f"  Replicate {i:03d}: kappa={kappa:.4f}, "
