@@ -1,0 +1,3 @@
+uncertainty_type	n_tips	n_covered	coverage	expected	binom_2.5%	binom_97.5%
+month	13631	12944	0.9496	0.950	0.9463	0.9536
+year	0	0	nan	0.950	nan	nan
