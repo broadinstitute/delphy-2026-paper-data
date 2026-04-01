@@ -19,7 +19,6 @@ import io
 import json
 import math
 import os
-import re
 import subprocess
 import sys
 from datetime import date
@@ -148,8 +147,8 @@ def check_ess(la_df, analyses_dir, ignore_low_ess=False,
             std_ess = la_df[col].std()
             ignored = "yes" if obs_name in ESS_IGNORE else "no"
             f.write(f"{obs_name}\t{low_count}\t{very_low_count}\t{n}\t"
-                    f"{low_count/n:.3f}\t{very_low_count/n:.3f}\t"
-                    f"{mean_ess:.1f}\t{std_ess:.1f}\t{ignored}\n")
+                    f"{float(low_count/n)!r}\t{float(very_low_count/n)!r}\t"
+                    f"{float(mean_ess)!r}\t{float(std_ess)!r}\t{ignored}\n")
     print(f"  Saved {tsv_path}")
 
     # Print human-readable summary (non-ignored with at least one low-ESS run)
@@ -385,7 +384,7 @@ def compute_clade_coverage(script_dir, analyses_dir, included, burnin_pct,
     with open(agg_path, "w") as f:
         f.write("bin_lo\tbin_hi\ttotal\ttrue_hits\tfraction\n")
         for lo, hi, total, true_hits, frac in agg_rows:
-            f.write(f"{lo}\t{hi}\t{total}\t{true_hits}\t{frac:.6f}\n")
+            f.write(f"{lo}\t{hi}\t{total}\t{true_hits}\t{float(frac)!r}\n")
     print(f"  Saved {agg_path}")
 
     # Print human-readable summary
@@ -440,16 +439,8 @@ def produce_tips_log(src_path, dst_path):
         tipYear = rootHeight + age(root) - age(TIP)
 
     With the fixed Delphy (v1.3.1+), all three log columns use
-    calendar-aware conversions:
-        rootHeight = to_linear_year(beast_t0) - to_linear_year(root.t)
-        age(root)  = to_linear_year(root.t)
-        age(TIP)   = to_linear_year(beast_t0) - to_linear_year(tip.t)
-
-    So: rootHeight + age(root) - age(TIP)
-      = [to_linear_year(beast_t0) - to_linear_year(root.t)]
-        + to_linear_year(root.t)
-        - [to_linear_year(beast_t0) - to_linear_year(tip.t)]
-      = to_linear_year(tip.t)
+    calendar-aware conversions, so:
+        tipYear = to_linear_year(tip.t)
     """
     with open(src_path) as fin, open(dst_path, "w") as fout:
         header_fields = None
@@ -671,9 +662,9 @@ def analyze_tip_dates(script_dir, analyses_dir, included, burnin_frac,
                     "hpd_lo\thpd_hi\tnormalized_rank\n")
             for r in results:
                 f.write(f"{r['replicate']}\t{r['tip_name']}\t"
-                        f"{r['true_date']:.6f}\t{r['posterior_mean']:.6f}\t"
-                        f"{r['hpd_lo']:.6f}\t{r['hpd_hi']:.6f}\t"
-                        f"{r['normalized_rank']:.6f}\n")
+                        f"{float(r['true_date'])!r}\t{float(r['posterior_mean'])!r}\t"
+                        f"{float(r['hpd_lo'])!r}\t{float(r['hpd_hi'])!r}\t"
+                        f"{float(r['normalized_rank'])!r}\n")
         print(f"  Saved {path} ({len(results)} tips)")
 
     # Coverage summary
@@ -692,8 +683,8 @@ def analyze_tip_dates(script_dir, analyses_dir, included, burnin_frac,
             coverage = n_covered / n_tips
             lo_binom = binom.ppf(0.025, n_tips, 0.95) / n_tips
             hi_binom = binom.ppf(0.975, n_tips, 0.95) / n_tips
-            f.write(f"{label}\t{n_tips}\t{n_covered}\t{coverage:.4f}\t"
-                    f"0.950\t{lo_binom:.4f}\t{hi_binom:.4f}\n")
+            f.write(f"{label}\t{n_tips}\t{n_covered}\t{float(coverage)!r}\t"
+                    f"0.950\t{float(lo_binom)!r}\t{float(hi_binom)!r}\n")
     print(f"  Saved {cov_path}")
 
     # Print summary
@@ -817,7 +808,7 @@ def main():
     with open(true_path, "w") as f:
         f.write("replicate\t" + "\t".join(param_names) + "\n")
         for i, tv in zip(included, true_vals):
-            vals = "\t".join(str(tv[name]) for name in param_names)
+            vals = "\t".join(repr(float(tv[name])) for name in param_names)
             f.write(f"sim_{i:03d}\t{vals}\n")
     print(f"  Saved {true_path}")
 
@@ -831,7 +822,7 @@ def main():
     print(f"{'Parameter':<14} {'Coverage':>10}")
     print(f"{'-'*14} {'-'*10}")
     for name in param_names:
-        print(f"{name:<14} {coverage[name]:>10.2f}")
+        print(f"{name:<14} {coverage[name]:>10.3f}")
     print(f"\nExpected coverage: 0.95.  "
           f"Binomial 95% interval for N={n_eff}: "
           f"[{lo_binom:.3f}, {hi_binom:.3f}].")
@@ -841,8 +832,8 @@ def main():
     with open(cov_path, "w") as f:
         f.write("Parameter\tCoverage\tN\tExpected\tBinom_2.5%\tBinom_97.5%\n")
         for name in param_names:
-            f.write(f"{name}\t{coverage[name]:.2f}\t{n_eff}\t"
-                    f"0.950\t{lo_binom:.3f}\t{hi_binom:.3f}\n")
+            f.write(f"{name}\t{float(coverage[name])!r}\t{n_eff}\t"
+                    f"0.950\t{float(lo_binom)!r}\t{float(hi_binom)!r}\n")
     print(f"  Saved {cov_path}")
 
     # Step 4: RUV — compute and save normalized ranks
@@ -854,7 +845,7 @@ def main():
     with open(ranks_path, "w") as f:
         f.write("replicate\t" + "\t".join(param_names) + "\n")
         for j, i in enumerate(included):
-            vals = "\t".join(str(ranks[name][j]) for name in param_names)
+            vals = "\t".join(repr(float(ranks[name][j])) for name in param_names)
             f.write(f"sim_{i:03d}\t{vals}\n")
     print(f"  Saved {ranks_path}")
 
