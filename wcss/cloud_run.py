@@ -210,7 +210,6 @@ def main():
     parser.add_argument("--jobs", type=int, default=10, help="Number of parallel jobs (default: 10)")
     parser.add_argument("--sync-every", type=int, default=120, help="Seconds between syncs (default: 120)")
     parser.add_argument("--resume", action="store_true", help="Skip launching make, just monitor")
-    parser.add_argument("--no-dphy-files", action="store_true", help="Don't rsync delphy.dphy files back")
     args = parser.parse_args()
 
     # Load metadata
@@ -274,15 +273,15 @@ def main():
         print()
 
     # Build rsync include list
+    # NOTE: .dphy files are no longer synced — they were huge and not useful
+    # enough to justify the storage.  Removed 2026-04-01.
     rsync_includes = [
         "--include=*/",
         "--include=sim_*/delphy.log",
         "--include=sim_*/delphy.trees",
         "--include=sim_*/.done",
+        "--exclude=*",
     ]
-    if not args.no_dphy_files:
-        rsync_includes.append("--include=sim_*/delphy.dphy")
-    rsync_includes.append("--exclude=*")
 
     local_sims = os.path.join(study, "sims")
 

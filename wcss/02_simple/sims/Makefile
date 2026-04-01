@@ -13,8 +13,6 @@ sim_%/.done: sim_%/sim.maple
 	  --v0-log-every 500000 \
 	  --v0-out-trees-file sim_$*/delphy.trees \
 	  --v0-tree-every 500000 \
-	  --v0-out-delphy-file sim_$*/delphy.dphy \
-	  --v0-delphy-snapshot-every 500000 \
 	  --v0-init-mutation-rate 0.001 \
 	  --v0-fix-mutation-rate \
 	  --v0-init-final-pop-size 1.0 \

@@ -13,8 +13,6 @@ sim_%/.done: sim_%/sim.maple
 	  --v0-log-every 1000000 \
 	  --v0-out-trees-file sim_$*/delphy.trees \
 	  --v0-tree-every 1000000 \
-	  --v0-out-delphy-file sim_$*/delphy.dphy \
-	  --v0-delphy-snapshot-every 1000000 \
 	  --v0-mu-prior-alpha 1 \
 	  --v0-mu-prior-beta 1000 \
 	  --v0-pop-model skygrid \
