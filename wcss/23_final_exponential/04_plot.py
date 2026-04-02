@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.patches import ConnectionPatch
+from scipy import stats
 
 
 # ---------------------------------------------------------------------------
@@ -48,10 +49,14 @@ def plot_rank_histogram(ranks, name, n, plots_dir, num_bins=None):
     """Plot rank histogram for one parameter."""
     fig, ax = plt.subplots(figsize=(5, 3.5))
     if num_bins is None:
-        num_bins = max(5, n // 10)
+        num_bins = 10
     ax.hist(ranks, bins=num_bins, range=(0, 1), edgecolor="black", alpha=0.7)
-    ax.axhline(n / num_bins, color="red", linestyle="--",
-               label=f"Expected ({n/num_bins:.1f})")
+    expected = n / num_bins
+    ax.axhline(expected, color="red", linestyle="--",
+               label=f"Expected ({expected:.1f})")
+    # 95% CI for Bin(n, 1/num_bins)
+    ci_lo, ci_hi = stats.binom.interval(0.95, n, 1.0 / num_bins)
+    ax.axhspan(ci_lo, ci_hi, color="red", alpha=0.10, label="95% CI")
     ax.set_xlabel("Normalized rank")
     ax.set_ylabel("Count")
     ax.set_title(f"Rank histogram: {name}")
@@ -196,10 +201,12 @@ def plot_summary(true_df, la_df, ranks_df, coverage_df, cc_df,
     for row, (name, col) in enumerate(params):
         # Column 1: Rank histogram
         ax = axes[row, 0]
-        num_bins = max(5, n // 10)
+        num_bins = 10
         ax.hist(ranks_df[name].values, bins=num_bins, range=(0, 1),
                 edgecolor="black", alpha=0.7)
         ax.axhline(n / num_bins, color="red", linestyle="--")
+        ci_lo, ci_hi = stats.binom.interval(0.95, n, 1.0 / num_bins)
+        ax.axhspan(ci_lo, ci_hi, color="red", alpha=0.10)
         ax.set_title(f"{name}")
         ax.set_ylabel("Count")
 

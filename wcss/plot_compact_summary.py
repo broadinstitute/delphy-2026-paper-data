@@ -193,6 +193,10 @@ def draw_rank_histogram(ax, ranks, ylim_max=2.0):
            alpha=0.6, edgecolor="none")
     ax.axhline(1.0, color="red", linewidth=0.5, alpha=0.7,
                linestyle="--")
+    n = len(ranks)
+    ci_lo, ci_hi = stats.binom.interval(0.95, n, 1.0 / NBINS_HIST)
+    ax.axhspan(ci_lo / expected, ci_hi / expected,
+               color="red", alpha=0.08)
 
     ax.set_xlim(0, 1)
     ax.set_ylim(0, ylim_max)
