@@ -176,7 +176,7 @@ def plot_tree(mcc_filename, out_pdf_filename, legend=False):
 
     
     ax.set_xlim(2019.9, 2020.37);
-    ax.set_ylim(-5, mcc_tree.ySpan+5);
+    ax.set_ylim(-5, mcc_tree.ySpan+75);
     for spine in ax.spines.values():
         spine.set_visible(False)
     ax.spines['bottom'].set_visible(True)

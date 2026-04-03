@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Compare clade support and dates between two .trees files using compare-clades."""
 
+import gzip
 import json
 import subprocess
 import sys
@@ -39,8 +40,8 @@ def plot_comparison(data, label_a, label_b, out_prefix):
     clade_sizes = np.array([len(c["tips_in_clade"]) for c in clades])
 
     # Scale dot area proportional to clade size
-    min_area, max_area = 5, 150
-    sizes = min_area + (max_area - min_area) * (clade_sizes - 1) / max(clade_sizes.max() - 1, 1)
+    max_area = 150
+    sizes = max_area * clade_sizes / clade_sizes.max()
 
     # -- Support scatter --
     fig, ax = plt.subplots(figsize=(7, 6))
@@ -120,18 +121,18 @@ if __name__ == "__main__":
         print(f"Comparing {label_a} vs {label_b}")
         print(f"{'='*60}")
 
-        json_path = analysis_dir / f"{name}.json"
+        json_gz_path = analysis_dir / f"{name}.json.gz"
         out_prefix = plots_dir / name
 
         # Run compare-clades (or load cached JSON)
-        if json_path.exists():
-            print(f"Loading cached {json_path}")
-            with open(json_path) as f:
+        if json_gz_path.exists():
+            print(f"Loading cached {json_gz_path}")
+            with gzip.open(json_gz_path, "rt") as f:
                 data = json.load(f)
         else:
             data = run_compare_clades(file_a, file_b)
-            with open(json_path, "w") as f:
+            with gzip.open(json_gz_path, "wt") as f:
                 json.dump(data, f)
-            print(f"Cached to {json_path}")
+            print(f"Cached to {json_gz_path}")
 
         plot_comparison(data, label_a, label_b, out_prefix)
