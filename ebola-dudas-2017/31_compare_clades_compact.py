@@ -14,9 +14,15 @@ def load_comparison(json_gz_path):
         return json.load(f)
 
 
-def plot_clade_panel(data, label_a, label_b, out_path, target_height=4.0):
-    """Create a compact 2-row figure: support scatter (top), dates scatter (bottom)."""
+def plot_clade_panel(data, label_a, label_b, out_path, target_height=4.0,
+                     highlights=None):
+    """Create a compact 2-row figure: support scatter (top), dates scatter (bottom).
+
+    highlights: list of (fingerprint, label, x_offset, y_offset, color) tuples
+    to mark with colored circles in the support panel.
+    """
     clades = data["clades"]
+    clade_fps = [c["clade_fp"] for c in clades]
 
     support_a = np.array([c["file_a"]["support"] for c in clades])
     support_b = np.array([c["file_b"]["support"] for c in clades])
@@ -73,8 +79,21 @@ def plot_clade_panel(data, label_a, label_b, out_path, target_height=4.0):
     ax.set_ylim(-0.02, 1.02)
     ax.set_aspect("equal")
     ax.tick_params(labelsize=9)
-    ax.text(0.05, 0.90, "Support", transform=ax.transAxes,
-            fontsize=11, va="top", ha="left")
+    support_label_pos = (0.10, 0.85) if highlights else (0.05, 0.90)
+    ax.text(support_label_pos[0], support_label_pos[1], "Support",
+            transform=ax.transAxes, fontsize=11, va="top", ha="left")
+
+    # Highlight specific clades in support panel
+    if highlights:
+        for fp, lbl, dx, dy, color in highlights:
+            if fp in clade_fps:
+                idx = clade_fps.index(fp)
+                ax.scatter(support_a[idx], support_b[idx], s=sizes[idx] * 3,
+                           facecolors="none", edgecolors=color, linewidths=1.0,
+                           zorder=5)
+                ax.annotate(lbl, (support_a[idx], support_b[idx]),
+                            textcoords="offset points", xytext=(dx, dy),
+                            fontsize=7, color=color, zorder=5)
 
     # -- Date scatter (bottom) --
     ax = axes[1]
@@ -121,18 +140,38 @@ if __name__ == "__main__":
     plots_dir.mkdir(exist_ok=True)
     analysis_dir = here / "analysis"
 
-    comparisons = [
-        ("BEAST X A", "BEAST X B", "clade_comparison_beastX_a_vs_b"),
-        ("BEAST X A", "BEAST X B", "clade_comparison_beastX_alpha_a_vs_b"),
-        ("BEAST X", "Delphy", "clade_comparison_beastX_a_vs_delphy_a"),
-        ("BEAST X", "Delphy", "clade_comparison_beastX_b_vs_delphy_b"),
-        ("BEAST X", "Delphy", "clade_comparison_beastX_alpha_a_vs_delphy_alpha_a"),
-        ("BEAST X", "Delphy", "clade_comparison_beastX_alpha_b_vs_delphy_alpha_b"),
-        ("Delphy A", "Delphy B", "clade_comparison_delphy_a_vs_b"),
-        ("Delphy A", "Delphy B", "clade_comparison_delphy_alpha_a_vs_b"),
+    delphy_a_vs_b_highlights = [
+        # (fingerprint, label, x_offset_pts, y_offset_pts, color)
+        # Group X (sizes 1463-1465) — red
+        (3056168053120098155,  "$X_1$",  -6, -16, "red"),       # (1.00, 0.85)
+        (615860167271339789,   "$X_2$",  -3,  10, "red"),       # (0.15, 0.00)
+        (4208303076419715594,  "$X_3$",  -5, -15, "red"),       # (0.04, 1.00)
+        (1766726551689611884,  "$X_4$",  -3,  10, "red"),       # (0.00, 0.13)
+        # Group Y (sizes 1098-1100) — darkgreen
+        (1133435413859384573,  "$Y_1$",   7,  -8, "darkgreen"), # (0.07, 0.99)
+        (3210674569445890789,  "$Y_2$",   3,   7, "darkgreen"), # (0.18, 0.00)
+        (11774686227717232978, "$Y_3$",  -3,   9, "darkgreen"), # (0.73, 0.00)
+        # Group Z (sizes 752-755) — darkorange
+        (14832638268288838707, "$Z_1$",  -2, -14, "darkorange"),# (0.00, 0.11)
+        (15512943217666836143, "$Z_2$",   7,  -3, "darkorange"),# (0.00, 0.37)
+        (9406187989066844029,  "$Z_3$",   7,  -3, "darkorange"),# (0.00, 0.45)
+        (8906950833791099648,  "$Z_4$",  -3,   7, "darkorange"),# (0.35, 0.00)
+        (3340453893401912018,  "$Z_5$",  -3,   7, "darkorange"),# (0.48, 0.00)
     ]
 
-    for label_a, label_b, name in comparisons:
+    comparisons = [
+        ("BEAST X A", "BEAST X B", "clade_comparison_beastX_a_vs_b", None),
+        ("BEAST X A", "BEAST X B", "clade_comparison_beastX_alpha_a_vs_b", None),
+        ("BEAST X", "Delphy", "clade_comparison_beastX_a_vs_delphy_a", None),
+        ("BEAST X", "Delphy", "clade_comparison_beastX_b_vs_delphy_b", None),
+        ("BEAST X", "Delphy", "clade_comparison_beastX_alpha_a_vs_delphy_alpha_a", None),
+        ("BEAST X", "Delphy", "clade_comparison_beastX_alpha_b_vs_delphy_alpha_b", None),
+        ("Delphy A", "Delphy B", "clade_comparison_delphy_a_vs_b",
+         delphy_a_vs_b_highlights),
+        ("Delphy A", "Delphy B", "clade_comparison_delphy_alpha_a_vs_b", None),
+    ]
+
+    for label_a, label_b, name, highlights in comparisons:
         json_gz_path = analysis_dir / f"{name}.json.gz"
         if not json_gz_path.exists():
             print(f"Skipping {name} (no cached data)")
@@ -140,4 +179,5 @@ if __name__ == "__main__":
 
         print(f"Plotting {name}...")
         data = load_comparison(json_gz_path)
-        plot_clade_panel(data, label_a, label_b, plots_dir / f"{name}_compact.pdf")
+        plot_clade_panel(data, label_a, label_b, plots_dir / f"{name}_compact.pdf",
+                         highlights=highlights)
