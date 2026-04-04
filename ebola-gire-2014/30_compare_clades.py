@@ -121,6 +121,54 @@ if __name__ == "__main__":
             "clade_comparison_beast2_alpha_vs_beastX_alpha",
         ),
         (
+            str(here / "beast2_run" / "output.trees"),
+            str(here / "delphy_outputs_a" / "ebola_delphy.trees"),
+            "BEAST 2", "Delphy A",
+            "clade_comparison_beast2_vs_delphy_a",
+        ),
+        (
+            str(here / "beast2_run" / "output.trees"),
+            str(here / "delphy_outputs_b" / "ebola_delphy.trees"),
+            "BEAST 2", "Delphy B",
+            "clade_comparison_beast2_vs_delphy_b",
+        ),
+        (
+            str(here / "beast2_run_alpha" / "output.trees"),
+            str(here / "delphy_outputs_alpha_a" / "ebola_delphy_alpha.trees"),
+            "BEAST 2 Alpha", "Delphy Alpha A",
+            "clade_comparison_beast2_alpha_vs_delphy_alpha_a",
+        ),
+        (
+            str(here / "beast2_run_alpha" / "output.trees"),
+            str(here / "delphy_outputs_alpha_b" / "ebola_delphy_alpha.trees"),
+            "BEAST 2 Alpha", "Delphy Alpha B",
+            "clade_comparison_beast2_alpha_vs_delphy_alpha_b",
+        ),
+        (
+            str(here / "beastX_run" / "output.trees"),
+            str(here / "delphy_outputs_a" / "ebola_delphy.trees"),
+            "BEAST X", "Delphy A",
+            "clade_comparison_beastX_vs_delphy_a",
+        ),
+        (
+            str(here / "beastX_run" / "output.trees"),
+            str(here / "delphy_outputs_b" / "ebola_delphy.trees"),
+            "BEAST X", "Delphy B",
+            "clade_comparison_beastX_vs_delphy_b",
+        ),
+        (
+            str(here / "beastX_run_alpha" / "output.trees"),
+            str(here / "delphy_outputs_alpha_a" / "ebola_delphy_alpha.trees"),
+            "BEAST X Alpha", "Delphy Alpha A",
+            "clade_comparison_beastX_alpha_vs_delphy_alpha_a",
+        ),
+        (
+            str(here / "beastX_run_alpha" / "output.trees"),
+            str(here / "delphy_outputs_alpha_b" / "ebola_delphy_alpha.trees"),
+            "BEAST X Alpha", "Delphy Alpha B",
+            "clade_comparison_beastX_alpha_vs_delphy_alpha_b",
+        ),
+        (
             str(here / "delphy_outputs_a" / "ebola_delphy.trees"),
             str(here / "delphy_outputs_b" / "ebola_delphy.trees"),
             "Delphy A", "Delphy B",
@@ -131,18 +179,6 @@ if __name__ == "__main__":
             str(here / "delphy_outputs_alpha_b" / "ebola_delphy_alpha.trees"),
             "Delphy Alpha A", "Delphy Alpha B",
             "clade_comparison_delphy_alpha_a_vs_b",
-        ),
-        (
-            str(here / "beastX_run" / "output.trees"),
-            str(here / "delphy_outputs_a" / "ebola_delphy.trees"),
-            "BEAST X", "Delphy A",
-            "clade_comparison_beastX_vs_delphy_a",
-        ),
-        (
-            str(here / "beastX_run_alpha" / "output.trees"),
-            str(here / "delphy_outputs_alpha_a" / "ebola_delphy_alpha.trees"),
-            "BEAST X Alpha", "Delphy Alpha A",
-            "clade_comparison_beastX_alpha_vs_delphy_alpha_a",
         ),
     ]
 

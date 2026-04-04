@@ -123,11 +123,17 @@ if __name__ == "__main__":
 
     comparisons = [
         ("BEAST 2", "BEAST X", "clade_comparison_beast2_vs_beastX"),
-        ("BEAST 2 Alpha", "BEAST X Alpha", "clade_comparison_beast2_alpha_vs_beastX_alpha"),
+        ("BEAST 2", "BEAST X", "clade_comparison_beast2_alpha_vs_beastX_alpha"),
+        ("BEAST 2", "Delphy", "clade_comparison_beast2_vs_delphy_a"),
+        ("BEAST 2", "Delphy", "clade_comparison_beast2_vs_delphy_b"),
+        ("BEAST 2", "Delphy", "clade_comparison_beast2_alpha_vs_delphy_alpha_a"),
+        ("BEAST 2", "Delphy", "clade_comparison_beast2_alpha_vs_delphy_alpha_b"),
+        ("BEAST X", "Delphy", "clade_comparison_beastX_vs_delphy_a"),
+        ("BEAST X", "Delphy", "clade_comparison_beastX_vs_delphy_b"),
+        ("BEAST X", "Delphy", "clade_comparison_beastX_alpha_vs_delphy_alpha_a"),
+        ("BEAST X", "Delphy", "clade_comparison_beastX_alpha_vs_delphy_alpha_b"),
         ("Delphy A", "Delphy B", "clade_comparison_delphy_a_vs_b"),
-        ("Delphy Alpha A", "Delphy Alpha B", "clade_comparison_delphy_alpha_a_vs_b"),
-        ("BEAST X", "Delphy A", "clade_comparison_beastX_vs_delphy_a"),
-        ("BEAST X Alpha", "Delphy Alpha A", "clade_comparison_beastX_alpha_vs_delphy_alpha_a"),
+        ("Delphy A", "Delphy B", "clade_comparison_delphy_alpha_a_vs_b"),
     ]
 
     for label_a, label_b, name in comparisons:

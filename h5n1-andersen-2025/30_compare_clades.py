@@ -121,6 +121,30 @@ if __name__ == "__main__":
             "clade_comparison_beastX_alpha_a_vs_b",
         ),
         (
+            str(here / "beastX_run_a" / "output.trees"),
+            str(here / "delphy_outputs_a" / "h5n1-andersen-e756a15-ALL_full_dates_only_a.trees"),
+            "BEAST X A", "Delphy A",
+            "clade_comparison_beastX_a_vs_delphy_a",
+        ),
+        (
+            str(here / "beastX_run_b" / "output.trees"),
+            str(here / "delphy_outputs_b" / "h5n1-andersen-e756a15-ALL_full_dates_only_b.trees"),
+            "BEAST X B", "Delphy B",
+            "clade_comparison_beastX_b_vs_delphy_b",
+        ),
+        (
+            str(here / "beastX_run_alpha_a" / "output.trees"),
+            str(here / "delphy_outputs_alpha_a" / "h5n1-andersen-e756a15-ALL_full_dates_only_alpha_a.trees"),
+            "BEAST X Alpha A", "Delphy Alpha A",
+            "clade_comparison_beastX_alpha_a_vs_delphy_alpha_a",
+        ),
+        (
+            str(here / "beastX_run_alpha_b" / "output.trees"),
+            str(here / "delphy_outputs_alpha_b" / "h5n1-andersen-e756a15-ALL_full_dates_only_alpha_b.trees"),
+            "BEAST X Alpha B", "Delphy Alpha B",
+            "clade_comparison_beastX_alpha_b_vs_delphy_alpha_b",
+        ),
+        (
             str(here / "delphy_outputs_a" / "h5n1-andersen-e756a15-ALL_full_dates_only_a.trees"),
             str(here / "delphy_outputs_b" / "h5n1-andersen-e756a15-ALL_full_dates_only_b.trees"),
             "Delphy A", "Delphy B",
@@ -131,24 +155,6 @@ if __name__ == "__main__":
             str(here / "delphy_outputs_alpha_b" / "h5n1-andersen-e756a15-ALL_full_dates_only_alpha_b.trees"),
             "Delphy Alpha A", "Delphy Alpha B",
             "clade_comparison_delphy_alpha_a_vs_b",
-        ),
-        (
-            str(here / "beastX_run_a" / "output.trees"),
-            str(here / "delphy_outputs_a" / "h5n1-andersen-e756a15-ALL_full_dates_only_a.trees"),
-            "BEAST X A", "Delphy A",
-            "clade_comparison_beastX_a_vs_delphy_a",
-        ),
-        (
-            str(here / "beastX_run_alpha_a" / "output.trees"),
-            str(here / "delphy_outputs_alpha_a" / "h5n1-andersen-e756a15-ALL_full_dates_only_alpha_a.trees"),
-            "BEAST X Alpha A", "Delphy Alpha A",
-            "clade_comparison_beastX_alpha_a_vs_delphy_alpha_a",
-        ),
-        (
-            str(here / "beastX_run_b" / "output.trees"),
-            str(here / "delphy_outputs_b" / "h5n1-andersen-e756a15-ALL_full_dates_only_b.trees"),
-            "BEAST X B", "Delphy B",
-            "clade_comparison_beastX_b_vs_delphy_b",
         ),
     ]
 

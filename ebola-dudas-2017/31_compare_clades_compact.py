@@ -123,12 +123,13 @@ if __name__ == "__main__":
 
     comparisons = [
         ("BEAST X A", "BEAST X B", "clade_comparison_beastX_a_vs_b"),
-        ("BEAST X Alpha A", "BEAST X Alpha B", "clade_comparison_beastX_alpha_a_vs_b"),
+        ("BEAST X A", "BEAST X B", "clade_comparison_beastX_alpha_a_vs_b"),
+        ("BEAST X", "Delphy", "clade_comparison_beastX_a_vs_delphy_a"),
+        ("BEAST X", "Delphy", "clade_comparison_beastX_b_vs_delphy_b"),
+        ("BEAST X", "Delphy", "clade_comparison_beastX_alpha_a_vs_delphy_alpha_a"),
+        ("BEAST X", "Delphy", "clade_comparison_beastX_alpha_b_vs_delphy_alpha_b"),
         ("Delphy A", "Delphy B", "clade_comparison_delphy_a_vs_b"),
-        ("Delphy Alpha A", "Delphy Alpha B", "clade_comparison_delphy_alpha_a_vs_b"),
-        ("BEAST X A", "Delphy A", "clade_comparison_beastX_a_vs_delphy_a"),
-        ("BEAST X Alpha A", "Delphy Alpha A", "clade_comparison_beastX_alpha_a_vs_delphy_alpha_a"),
-        ("BEAST X B", "Delphy B", "clade_comparison_beastX_b_vs_delphy_b"),
+        ("Delphy A", "Delphy B", "clade_comparison_delphy_alpha_a_vs_b"),
     ]
 
     for label_a, label_b, name in comparisons:
