@@ -10,6 +10,10 @@ import pandas as pd
 import math
 import numpy as np
 
+# 2026-08-17: make text editable in pdfs, not "outline", per the publisher's request
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42   # embed TrueType (Type 42) -> editable text
+
 def mrca_node_of(tree, leaf_names):
     leaf_nodes = [node for node in tree.Objects if node.is_leaf() and node.name.split('|')[0] in leaf_names]
     if len(leaf_nodes) == 1:
