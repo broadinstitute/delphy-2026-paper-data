@@ -8,6 +8,10 @@ import math
 from pathlib import Path
 import datetime
 
+# 2026-08-17: make text editable in pdfs, not "outline", per the publisher's request
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42   # embed TrueType (Type 42) -> editable text
+
 def extract_ml_results(iqtree_log_filename, tt_folder_name, look_for_alpha=False):
     """Extremely brittle IQ-Tree log file parser, enough for these plots though"""
 

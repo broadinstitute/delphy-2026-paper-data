@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 import subprocess
 
+# 2026-08-17: make text editable in pdfs, not "outline", per the publisher's request
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42   # embed TrueType (Type 42) -> editable text
+
 def plots_for(sim, rep):  # e.g., sim == "exp_100", rep == "a"
     
     # Baltic doesn't like inner node names (!)

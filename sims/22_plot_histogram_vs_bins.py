@@ -8,6 +8,10 @@ import math
 from pathlib import Path
 import datetime
 
+# 2026-08-17: make text editable in pdfs, not "outline", per the publisher's request
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42   # embed TrueType (Type 42) -> editable text
+
 def plot_logs(delphy_log_filename_and_colors_and_labels, out_pdf_filename, ground_truth_nwk, burnin=0.10):
     delphy_raw_datas = []
     delphy_datas = []
