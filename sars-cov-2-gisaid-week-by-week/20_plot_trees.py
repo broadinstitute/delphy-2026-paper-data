@@ -7,6 +7,10 @@ from matplotlib.lines import Line2D
 from pathlib import Path
 import subprocess
 
+# 2026-08-17: make text editable in pdfs, not "outline", per the publisher's request
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42   # embed TrueType (Type 42) -> editable text
+
 # Conversions for the humans
 # ==========================
 epiweek_2_hyphenated = {
