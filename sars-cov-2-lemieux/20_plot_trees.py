@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from pathlib import Path
 
+# 2026-08-17: make text editable in pdfs, not "outline", per the publisher's request
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42   # embed TrueType (Type 42) -> editable text
+
 # Read in sample IDs & clades
 # ===========================
 # sample_ids.txt = Sample ids for 772 sequences used in Fig 3A of LeMieux et al (2021) (private communication)

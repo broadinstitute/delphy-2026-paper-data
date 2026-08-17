@@ -8,6 +8,10 @@ import matplotlib.ticker as ticker
 import numpy as np
 from pathlib import Path
 
+# 2026-08-17: make text editable in pdfs, not "outline", per the publisher's request
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42   # embed TrueType (Type 42) -> editable text
+
 
 def load_comparison(json_gz_path):
     with gzip.open(json_gz_path, "rt") as f:

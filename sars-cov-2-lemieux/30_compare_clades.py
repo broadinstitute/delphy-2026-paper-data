@@ -9,6 +9,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 
+# 2026-08-17: make text editable in pdfs, not "outline", per the publisher's request
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42   # embed TrueType (Type 42) -> editable text
+
 
 def run_compare_clades(file_a, file_b, burnin_pct=30, min_support=0.01):
     """Run compare-clades and return parsed JSON."""
