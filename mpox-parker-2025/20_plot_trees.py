@@ -13,6 +13,10 @@ import math
 import numpy as np
 import random
 
+# 2026-08-17: make text editable in pdfs, not "outline", per the publisher's request
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42   # embed TrueType (Type 42) -> editable text
+
 # Read in metadata
 # ===========================
 print("\nReading in metadata...")

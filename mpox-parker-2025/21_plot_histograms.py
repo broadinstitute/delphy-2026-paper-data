@@ -9,6 +9,10 @@ import math
 from pathlib import Path
 from scipy import stats
 
+# 2026-08-17: make text editable in pdfs, not "outline", per the publisher's request
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42   # embed TrueType (Type 42) -> editable text
+
 t0 = bt.decimalDate("2023-05-31")  # Hard-coded, but ok
 
 def extract_log_params(log_filename, burnin):
