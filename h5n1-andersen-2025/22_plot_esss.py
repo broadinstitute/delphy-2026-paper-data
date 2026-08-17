@@ -12,6 +12,10 @@ import seaborn as sb
 import numpy as np
 import matplotlib.pyplot as plt
 
+# 2026-08-17: make text editable in pdfs, not "outline", per the publisher's request
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42   # embed TrueType (Type 42) -> editable text
+
 def compare_logs(log_and_wallclock_minutes: list[tuple[Log, float]],
                  out_pdf_filename,
                  show_alpha=False):

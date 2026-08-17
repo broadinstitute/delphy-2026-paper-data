@@ -15,6 +15,10 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 from utils import *
 
+# 2026-08-17: make text editable in pdfs, not "outline", per the publisher's request
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42   # embed TrueType (Type 42) -> editable text
+
 # Oops!  Somehow 4 sequences without exact dates slipped through; ignore them
 BAD_LEAVES = [
     'A/cattle/ID/25-014338-001-original/2025',

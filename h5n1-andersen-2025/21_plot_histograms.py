@@ -13,6 +13,10 @@ import baltic as bt
 from pathlib import Path
 from matplotlib.ticker import FuncFormatter
 
+# 2026-08-17: make text editable in pdfs, not "outline", per the publisher's request
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42   # embed TrueType (Type 42) -> editable text
+
 def compare_logs(
         logs: list[Log],
         out_pdf_filename,
